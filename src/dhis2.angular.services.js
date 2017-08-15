@@ -1786,7 +1786,6 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             variables = pushVariable(variables, programVariable.displayName, "", null, dataElement.dataElement.valueType, false, '#', '', programVariable.useCodeForOptionSet );
                         }
                         else {
-                            $log.warn("Variable #{" + programVariable.displayName + "} is linked to a dataelement that is not part of the program");
                             variables = pushVariable(variables, programVariable.displayName, "", null, "TEXT",false, '#', '', programVariable.useCodeForOptionSet );
                         }
                     }
@@ -2867,10 +2866,13 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                     } else if (effect.action === "SHOWWARNING" && effect.trackedEntityAttribute) {
                         if(effect.ineffect) {
                             var message = effect.content + (angular.isDefined(effect.data) ? effect.data : "");
-                            warningMessages.push(message);
-
+                            
                             if( effect.trackedEntityAttribute ) {
                                 warningMessages[effect.trackedEntityAttribute.id] = message;
+                            }
+                            else
+                            {
+                                warningMessages.push(message);
                             }
                         }
                     }
