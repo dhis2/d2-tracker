@@ -1824,7 +1824,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
             var orgUnitUid = selectedEnrollment ? selectedEnrollment.orgUnit : executingEvent.orgUnit;
             var orgUnitCode = '';
-            return OrgUnitFactory.getOrgUnit( orgUnitUid ).then(function (response) {
+            return OrgUnitFactory.getFromStoreOrServer( orgUnitUid ).then(function (response) {
                 orgUnitCode = response.code;
                 variables = pushVariable(variables, 'orgunit_code', orgUnitCode, null, 'TEXT', orgUnitCode ? true : false, 'V', '', false);
                 return variables;
