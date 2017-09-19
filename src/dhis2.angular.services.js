@@ -1562,7 +1562,8 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         processedValue = $filter('trimquotes')(processedValue);
 
         //Append single quotation marks in case the variable is of text or date type:
-        if(valueType === 'LONG_TEXT' || valueType === 'TEXT' || valueType === 'DATE' || valueType === 'OPTION_SET') {
+        if(valueType === 'LONG_TEXT' || valueType === 'TEXT' || valueType === 'DATE' || valueType === 'OPTION_SET' ||
+            valueType === 'URL' || valueType === 'DATETIME' || valueType === 'TIME') {
             if(processedValue) {
                 processedValue = "'" + processedValue + "'";
             } else {
