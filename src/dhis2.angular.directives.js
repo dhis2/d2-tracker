@@ -1011,9 +1011,11 @@ var d2Directives = angular.module('d2Directives', [])
             };
 
             $scope.interacted = function (field, form) {
-                var status = false;                
-                status = form.$submitted || field.$touched;                 
-                return status;
+                if(field || form) {
+                    var status = false;                
+                    status = form.$submitted || field.$touched;                 
+                    return status;
+                }
             };           
 
             $scope.saveDateTime = function(isDate) {
@@ -1065,7 +1067,7 @@ var d2Directives = angular.module('d2Directives', [])
                     return 'form-control input-pending';
                 }
 
-                if($scope.datetimeElement.id && $scope.datetimeElement.id === id && $scope.datetimeElement.event && $scope.datetimeElement.event === event.event) {
+                if($scope.datetimeElement && $scope.datetimeElement.id === id && $scope.datetimeElement.event && $scope.datetimeElement.event === event.event) {
                     if($scope.datetimeElement.pending) {
                         return 'form-control input-pending';
                     }
@@ -1159,7 +1161,7 @@ var d2Directives = angular.module('d2Directives', [])
                     return 'form-control input-pending';
                 }
 
-                if($scope.timeElement.id && $scope.timeElement.id === id && $scope.timeElement.event && $scope.timeElement.event === event.event) {
+                if($scope.timeElement && $scope.timeElement.id === id && $scope.timeElement.event && $scope.timeElement.event === event.event) {
                     if($scope.timeElement.pending) {
                         return 'form-control input-pending';
                     }
