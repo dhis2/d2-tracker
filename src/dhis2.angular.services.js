@@ -5,7 +5,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
 /* Factory for loading translation strings */
 .factory('i18nLoader', function ($q, $http, SessionStorageService, DHIS2URL) {
-
+    
     var getTranslationStrings = function (locale) {
         var defaultUrl = 'i18n/i18n_app.properties';
         var url = '';
@@ -32,13 +32,13 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         return promise;
     };
 
-    var getProfile = function () {
+    var getUserSetting = function () {
         var locale = 'en';
-
-        var promise = $http.get( DHIS2URL + '/me.json?fields=id,displayName,userCredentials[username,userRoles[id,programs,authorities]],organisationUnits[id,displayName,level,path,children[id,displayName,level,children[id]]],dataViewOrganisationUnits[id,displayName,level,path,children[id,displayName,level,children[id]]],teiSearchOrganisationUnits[id,displayName,level,path,children[id,displayName,level,children[id]]]').then(function (response) {
-            SessionStorageService.set('USER_PROFILE', response.data);
-            if (response.data && response.data.settings && response.data.settings.keyUiLocale) {
-                locale = response.data.settings.keyUiLocale;
+        
+        var promise = $http.get( DHIS2URL + '/userSettings.json?key=keyDbLocale&key=keyUiLocale&key=keyCurrentStyle&key=keyStyle').then(function (response) {
+            SessionStorageService.set('USER_SETTING', response.data);
+            if (response.data &&response.data.keyUiLocale) {
+                locale = response.data.keyUiLocale;
             }
             return locale;
         }, function () {
@@ -49,16 +49,16 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     };
     return function () {
         var deferred = $q.defer(), translations;
-        var userProfile = SessionStorageService.get('USER_PROFILE');
-        if (userProfile && userProfile.settings && userProfile.settings.keyUiLocale) {
-            getTranslationStrings(userProfile.settings.keyUiLocale).then(function (response) {
+        var userSetting = SessionStorageService.get('USER_SETTING');
+        if (userSetting && userSetting.keyUiLocale) {
+            getTranslationStrings(userSetting.keyUiLocale).then(function (response) {
                 translations = response.keys;
                 deferred.resolve(translations);
             });
             return deferred.promise;
         }
         else {
-            getProfile().then(function (locale) {
+            getUserSetting().then(function (locale) {
                 getTranslationStrings(locale).then(function (response) {
                     translations = response.keys;
                     deferred.resolve(translations);
@@ -68,7 +68,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         }
     };
 })
-
+    
 .service('AuthorityService', function () {
     var getAuthorities = function (roles) {
         var authority = {};
