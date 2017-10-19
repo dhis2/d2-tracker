@@ -289,9 +289,15 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             } else if(calendarSetting.keyCalendar === 'persian') {
                 date = date.toLocaleDateString('en-GB-u-ca-persian');
                 
+            } else if(calendarSetting.keyCalendar === 'thai') {
+                date = date.toLocaleDateString('en-GB-u-ca-buddhist');
+                
+            } else if(calendarSetting.keyCalendar === 'nepali') {
+                date = date.toLocaleDateString('en-GB-u-ca-ne');
+                
             } else {
                 date = date.toLocaleDateString('en-GB-u-ca-iso8601');
-                
+            
             }
             
             date = formatDate(date);
