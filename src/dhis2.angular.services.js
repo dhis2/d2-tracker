@@ -2538,7 +2538,18 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             $log.warn("Cannot create event with empty content.");
         }
     };
-    
+    /**
+     * 
+     * @param {*} allProgramRules all program rules for the program
+     * @param {*} executingEvent the event context for the program
+     * @param {*} evs all events in the enrollment
+     * @param {*} allDataElements all data elements(metadata)
+     * @param {*} allTrackedEntityAttributes all tracked entity attributes(metadata)
+     * @param {*} selectedEntity the selected tracked entity instance
+     * @param {*} selectedEnrollment the selected enrollment
+     * @param {*} optionSets all optionsets(matedata)
+     * @param {*} flag execution flags
+     */
     var internalExecuteRules = function(allProgramRules, executingEvent, evs, allDataElements, allTrackedEntityAttributes, selectedEntity, selectedEnrollment, optionSets, flag) {
         if(allProgramRules) {
             var variablesHash = {};
