@@ -1,13 +1,18 @@
-    <ui-select  ng-model="d2Model[d2ModelId]"
-                theme="select2"
-                ng-required="d2Required"
-                ng-disabled="d2Disabled"
-                name="foo"
-                on-select="saveOption()"
-                style="width: 100%; z-index: 100;">
+    <ui-select ng-model="d2Model[d2ModelId]"
+               theme="select2"
+               ng-required="d2Required"
+               ng-disabled="d2Disabled"
+               name="foo"
+               on-select="saveOption()"
+               style="width: 100%; z-index: 100;">
         <ui-select-match allow-clear="true" ng-class="d2UseNotification ? getInputNotifcationClass(d2ModelId) : ''"  class="form-control-ui-select"  placeholder="{{'select_or_search' | translate}}">{{$select.selected.displayName  || $select.selected}}</ui-select-match>
-        <ui-select-choices repeat="option.displayName as option in d2AllOptions | filter: $select.search | limitTo: d2MaxOptionSize" >
+        <ui-select-choices repeat="option.displayName as option in d2AllOptions | filter: $select.search | limitTo: (d2MaxOptionSize + 1)">
             <option ng-if="$index < d2MaxOptionSize" ng-bind-html="option.displayName | highlight: $select.search"></option>
+            <div ng-if="$index >= d2MaxOptionSize">
+                <button class="btn btn-xs btn-default" 
+                        style="width: 100%; margin-top: 5px;" 
+                        ng-click="showMore($select, $event);"
+                        ng-disabled="loading">{{'show_more' | translate}}</button>                              
+              </div>
         </ui-select-choices>
     </ui-select>
-<span ng-if="d2AllOptions.length > d2MaxOptionSize" ng-click="showMore()" style="color:gray;"><u>{{d2AllOptions.length - d2MaxOptionSize}} {{'more_options_available' | translate}}</u></span>
