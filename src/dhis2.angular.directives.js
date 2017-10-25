@@ -1273,7 +1273,7 @@ var d2Directives = angular.module('d2Directives', [])
                 if($event){
                     $event.stopPropagation();
                     $event.preventDefault();
-                    $scope.d2MaxOptionSize = $scope.d2MaxOptionSize + 3;
+                    $scope.d2MaxOptionSize = $scope.d2MaxOptionSize + 10;
                 }
                 
 			};
