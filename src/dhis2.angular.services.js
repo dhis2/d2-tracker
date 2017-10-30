@@ -160,7 +160,9 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
 /* service for dealing with dates */
 .service('DateUtils', function ($filter, CalendarService, NotificationService, $translate) {
-
+    var formatDate = function(date){
+       return date.substring(6,10) + '-' + date.substring(3,5) + '-' + date.substring(0,2);
+    };
     return {        
         getDate: function (dateValue) {
             if (!dateValue) {
@@ -251,6 +253,57 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             }
             dateValue = moment(dateValue, 'YYYY-MM-DD')._d;
             return $filter('date')(dateValue, calendarSetting.keyDateFormat);
+        },
+        formatFromApiToUserCalendar: function (dateValue) {
+            if (!dateValue) {
+                return;
+            }
+
+            var calendarSetting = CalendarService.getSetting();
+
+            //A bit hacky way to check if format id dd-mm-yyyy.
+            if(dateValue.charAt(2) === '-') {
+                dateValue = moment(dateValue, calendarSetting.momentFormat)._d;
+                dateValue = Date.parse(dateValue);
+                dateValue = $filter('date')(dateValue, 'yyyy-MM-dd');
+            }
+
+            var splitDate = dateValue.split('-');
+
+            //Months are for some reason 0 based.
+            var date = new Date(splitDate[0], splitDate[1]-1, splitDate[2]);
+
+            if(calendarSetting.keyCalendar === 'ethiopian') {
+                date = date.toLocaleDateString('en-GB-u-ca-ethiopic');
+
+            } else if(calendarSetting.keyCalendar === 'coptic') {
+                date = date.toLocaleDateString('en-GB-u-ca-coptic');
+
+            } else if(calendarSetting.keyCalendar === 'gregorian') {
+                date = date.toLocaleDateString('en-GB-u-ca-gregory');
+
+            } else if(calendarSetting.keyCalendar === 'islamic') {
+                date = date.toLocaleDateString('en-GB-u-ca-islamic');
+                
+            } else if(calendarSetting.keyCalendar === 'iso8601') {
+                date = date.toLocaleDateString('en-GB-u-ca-iso8601');
+            
+            } else if(calendarSetting.keyCalendar === 'persian') {
+                date = date.toLocaleDateString('en-GB-u-ca-persian');
+                
+            } else if(calendarSetting.keyCalendar === 'thai') {
+                date = date.toLocaleDateString('en-GB-u-ca-buddhist');
+                
+            } else if(calendarSetting.keyCalendar === 'nepali') {
+                date = date.toLocaleDateString('en-GB-u-ca-ne');
+                
+            } else {
+                date = date.toLocaleDateString('en-GB-u-ca-iso8601');
+            
+            }
+            
+            date = formatDate(date);
+            return date;
         },
         getDateAfterOffsetDays: function (offSetDays) {
             var date = new Date();
