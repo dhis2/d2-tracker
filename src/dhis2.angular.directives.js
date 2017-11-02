@@ -1278,7 +1278,7 @@ var d2Directives = angular.module('d2Directives', [])
 			$scope.getInputNotifcationClass = function(id) {
 				event = $scope.d2Model;
 				
-				if($scope.d2Element.id && $scope.d2Element.id === id && $scope.d2Element.event && $scope.d2Element.event === event.event) {
+				if($scope.d2Element && $scope.d2Element.id === id && $scope.d2Element.event && $scope.d2Element.event === event.event) {
 					if($scope.d2Element.pending) {
 						return 'input-pending';
 					}
