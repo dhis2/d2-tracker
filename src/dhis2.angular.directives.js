@@ -1271,6 +1271,15 @@ var d2Directives = angular.module('d2Directives', [])
             
         },
         controller: function($scope) {
+            $scope.showMore = function($select, $event) {
+                if($event){
+                    $event.stopPropagation();
+                    $event.preventDefault();
+                    $scope.d2MaxOptionSize = $scope.d2MaxOptionSize + 10;
+                }
+                
+			};
+
 			$scope.saveOption = function() {
 				$scope.d2SaveMethode()($scope.d2SaveMethodeParameter1, $scope.d2SaveMethodeParameter2);
 			};
