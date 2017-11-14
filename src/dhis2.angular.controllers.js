@@ -650,7 +650,6 @@ var d2Controllers = angular.module('d2Controllers', [])
             ou.show = true;
             angular.forEach(ou.children, function(o){                    
                 o.hasChildren = o.children && o.children.length > 0 ? true : false;
-                o.show = true;
             });            
         });
     });
