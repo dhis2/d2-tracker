@@ -28,7 +28,7 @@
             </ul>
         </script>
         <ul class="tree" id="tree">
-            <li ng-repeat="orgUnit in orgUnits | orderBy:['level','displayName']" ng-include="'orgUnitTree.html'"></li>
+            <li ng-repeat="orgUnit in orgUnitsDataElement | orderBy:['level','displayName']" ng-include="'orgUnitTree.html'"></li>
         </ul>
     </div>
 </div>
