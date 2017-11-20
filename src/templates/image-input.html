@@ -1,0 +1,55 @@
+<div>
+    <accordion>
+        <accordion-group>
+            <accordion-heading>
+                <span> {{'please_select'| translate}} <i class="pull-right" ng-class="{'fa fa-chevron-up vertical-center': searchOuTree.open, 'fa fa-chevron-down vertical-center': !searchOuTree.open}"></i></span>
+            </accordion-heading>
+            <div class="row" style="max-height: 250px; overflow: auto;">
+                <img class="img-thumbnail img-preview">
+                <div class="text-center" style="padding-top: 10px;">
+                    <div class="input-group">
+                        <input id="imgPath" class="form-control" placeholder="{{'please_select'| translate}}" disabled="disabled">
+                        <div class="input-group-btn">
+                            <div class="imgUpload btn btn-default" style="margin-top: 5px;">
+                                <span><i class="fa fa-upload"></i> {{'upload_image' | translate}}</span>
+                                <input id="img-id" name="logo" type="file">
+                            </div>
+                        </div>
+                        <div class="input-group-btn">
+                            <div ng-click="clearImg()" class="btn btn-danger leftFlat" style="margin-top: 5px;">
+                                <span><i class="fa fa-trash-o"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>           
+            </div>                      
+        </accordion-group> 
+    </accordion>
+</div>
+
+<style>
+.imgUpload {
+    position: relative;
+    overflow: hidden;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+.imgUpload #img-id {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 33px;
+    cursor: pointer;
+    opacity: 0;
+    filter: alpha(opacity=0);
+}
+
+.leftFlat {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;  
+}
+</style>

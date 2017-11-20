@@ -506,6 +506,51 @@ var d2Directives = angular.module('d2Directives', [])
     };
 })
 
+.directive('d2Image', function () {
+    return {
+        restrict: 'E',
+        templateUrl: "./templates/image-input.html",
+        scope: {
+            d2Model: '=',
+			d2ModelId: '=',
+            d2Required: '=',
+            d2Disabled: '=',
+			d2SaveMethode: '&',
+			d2SaveMethodeParameter1: '=',
+			d2SaveMethodeParameter2: '='
+        },
+        controller: function ($scope) {
+            $(document).ready(function() {
+                var img = document.getElementById('img-id');
+                img.onchange = function() {
+                    document.getElementById('imgPath').value = this.value.substring(12);
+                };
+            
+                function readURL(input) {
+                    if (input.files && input.files[0]) {
+                        var reader = new FileReader();
+                        
+                        reader.onload = function(e) {
+                            $('.img-preview').attr('src', e.target.result);
+                        };
+                        reader.readAsDataURL(input.files[0]);
+                    }
+                }
+                
+                $("#img-id").change(function() {
+                    readURL(this);
+                });
+            });
+
+            $scope.clearImg = function() {
+                $('.img-preview').attr('src', '');
+                document.getElementById('imgPath').value = '';
+                document.getElementById('img-id').value = '';
+            };
+        }
+    };
+})
+
 .directive('d2RadioButton', function (){
     return {
         restrict: 'E',
