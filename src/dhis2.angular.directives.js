@@ -543,7 +543,7 @@ var d2Directives = angular.module('d2Directives', [])
             });
 
             $scope.clearImg = function() {
-                $('.img-preview').attr('src', '');
+                $('.img-preview').attr('src', '#');
                 document.getElementById('imgPath').value = '';
                 document.getElementById('img-id').value = '';
             };
