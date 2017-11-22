@@ -3127,9 +3127,11 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     this.selectedTeiEvents = [];
     this.fileNames = {};
     this.orgUnitNames = {};
+    this.frontPageData = {};
     this.location = null;
     this.advancedSearchOptions = null;
-	this.trackedEntities = null;
+    this.trackedEntities = null;
+    this.frontPageData = null;
 
     this.set = function(currentSelection){
         this.currentSelection = currentSelection;
@@ -3207,36 +3209,29 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     this.getLocation = function(){
         return this.location;
     };
-    
-    this.setAdvancedSearchOptions = function (searchOptions) {
-        this.advancedSearchOptions = searchOptions;
-    };
-    this.getAdvancedSearchOptions = function () {
-        return this.advancedSearchOptions;
-    };
 
     this.setTrackedEntities = function (trackedEntities) {
         this.trackedEntities = trackedEntities;
+        if(this.frontPageData && this.frontPageData.trackedEntityList){
+            this.frontPageData.trackedEntityList.data = this.trackedEntities;
+        }
     };
     this.getTrackedEntities = function () {
         return this.trackedEntities;
     };
 
-    this.setSortColumn = function (sortColumn) {
-        if (this.advancedSearchOptions) {
-            this.advancedSearchOptions.sortColumn = sortColumn;
+    this.setFrontPageData = function(frontPageData){
+        this.frontPageData = frontPageData;
+        if(this.frontPageData && this.frontPageData.trackedEntityList && this.frontPageData.trackedEntityList.data){
+            this.setTrackedEntities(this.frontPageData.trackedEntityList.data);
         }
-    };
-
-    this.setColumnReverse = function (reverseSortStatus) {
-        if (this.advancedSearchOptions) {
-            this.advancedSearchOptions.reverse = reverseSortStatus;
-        }
-    };
-
-    this.setGridColumns = function (gridColumns) {
-        if (this.advancedSearchOptions) {
-            this.advancedSearchOptions.gridColumns = gridColumns;
+    }
+    this.getFrontPageData = function(){
+        return this.frontPageData;
+    }
+    this.setFrontPageRefresh = function(refresh){
+        if(this.frontPageData && this.frontPageData.trackedEntityList){
+            this.frontPageData.trackedEntityList.refresh = refresh;
         }
     }
 })
