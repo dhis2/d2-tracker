@@ -2624,7 +2624,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             //Run rules in priority - lowest number first(priority null is last)
             rules = orderByFilter(rules, 'priority');
 
-            VariableService.getVariables(allProgramRules, executingEvent, evs, allDataElements,
+            return VariableService.getVariables(allProgramRules, executingEvent, evs, allDataElements,
                 allTrackedEntityAttributes, selectedEntity, selectedEnrollment, optionSets).then( function(variablesHash) {
                 if(angular.isObject(rules) && angular.isArray(rules)){
                     //The program has rules, and we want to run them.
@@ -2776,16 +2776,19 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             }
                         });
                     });
-
+                    var result = { event: ruleEffectKey, callerId:flag.callerId, eventsCreated:eventsCreated };
                     //Broadcast rules finished if there was any actual changes to the event.
                     if(updatedEffectsExits){
-                        $rootScope.$broadcast("ruleeffectsupdated", { event: ruleEffectKey, callerId:flag.callerId, eventsCreated:eventsCreated });
+                        $rootScope.$broadcast("ruleeffectsupdated", result);
                     }
+                    return result;
                 }
-
-                return true;
+                return null;
             });
         }
+        var def = $q.defer();
+        def.resolve();
+        return def.promise;
     };
     
     var internalProcessEventGrid = function( eventGrid ){
@@ -2894,12 +2897,12 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     };
     return {
         executeRules: function(allProgramRules, executingEvent, evs, allDataElements, allTrackedEntityAttributes, selectedEntity, selectedEnrollment, optionSets, flags) {
-            internalExecuteRules(allProgramRules, executingEvent, evs, allDataElements, allTrackedEntityAttributes, selectedEntity, selectedEnrollment, optionSets, flags);
+            return internalExecuteRules(allProgramRules, executingEvent, evs, allDataElements, allTrackedEntityAttributes, selectedEntity, selectedEnrollment, optionSets, flags);
         },
         loadAndExecuteRulesScope: function(currentEvent, programId, programStageId, programStageDataElements, allTrackedEntityAttributes, optionSets, orgUnitId, flags){
-            internalGetOrLoadRules(programId).then(function(rules) {
-                internalGetOrLoadScope(currentEvent,programStageId,orgUnitId).then(function(scope) {
-                    internalExecuteRules(rules, currentEvent, scope, programStageDataElements, allTrackedEntityAttributes, null, null, optionSets, flags);
+            return internalGetOrLoadRules(programId).then(function(rules) {
+                return internalGetOrLoadScope(currentEvent,programStageId,orgUnitId).then(function(scope) {
+                    return internalExecuteRules(rules, currentEvent, scope, programStageDataElements, allTrackedEntityAttributes, null, null, optionSets, flags);
                 });
             });
         },
