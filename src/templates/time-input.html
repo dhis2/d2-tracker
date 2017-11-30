@@ -18,7 +18,7 @@
             placeholder="{{'hours_and_minutes' | translate}}"
             class="form-control"
             ng-class="timeUseNotification ? getInputNotifcationClass(timeModelId, timeModel) : ''"
-            d2-time-validator
+            d2-time-am-pm-validator
             d2-time-parser
             ng-required="timeRequired"
             ng-disabled="timeDisabled"
