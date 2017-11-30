@@ -1146,9 +1146,7 @@ var d2Directives = angular.module('d2Directives', [])
         },
         controller: function($scope, ModalService) {
             $scope.use24 = $scope.timeFormat && $scope.timeFormat !== '12h' ? true : false;
-            $scope.base = {};
-            console.log($scope.timeFormat);
-            
+            $scope.base = {};            
             
             $scope.saveTime = function() {
                 if(!$scope.timeModel[$scope.timeModelId] || $scope.timeModel[$scope.timeModelId].match(/^(\d\d:\d\d)$/)) {
