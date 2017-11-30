@@ -1005,6 +1005,7 @@ var d2Directives = angular.module('d2Directives', [])
         controller: function($scope, ModalService, DateUtils) {
             $scope.firstInput = true;
             $scope.use24 = $scope.timeFormat !== '12h' ? true : false;
+            $scope.timeFormat = 'AM';
             $scope.base = {};
 
             $scope.dateTimeInit = function() {
@@ -1149,6 +1150,7 @@ var d2Directives = angular.module('d2Directives', [])
 			$scope.clearDateTime = function() {
 				$scope.dateTime.date = null;
                 $scope.dateTime.time = null;
+                $scope.base.temp12hTime = null;
 				if($scope.datetimeSaveMethode()) {
 					$scope.saveDateTime();
 				}
