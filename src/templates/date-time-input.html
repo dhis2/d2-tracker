@@ -13,6 +13,7 @@
                name="foo">
         <span class="input-group-btn empty-span"></span>
         <input type="text"
+               ng-if="use24"
                placeholder="{{'hours_and_minutes' | translate}}"
                class="form-control no-left-radius no-right-radius"
                ng-class="datetimeUseNotification ? getInputNotifcationClass(datetimeModelId, datetimeModel) : ''"
@@ -24,6 +25,34 @@
                ng-change="autoTimeFormat()"
                ng-blur="saveDateTime(false, 'foo2')"
                name="foo2">
+        <input type="text"
+                ng-if="!use24"
+                ng-model="base.temp12hTime"
+                placeholder="{{'hours_and_minutes' | translate}}"
+                class="form-control"
+                ng-class="datetimeUseNotification ? getInputNotifcationClass(datetimeModelId, datetimeModel) : ''"
+                d2-time-am-pm-validator
+                d2-time-parser
+                ng-required="datetimeRequired"
+                ng-disabled="datetimeDisabled"
+                ng-blur="save12hTime()"
+                name="foo2"/>
+        <div ng-if="!use24" class="input-group-btn">
+            <button type="button" 
+                    class="btn btn-default dropdown-toggle" 
+                    data-toggle="dropdown" 
+                    aria-haspopup="true" 
+                    aria-expanded="false" 
+                    style="border-top-right-radius: 0; border-bottom-right-radius: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; border-color: #aaaaaa;">
+                {{timeFormat}} 
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a ng-click="setFormat('AM'); save12hTime()">AM</a></li>
+                <li><a ng-click="setFormat('PM'); save12hTime()">PM</a></li>
+            </ul>
+        </div>
+        
         <span class="input-group-btn hideInPrint">
             <button class="btn btn-danger hideInPrint trim" type="button" ng-disabled="datetimeDisabled" title="Clear" ng-click="clearDateTime()"> 
                 <i class="fa fa-trash-o"></i>                             

@@ -995,14 +995,18 @@ var d2Directives = angular.module('d2Directives', [])
             datetimeDisablePopup: '=',
             datetimeUseNotification: "=",
             datetimeElement: '=',
-            datetimeOuterform: '='
+            datetimeOuterform: '=',
+            timeFormat: '='
 
         },
         link: function (scope, element, attrs) {
            
         },
         controller: function($scope, ModalService, DateUtils) {
-			$scope.firstInput = true;
+            $scope.firstInput = true;
+            $scope.use24 = $scope.timeFormat !== '12h' ? true : false;
+            $scope.base = {};
+
             $scope.dateTimeInit = function() {
                 $scope.dateTime = { date: null, time: null};        
                 if(!$scope.datetimeModel[$scope.datetimeModelId]) {
@@ -1011,6 +1015,7 @@ var d2Directives = angular.module('d2Directives', [])
                 var values = $scope.datetimeModel[$scope.datetimeModelId].split('T');
                 $scope.dateTime.date = DateUtils.formatFromApiToUser(values[0]);
                 $scope.dateTime.time = values[1];
+                $scope.base.temp12hTime = $scope.convertFrom24h($scope.dateTime.time);
             };
 
             $scope.interacted = function (field, form) {
@@ -1019,7 +1024,64 @@ var d2Directives = angular.module('d2Directives', [])
                     status = form.$submitted || field.$touched;                 
                     return status;
                 }
-            };           
+            };
+
+            $scope.setFormat = function (format) {
+                if(format === 'AM') {
+                    $scope.timeFormat = 'AM';
+                } else if(format === 'PM') {
+                    $scope.timeFormat = 'PM';
+                } else if(format === '24h') {
+                    $scope.timeFormat = '24h';
+                }
+            };
+
+            $scope.convertTo24h = function(time) {
+                if(!time) {
+                    return;
+                }
+                var timeSplit = time.split(':');
+                
+                if($scope.timeFormat === 'PM') {
+                    timeSplit[0] = parseInt(timeSplit[0]) + 12 + '';
+                }
+
+                if($scope.timeFormat === 'AM' && timeSplit[0] === '12') {
+                    timeSplit[0] = '00';
+                }
+
+                if($scope.timeFormat === 'PM' && timeSplit[0] === '24') {
+                    timeSplit[0] = '12';
+                }
+                return timeSplit[0] + ':' + timeSplit[1];
+            };
+
+            $scope.convertFrom24h = function(time) {
+                if(!time) {
+                    $scope.setFormat('AM');
+                    return;
+                }
+                var timeSplit = time.split(':');
+                if(timeSplit[0] > 12) {
+                    $scope.setFormat('PM');
+                    var addZero = timeSplit[0]%12 < 10 ? '0' : '';
+                    return addZero + timeSplit[0]%12 + ':' + timeSplit[1];
+                } else if(timeSplit[0] === '12') {
+                    $scope.setFormat('PM');
+                    return time;
+                } else {
+                    if(timeSplit[0] === '00') {
+                        timeSplit[0] = '12';
+                    }
+                    $scope.setFormat('AM');
+                    return timeSplit[0] + ':' + timeSplit[1];
+                }
+            };
+            $scope.save12hTime = function(){
+                $scope.dateTime.time = $scope.convertTo24h($scope.base.temp12hTime);
+                $scope.saveDateTime(false);
+
+            }
 
             $scope.saveDateTime = function(isDate) {
                 var splitDateTime = '';
@@ -1090,7 +1152,7 @@ var d2Directives = angular.module('d2Directives', [])
 				if($scope.datetimeSaveMethode()) {
 					$scope.saveDateTime();
 				}
-			};
+            };
         }
     };
 })
@@ -1145,7 +1207,7 @@ var d2Directives = angular.module('d2Directives', [])
             
         },
         controller: function($scope, ModalService) {
-            $scope.use24 = $scope.timeFormat && $scope.timeFormat !== '12h' ? true : false;
+            $scope.use24 = $scope.timeFormat !== '12h' ? true : false;
             $scope.base = {};            
             
             $scope.saveTime = function() {
