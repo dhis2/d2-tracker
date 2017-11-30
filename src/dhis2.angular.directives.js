@@ -1211,6 +1211,9 @@ var d2Directives = angular.module('d2Directives', [])
                     $scope.setFormat('PM');
                     var addZero = timeSplit[0]%12 < 10 ? '0' : '';
                     return addZero + timeSplit[0]%12 + ':' + timeSplit[1];
+                } else if(timeSplit[0] === '12') {
+                    $scope.setFormat('PM');
+                    return time;
                 } else {
                     if(timeSplit[0] === '00') {
                         timeSplit[0] = '12';
