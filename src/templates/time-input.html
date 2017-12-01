@@ -25,7 +25,7 @@
             ng-blur="save12hTime()"
             name="foo"/>
         <div class="input-group-btn" style="padding-top: 5px;">
-            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="border-color: #aaaaaa;">{{timeFormat}} <span class="caret"></span></button>
+            <button type="button" class="btn btn-default dropdown-toggle" ng-disabled="timeDisabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="border-color: #aaaaaa;">{{timeFormat}} <span class="caret"></span></button>
             <ul class="dropdown-menu">
                 <li><a ng-click="setFormat('AM'); save12hTime()">AM</a></li>
                 <li><a ng-click="setFormat('PM'); save12hTime()">PM</a></li>
