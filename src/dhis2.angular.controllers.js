@@ -644,13 +644,12 @@ var d2Controllers = angular.module('d2Controllers', [])
         }
     });
 
-    //This methode is used to fetch all the orgUnits, no matter authority.
-    OrgUnitFactory.getRootDataElement().then(function(response) {
+    //This methode is used to fetch all "search orgUnits" a user has.
+    OrgUnitFactory.getSearchTreeRoot().then(function(response) {
         $scope.orgUnitsDataElement = response.organisationUnits;
         var selectedOuFetched = false;
         var levelsFetched = 0;
         angular.forEach($scope.orgUnitsDataElement, function(ou){
-            ou.show = true;
             levelsFetched = ou.level;
             if( orgUnitId && orgUnitId === ou.id ){
                 selectedOuFetched = true;
@@ -691,6 +690,18 @@ var d2Controllers = angular.module('d2Controllers', [])
                                 $scope.orgUnitsDataElement = attachOrgUnit( $scope.orgUnitsDataElement, response.organisationUnits[0] );
                             }
                         });
+
+                        openPath($scope.orgUnitsDataElement);
+
+                        //Recurtsive methode for expanding all orgUnits that contain the selected orgUnit.
+                        function openPath(orgUnits) {
+                            angular.forEach(orgUnits, function(orgUnit){
+                                if(parents.indexOf(orgUnit.id) > -1) {
+                                    $scope.expandCollapse(orgUnit);
+                                    openPath(orgUnit.children);
+                                }
+                            });
+                        }
                     }
                 }
             });
