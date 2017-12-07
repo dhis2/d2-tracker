@@ -3132,7 +3132,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     this.orgUnitNames = {};
     this.location = null;
     this.advancedSearchOptions = null;
-	this.trackedEntities = null;
+	this.trackedEntityTypes = null;
 
     this.set = function(currentSelection){
         this.currentSelection = currentSelection;
@@ -3218,11 +3218,11 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         return this.advancedSearchOptions;
     };
 
-    this.setTrackedEntities = function (trackedEntities) {
-        this.trackedEntities = trackedEntities;
+    this.setTrackedEntityTypes = function (trackedEntityTypes) {
+        this.trackedEntityTypes = trackedEntityTypes;
     };
-    this.getTrackedEntities = function () {
-        return this.trackedEntities;
+    this.getTrackedEntityTypes = function () {
+        return this.trackedEntityTypes;
     };
 
     this.setSortColumn = function (sortColumn) {
