@@ -3225,7 +3225,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     this.setFrontPageData = function(frontPageData){
         this.frontPageData = frontPageData;
         if(this.frontPageData && this.frontPageData.trackedEntityList && this.frontPageData.trackedEntityList.data){
-            this.setTrackedEntities(this.frontPageData.trackedEntityList.data);
+            this.setTrackedEntityTypes(this.frontPageData.trackedEntityList.data);
         }
     }
     this.getFrontPageData = function(){
