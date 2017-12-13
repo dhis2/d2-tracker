@@ -180,6 +180,9 @@ var d2Directives = angular.module('d2Directives', [])
                 $('body').on('click', function (e) {
                     if (!element[0].contains(e.target)) {
                         element.popover('hide');
+                        //Fix for bootstrap 3.0.2. This is fixed in 3.1.0
+                        var popover = element.siblings('.popover.fade.right');
+                        if(popover) popover.remove();
                     }
                 });
             }
