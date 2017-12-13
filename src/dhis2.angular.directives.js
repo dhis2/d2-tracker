@@ -558,6 +558,63 @@ var d2Directives = angular.module('d2Directives', [])
     };
 })
 
+.directive("imgUpload",function($http,$compile){
+    return {
+        restrict : 'AE',
+        scope : {
+            url : "@",
+            method : "@"
+        },
+        templateUrl: "./templates/img-input.html",
+        link : function(scope,elem,attrs){
+            var formData = new FormData();
+            scope.previewData = {};	
+
+            function previewFile(file){
+                var reader = new FileReader();
+                var obj = new FormData().append('file',file);			
+                
+                reader.onload = function(data){
+                    var src = data.target.result;
+                    var size = ((file.size/(1024*1024)) > 1)? (file.size/(1024*1024)).toFixed(2) + ' mB' : (file.size/1024).toFixed(2) +' kB';
+                    scope.$apply(function(){
+                        scope.previewData = {'name':file.name,'size':size,'type':file.type,
+                                                'src':src,'data':obj};
+                    });								
+                }
+                reader.readAsDataURL(file);
+            }
+
+            function uploadFile(e){
+                e.preventDefault();			
+                var files = e.target.files;	
+                var file = files[0];
+                
+                if(file.type.indexOf("image") !== -1){
+                    previewFile(file);								
+                } else {
+                    alert(file.name + " is not supported");
+                }
+            }	
+            elem.find('.fileUpload').bind('change',function(e){
+                uploadFile(e,'formControl');
+            });
+
+            scope.upload = function(obj){
+                $http({method:scope.method,url:scope.url,data: obj.data,
+                    headers: {'Content-Type': undefined}, transformRequest: angular.identity
+                }).success(function(data){
+
+                });
+            }
+
+            scope.remove =function(){
+                scope.previewData = {};
+            }
+        }
+    }
+})
+
 .directive('d2RadioButton', function (){
     return {
         restrict: 'E',
