@@ -8,11 +8,11 @@
                 <img class="img-thumbnail img-preview">
                 <div class="text-center" style="padding-top: 10px;">
                     <div class="input-group">
-                        <input id="imgPath" class="form-control" placeholder="{{'please_select'| translate}}" disabled="disabled">
+                        <input id={{imgElementPath}} class="form-control" placeholder="{{'please_select'| translate}}" disabled="disabled">
                         <div class="input-group-btn">
                             <div class="imgUpload btn btn-default" style="margin-top: 5px;">
                                 <span><i class="fa fa-upload"></i> {{'upload_image' | translate}}</span>
-                                <input id="img-id" type="file">
+                                <input id={{imgElementID}} class="imgInput" type="file">
                             </div>
                         </div>
                         <div class="input-group-btn">
@@ -36,7 +36,7 @@
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
 }
-.imgUpload #img-id {
+.imgUpload .imgInput {
     position: absolute;
     top: 0;
     right: 0;

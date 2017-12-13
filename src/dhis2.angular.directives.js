@@ -520,10 +520,15 @@ var d2Directives = angular.module('d2Directives', [])
 			d2SaveMethodeParameter2: '='
         },
         controller: function ($scope) {
+            $scope.imgElementID = $scope.d2ModelId + "-img";
+            $scope.imgElementPath = $scope.d2ModelId + "-path";
+
             $(document).ready(function() {
-                var img = document.getElementById('img-id');
+                var img = document.getElementById($scope.imgElementID);
+                console.log(img);
                 img.onchange = function() {
-                    document.getElementById('imgPath').value = this.value.substring(12);
+                    console.log("Change path");
+                    document.getElementById($scope.imgElementPath).value = this.value.substring(12);
                 };
             
                 function readURL(input) {
@@ -537,15 +542,17 @@ var d2Directives = angular.module('d2Directives', [])
                     }
                 }
                 
-                $("#img-id").change(function() {
+                var imgID = '#' + $scope.imgElementID;
+                $(imgID).change(function() {
+                    console.log("Inside change function");
                     readURL(this);
                 });
             });
 
             $scope.clearImg = function() {
                 $('.img-preview').attr('src', '#');
-                document.getElementById('imgPath').value = '';
-                document.getElementById('img-id').value = '';
+                document.getElementById($scope.imgElementPath).value = '';
+                document.getElementById($scope.imgElementID).value = '';
             };
         }
     };
