@@ -509,70 +509,21 @@ var d2Directives = angular.module('d2Directives', [])
     };
 })
 
-.directive('d2Image', function () {
+.directive("d2Image",function($http,$compile){
     return {
-        restrict: 'E',
-        templateUrl: "./templates/image-input.html",
-        scope: {
-            d2Model: '=',
-			d2ModelId: '=',
-            d2Required: '=',
-            d2Disabled: '=',
-			d2SaveMethode: '&',
-			d2SaveMethodeParameter1: '=',
-			d2SaveMethodeParameter2: '='
-        },
-        controller: function ($scope) {
-            $scope.imgElementID = $scope.d2ModelId + "-img";
-            $scope.imgElementPath = $scope.d2ModelId + "-path";
-
-            $(document).ready(function() {
-                var img = document.getElementById($scope.imgElementID);
-                console.log(img);
-                img.onchange = function() {
-                    console.log("Change path");
-                    document.getElementById($scope.imgElementPath).value = this.value.substring(12);
-                };
-            
-                function readURL(input) {
-                    if (input.files && input.files[0]) {
-                        var reader = new FileReader();
-                        
-                        reader.onload = function(e) {
-                            $('.img-preview').attr('src', e.target.result);
-                        };
-                        reader.readAsDataURL(input.files[0]);
-                    }
-                }
-                
-                var imgID = '#' + $scope.imgElementID;
-                $(imgID).change(function() {
-                    console.log("Inside change function");
-                    readURL(this);
-                });
-            });
-
-            $scope.clearImg = function() {
-                $('.img-preview').attr('src', '#');
-                document.getElementById($scope.imgElementPath).value = '';
-                document.getElementById($scope.imgElementID).value = '';
-            };
-        }
-    };
-})
-
-.directive("imgUpload",function($http,$compile){
-    return {
-        restrict : 'AE',
+        restrict : 'E',
         scope : {
-            url : "@",
-            method : "@"
+            d2DisplayOpen : "="
         },
         templateUrl: "./templates/img-input.html",
         link : function(scope,elem,attrs){
+            scope.url = 'dhis.org/api';
+            scope.method = 'POST';
+            
             var formData = new FormData();
             scope.previewData = {};	
 
+            //Function for loading the preview image.
             function previewFile(file){
                 var reader = new FileReader();
                 var obj = new FormData().append('file',file);			
@@ -580,21 +531,22 @@ var d2Directives = angular.module('d2Directives', [])
                 reader.onload = function(data){
                     var src = data.target.result;
                     var size = ((file.size/(1024*1024)) > 1)? (file.size/(1024*1024)).toFixed(2) + ' mB' : (file.size/1024).toFixed(2) +' kB';
+                    
                     scope.$apply(function(){
-                        scope.previewData = {'name':file.name,'size':size,'type':file.type,
-                                                'src':src,'data':obj};
+                        scope.previewData = {'name': file.name,'size': size,'type': file.type,'src': src,'data': obj};
                     });								
                 }
                 reader.readAsDataURL(file);
             }
 
+            //Function for upload from OS to browser.
             function uploadFile(e){
                 e.preventDefault();			
                 var files = e.target.files;	
                 var file = files[0];
                 
                 if(file.type.indexOf("image") !== -1){
-                    previewFile(file);								
+                    previewFile(file);
                 } else {
                     alert(file.name + " is not supported");
                 }
@@ -603,6 +555,7 @@ var d2Directives = angular.module('d2Directives', [])
                 uploadFile(e,'formControl');
             });
 
+            //Upload from browser to API.
             scope.upload = function(obj){
                 $http({method:scope.method,url:scope.url,data: obj.data,
                     headers: {'Content-Type': undefined}, transformRequest: angular.identity

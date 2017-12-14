@@ -2,7 +2,8 @@
     <accordion>
         <accordion-group>
             <accordion-heading>
-                <span> {{'please_select'| translate}} <i class="pull-right" ng-class="{'fa fa-chevron-up vertical-center': searchOuTree.open, 'fa fa-chevron-down vertical-center': !searchOuTree.open}"></i></span>
+                <span ng-if="!previewData.name"> {{'please_select_an_image'| translate}} <i class="pull-right" ng-class="{'fa fa-chevron-up vertical-center': !d2DisplayOpen, 'fa fa-chevron-down vertical-center': d2DisplayOpen}"></i></span>
+                <span ng-if="previewData.name"> {{previewData.name}} <i class="pull-right" ng-class="{'fa fa-chevron-up vertical-center': !d2DisplayOpen, 'fa fa-chevron-down vertical-center': d2DisplayOpen}"></i></span>
             </accordion-heading>
             <div class="preview clearfix">
                 <div class="previewData clearfix" ng-show="previewData.name">
@@ -28,6 +29,11 @@
                         <input class="fileUpload imgInput" type="file"/>
                     </div>
                 </div>
+                <div class="input-group-btn">
+                        <div ng-click="upload(previewData)" ng-disabled="!previewData.name" class="btn btn-success leftFlat rightFlat" style="margin-top: 5px;">
+                            <span>Save <i class="fa fa-floppy-o"></i></span>
+                        </div>
+                    </div>
                 <div class="input-group-btn">
                     <div ng-click="remove()" class="btn btn-danger leftFlat" style="margin-top: 5px;">
                         <span><i class="fa fa-trash-o"></i></span>
@@ -62,5 +68,10 @@
 .leftFlat {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;  
+}
+
+.rightFlat {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;  
 }
 </style>
