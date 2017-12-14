@@ -785,7 +785,7 @@ var d2Directives = angular.module('d2Directives', [])
                     controller: 'OrgUnitTreeController',
                     resolve: {
                         orgUnitId: function(){
-                            return $scope.d2Object[dataElementId] ? $scope.d2Object[dataElementId] : $scope.selectedOrgUnitId;
+                            return $scope.d2Object[dataElementId];
                         },
                         orgUnitNames: function(){
                             return $scope.d2OrgunitNames;

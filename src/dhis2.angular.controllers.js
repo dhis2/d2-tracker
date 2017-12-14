@@ -644,6 +644,70 @@ var d2Controllers = angular.module('d2Controllers', [])
         }
     });
 
+    //This methode is used to fetch all "search orgUnits" a user has.
+    OrgUnitFactory.getSearchTreeRoot().then(function(response) {
+        $scope.orgUnitsDataElement = response.organisationUnits;
+        var selectedOuFetched = false;
+        var levelsFetched = 0;
+        angular.forEach($scope.orgUnitsDataElement, function(ou){
+            levelsFetched = ou.level;
+            if( orgUnitId && orgUnitId === ou.id ){
+                selectedOuFetched = true;
+            }
+            angular.forEach(ou.children, function(o){
+                levelsFetched = o.level;
+                o.hasChildren = o.children && o.children.length > 0 ? true : false;
+                if( orgUnitId && !selectedOuFetched && orgUnitId === ou.id ){
+                    selectedOuFetched = true;
+                }
+            });
+        });
+
+        levelsFetched = levelsFetched > 0 ? levelsFetched - 1 : levelsFetched;
+
+        if( orgUnitId && !selectedOuFetched ){
+            var parents = null;
+            OrgUnitFactory.get( orgUnitId ).then(function( ou ){
+                if( ou && ou.path ){
+                    parents = ou.path.substring(1, ou.path.length);
+                    parents = parents.split("/");
+                    if( parents && parents.length > 0 ){
+                        var url = "fields=id,displayName,path,level,";
+                        for( var i=levelsFetched; i<ou.level; i++){
+                            url = url + "children[id,displayName,level,path,";
+                        }
+
+                        url = url.substring(0, url.length-1);
+                        for( var i=levelsFetched; i<ou.level; i++){
+                            url = url + "]";
+                        }
+
+                        OrgUnitFactory.getOrgUnits(parents[levelsFetched], url).then(function(response){
+                            if( response && response.organisationUnits && response.organisationUnits[0] ){
+                                response.organisationUnits[0].show = true;
+                                response.organisationUnits[0].hasChildren = response.organisationUnits[0].children && response.organisationUnits[0].children.length > 0 ? true : false;
+                                response.organisationUnits[0] = expandOrgUnit(response.organisationUnits[0], ou );
+                                $scope.orgUnitsDataElement = attachOrgUnit( $scope.orgUnitsDataElement, response.organisationUnits[0] );
+                            }
+                        });
+
+                        openPath($scope.orgUnitsDataElement);
+
+                        //Recurtsive methode for expanding all orgUnits that contain the selected orgUnit.
+                        function openPath(orgUnits) {
+                            angular.forEach(orgUnits, function(orgUnit){
+                                if(parents.indexOf(orgUnit.id) > -1) {
+                                    $scope.expandCollapse(orgUnit);
+                                    openPath(orgUnit.children);
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+        }
+    });
+
     //filter orgunits
     $scope.filterOrgUnits = function( clear ){
         if( !$scope.orgUnitFilterText || clear ){
