@@ -24,7 +24,7 @@
             <div class="input-group">
                 <input ng-model="previewData.name" class="form-control" placeholder="{{'please_select'| translate}}" disabled="disabled">
                 <div class="input-group-btn">
-                    <div class="imgUpload btn btn-default" style="margin-top: 5px;">
+                    <div class="imgUpload btn btn-default">
                         <span><i class="fa fa-upload"></i> {{'upload_image' | translate}}</span>
                         <input class="fileUpload imgInput" type="file"/>
                     </div>
@@ -52,6 +52,8 @@
     border-bottom-left-radius: 0;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
+    margin-top: 5px;
+    max-width: 85px;
 }
 .imgUpload .imgInput {
     position: absolute;
