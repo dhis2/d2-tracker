@@ -242,7 +242,7 @@ angular.module("d2Directives")
                             programUrl = 'program=' + attrs.selectedProgram;
                         }
                         
-                        if(attributeData.orgUnitScope){
+                        if(attributeData.orgunitScope){
                             ouMode = 'SELECTED';
                         }                        
 
