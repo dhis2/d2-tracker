@@ -523,6 +523,12 @@ var d2Directives = angular.module('d2Directives', [])
             var formData = new FormData();
             scope.previewData = {};	
 
+            $(document).ready(function() {
+                if(scope.d2DisplayOpen) {
+                    $('.panel-collapse .collapse').collapse('show');
+                }
+            });
+
             //Function for loading the preview image.
             function previewFile(file){
                 var reader = new FileReader();
