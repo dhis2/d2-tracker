@@ -3471,4 +3471,65 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             return deferred.promise;
         }
     };
+})
+.service('UserDataStoreService', function ($http, $q, DHIS2URL, $translate, SessionStorageService, NotificationService) {
+    var baseUrl = DHIS2URL+'/userDataStore';
+    var cached = {};
+    var getUrl = function(container, name){
+        return baseUrl + "/" + container + "/" + name;
+    }
+
+    var setCached = function(container, name, data){
+        if(!cached[container]) cached[container] = {};
+        cached[container][name] = data;
+    }
+    return {
+        set: function (data, container, name) {
+            var deferred = $q.defer();
+            var httpMessage = {
+                method: "put",
+                url: getUrl(container, name),
+                data: data,
+                headers: {'Content-Type': 'application/json;charset=UTF-8'}
+            };
+
+            $http(httpMessage).then(function (response) {
+                setCached(data);
+                deferred.resolve(response.data);
+            },function (error) {
+                httpMessage.method = "post";
+                $http(httpMessage).then(function (response) {
+                    setCached(data);
+                    deferred.resolve(response.data);
+                }, function (error) {
+                    if (error && error.data) {
+                        deferred.reject(error.data);
+                    } else {
+                        deferred.reject(null);
+                    }
+                });
+            });
+            return deferred.promise;
+        },
+        get: function (container, name) {
+            var deferred = $q.defer();
+
+            if(cached[container] && cached[container][name]){
+                deferred.resolve(cached[container][name]);
+            }else{
+                $http.get(getUrl(container,name)).then(function (response) {
+                    if (response && response.data) {
+                        setCached(container, name, response.data);
+                        deferred.resolve(response.data);
+                    } else {
+                        deferred.resolve(null);
+                    }
+                }, function (error) {
+                    deferred.resolve(null);
+                });
+            }
+
+            return deferred.promise;
+        }
+    };
 });
