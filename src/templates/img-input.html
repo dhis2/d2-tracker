@@ -1,8 +1,8 @@
 <div>
     <accordion>
-        <accordion-group>
+        <accordion-group is-open="d2DisplayOpen">
             <accordion-heading>
-                <span ng-if="!previewData.name"> {{'please_select_an_image'| translate}} <i class="pull-right" ng-class="{'fa fa-chevron-up vertical-center': !d2DisplayOpen, 'fa fa-chevron-down vertical-center': d2DisplayOpen}"></i></span>
+                <span ng-if="!previewData.name"> {{'please_select_an_image'| translate}} <i class="pull-right" ng-class="{'fa fa-chevron-up vertical-center': d2DisplayOpen, 'fa fa-chevron-down vertical-center': !d2DisplayOpen}"></i></span>
                 <span ng-if="previewData.name"> {{previewData.name}} <i class="pull-right" ng-class="{'fa fa-chevron-up vertical-center': !d2DisplayOpen, 'fa fa-chevron-down vertical-center': d2DisplayOpen}"></i></span>
             </accordion-heading>
             <div class="preview clearfix">
@@ -21,7 +21,7 @@
                     </div>
                 </div>	
             </div>
-            <div class="input-group">
+            <div class="input-group" ng-if="d2CanEdit">
                 <input ng-model="previewData.name" class="form-control" placeholder="{{'please_select'| translate}}" disabled="disabled">
                 <div class="input-group-btn">
                     <div class="imgUpload btn btn-default">

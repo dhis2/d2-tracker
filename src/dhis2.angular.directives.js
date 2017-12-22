@@ -513,7 +513,8 @@ var d2Directives = angular.module('d2Directives', [])
     return {
         restrict : 'E',
         scope : {
-            d2DisplayOpen : "="
+            d2DisplayOpen : "=",
+            d2CanEdit : "="
         },
         templateUrl: "./templates/img-input.html",
         link : function(scope,elem,attrs){
@@ -522,12 +523,6 @@ var d2Directives = angular.module('d2Directives', [])
             
             var formData = new FormData();
             scope.previewData = {};	
-
-            $(document).ready(function() {
-                if(scope.d2DisplayOpen) {
-                    $('.panel-collapse .collapse').collapse('show');
-                }
-            });
 
             //Function for loading the preview image.
             function previewFile(file){
