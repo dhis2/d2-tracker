@@ -1471,7 +1471,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         if(pi.displayInForm){
                             var newAction = {
                                     id:pi.id,
-                                    content:pi.displayDescription ? pi.displayDescription : pi.displayName,
+                                    content:pi.shortName ? pi.shortName : pi.displayName,
                                     data:pi.expression,
                                     programRuleActionType:'DISPLAYKEYVALUEPAIR',
                                     location:'indicators'
