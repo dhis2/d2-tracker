@@ -6,22 +6,14 @@
                 <span ng-if="previewData.name"> {{previewData.name}} <i class="pull-right" ng-class="{'fa fa-chevron-up vertical-center': !d2DisplayOpen, 'fa fa-chevron-down vertical-center': d2DisplayOpen}"></i></span>
             </accordion-heading>
             <div class="preview clearfix">
-                <div class="previewData clearfix" ng-show="previewData.name">
+                <div class="previewData clearfix" ng-show="previewData.src">
                     <img src={{previewData.src}} style="max-width:100%;"></img>
                     <div class="previewDetails">
-                        <div class="detail"><b>Name : </b>{{previewData.name}} <b>Size : </b> {{previewData.size}}</div>
-                    </div>
-                    <div class="previewControls">
-                        <span ng-click="upload(previewData)" class="circle upload">
-                            <i class="fa fa-check"></i>
-                        </span>
-                        <span ng-click="remove()" class="circle remove">
-                            <i class="fa fa-close"></i>
-                        </span>
+                        <div class="detail"><b>Size : </b> {{previewData.size}}</div>
                     </div>
                 </div>	
             </div>
-            <div class="input-group" ng-if="d2CanEdit">
+            <div class="input-group" ng-show="d2CanEdit">
                 <input ng-model="previewData.name" class="form-control" placeholder="{{'please_select'| translate}}" disabled="disabled">
                 <div class="input-group-btn">
                     <div class="imgUpload btn btn-default">
@@ -39,7 +31,9 @@
                         <span><i class="fa fa-trash-o"></i></span>
                     </div>
                 </div>
-            </div>                
+            </div>
+            <!--Add translatable text -->
+            <h3 ng-if="!d2CanEdit && !previewData.name" style="text-align: center;">No image found</h3>               
         </accordion-group> 
     </accordion>
 </div>
