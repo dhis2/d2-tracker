@@ -1393,8 +1393,8 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 /* Returns a function for getting rules for a specific program */
 .factory('RulesFactory', function($q,MetaDataFactory,$filter){
     var staticReplacements = 
-                        [{regExp:new RegExp("([^\w\d])(and)([^\w\d])","gi"), replacement:"$1&&$3"},
-                        {regExp:new RegExp("([^\w\d])(or)([^\w\d])","gi"), replacement:"$1||$3"},
+                        [{regExp:new RegExp("([^\\w\\d])(and)([^\\w\\d])","gi"), replacement:"$1&&$3"},
+                        {regExp:new RegExp("([^\\w\\d])(or)([^\\w\\d])","gi"), replacement:"$1||$3"},
                         {regExp:new RegExp("V{execution_date}","g"), replacement:"V{event_date}"}];
 
     var performStaticReplacements = function(expression) {
