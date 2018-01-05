@@ -508,76 +508,29 @@ var d2Directives = angular.module('d2Directives', [])
     };
 })
 
-.directive("d2Image",function($http, $compile, FileService, DHIS2EventService, DHIS2EventFactory){
+.directive("d2Image",function($http, $compile, DHIS2URL){
     return {
         restrict : 'E',
         scope : {
+            d2Disabled : "=",
+            d2Required : "=",
             d2DisplayOpen : "=",
             d2CanEdit : "=",
             d2Event : "=",
             d2DataElementId : "=",
             d2FileNames : "=",
-            d2FileInputList : "=",
-            d2DeleteMethode : "="
+            d2CurrentImageName : "=",
+            d2Ps : "=",
+            d2DeleteMethode : "=",
+            d2DownloadMethode : "="
         },
         templateUrl: "./templates/img-input.html",
         link : function(scope,elem,attrs){
-            var formData = new FormData();
-            scope.previewData = {};
+            scope.path = DHIS2URL + "/events/files?eventUid=" + scope.d2Event.event + "&dataElementUid=" + scope.d2DataElementId;
 
-            scope.previewData.src = "http://localhost:8081/api/events/files?eventUid=" + scope.d2Event.event + "&dataElementUid=" + scope.d2DataElementId;
-
-            //console.log(scope.d2FileNames);
-            //scope.previewData.name = scope.d2FileNames[scope.d2DataElementId] ? scope.d2FileNames[scope.d2DataElementId] : '';
-
-            //Function for loading the preview image.
-            function previewFile(file){
-                var reader = new FileReader();
-                var obj = new FormData().append('file',file);			
-                
-                reader.onload = function(data){
-                    var src = data.target.result;
-                    
-                    scope.$apply(function(){
-                        scope.previewData = {'name': file.name,'type': file.type,'src': src,'data': obj};
-                    });								
-                }
-                reader.readAsDataURL(file);
-            }
-
-            //Function for upload from OS to browser.
-            function uploadFile(e){
-                e.preventDefault();			
-                var files = e.target.files;	
-                var file = files[0];
-                
-                if(file.type.indexOf("image") !== -1){
-                    previewFile(file);
-                    upload(file);
-                } else {
-                    alert(file.name + " is not supported");
-                }
-            }	
-            elem.find('.fileUpload').bind('change',function(e){
-                uploadFile(e,'formControl');
-            });
-
-            //Upload from browser to API.
-            function upload(file){
-                FileService.upload(file).then(function(data){
-
-                    var updatedSingleValueEvent = {event: scope.d2Event.event, dataValues: [{value: data.response.fileResource.id, dataElement: scope.d2DataElementId}]};
-                    DHIS2EventFactory.updateForSingleValue(updatedSingleValueEvent).then(function(data){
-                        //Not needed if we can get filename from response header.
-                        scope.d2FileInputList = DHIS2EventService.refreshList(scope.d2FileInputList, scope.d2Event);
-                    });
-                });
-            }
-
-            scope.remove =function(){
-                scope.previewData = {};
-                scope.d2DeleteMethode(scope.d2Event, scope.d2DataElementId);
-            }
+            scope.fetch = function() {
+                scope.path = scope.path + "&" + new Date().getTime();
+            };
         }
     }
 })
