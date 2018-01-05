@@ -400,8 +400,6 @@ var d2Directives = angular.module('d2Directives', [])
                 var update = scope.d2FileInput.event &&  scope.d2FileInput.event !== 'SINGLE_EVENT' ? true : false;
 
                 FileService.upload(element[0].files[0]).then(function(data){
-                    console.log(element[0].files[0]);
-
                     if(data && data.status === 'OK' && data.response && data.response.fileResource && data.response.fileResource.id && data.response.fileResource.name){
                         scope.d2FileInput[de] = data.response.fileResource.id;
                         scope.d2FileInputCurrentName[de] = data.response.fileResource.name;
@@ -519,15 +517,17 @@ var d2Directives = angular.module('d2Directives', [])
             d2Event : "=",
             d2DataElementId : "=",
             d2FileNames : "=",
-            d2FileInputList : "="
+            d2FileInputList : "=",
+            d2DeleteMethode : "="
         },
         templateUrl: "./templates/img-input.html",
         link : function(scope,elem,attrs){
             var formData = new FormData();
             scope.previewData = {};
 
-            scope.previewData.src = "http://localhost:8081/api/events/files?eventUid=ZK7gM9MDQGY&dataElementUid=de0FEHSIoxh";
-            console.log(scope.d2FileNames);
+            scope.previewData.src = "http://localhost:8081/api/events/files?eventUid=" + scope.d2Event.event + "&dataElementUid=" + scope.d2DataElementId;
+
+            //console.log(scope.d2FileNames);
             //scope.previewData.name = scope.d2FileNames[scope.d2DataElementId] ? scope.d2FileNames[scope.d2DataElementId] : '';
 
             //Function for loading the preview image.
@@ -564,13 +564,11 @@ var d2Directives = angular.module('d2Directives', [])
 
             //Upload from browser to API.
             function upload(file){
-                console.log(file);
                 FileService.upload(file).then(function(data){
-                    console.log(data);
-                    
-                    var updatedSingleValueEvent = {event: scope.d2Event, dataValues: [{value: data.response.fileResource.id, dataElement: scope.d2DataElementId}]};
+
+                    var updatedSingleValueEvent = {event: scope.d2Event.event, dataValues: [{value: data.response.fileResource.id, dataElement: scope.d2DataElementId}]};
                     DHIS2EventFactory.updateForSingleValue(updatedSingleValueEvent).then(function(data){
-                        console.log(data);
+                        //Not needed if we can get filename from response header.
                         scope.d2FileInputList = DHIS2EventService.refreshList(scope.d2FileInputList, scope.d2Event);
                     });
                 });
@@ -578,6 +576,7 @@ var d2Directives = angular.module('d2Directives', [])
 
             scope.remove =function(){
                 scope.previewData = {};
+                scope.d2DeleteMethode(scope.d2Event, scope.d2DataElementId);
             }
         }
     }
