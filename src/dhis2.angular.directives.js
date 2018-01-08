@@ -531,6 +531,10 @@ var d2Directives = angular.module('d2Directives', [])
             scope.fetch = function() {
                 scope.path = scope.path + "&" + new Date().getTime();
             };
+
+            scope.delete = function() {
+                scope.d2DeleteMethode(scope.d2Event, scope.d2DataElementId);
+            };
         }
     }
 })

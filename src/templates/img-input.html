@@ -5,13 +5,13 @@
                 <span ng-if="!d2FileNames[d2Event.event][d2DataElementId]"> {{'please_select_an_image'| translate}} <i class="pull-right" ng-class="{'fa fa-chevron-up vertical-center': d2DisplayOpen, 'fa fa-chevron-down vertical-center': !d2DisplayOpen}"></i></span>
                 <span ng-if="d2FileNames[d2Event.event][d2DataElementId]"> {{d2FileNames[d2Event.event][d2DataElementId].length > 20 ? d2FileNames[d2Event.event][d2DataElementId].substring(0,20).concat('...') : d2FileNames[d2Event.event][d2DataElementId]}} <i class="pull-right" ng-class="{'fa fa-chevron-up vertical-center': !d2DisplayOpen, 'fa fa-chevron-down vertical-center': d2DisplayOpen}"></i></span>
             </accordion-heading>
-            <div class="preview clearfix" ng-if="d2FileNames[d2Event.event][d2DataElementId]">
+            <div class="preview clearfix" ng-if="d2Event[d2DataElementId]">
                 <div class="previewData clearfix" ng-init="fetch()">
                     <img class="img" ng-src={{path}} style="max-width:100%;"></img>
                 </div>	
             </div>
-            <div ng-if="!d2FileNames[d2Event.event][d2DataElementId]">
-                <h3 style="text-align: center;">No image found</h3>
+            <div ng-if="!d2Event[d2DataElementId]">
+                <h3 style="text-align: center;">{{'no_image_found' | translate}}</h3>
                 <br>
             </div>
             <div class="input-group" ng-show="d2CanEdit" style="margin-top: 5px;">
@@ -19,14 +19,14 @@
                     <a href ng-click="d2DownloadMethode(d2Event.event, d2DataElementId)" title="{{d2FileNames[d2Event.event][d2DataElementId]}}">{{d2FileNames[d2Event.event][d2DataElementId].length > 20 ? d2FileNames[d2Event.event][d2DataElementId].substring(0,20).concat('...') : d2FileNames[d2Event.event][d2DataElementId]}}</a>
                 </div>
                 <span class="input-group-btn">
-                    <span class="btn btn-grp btn-file" ng-click="d2DeleteMethode(d2Event,d2DataElementId)" ng-if="d2Event[d2DataElementId]">
+                    <span class="btn btn-grp btn-file" ng-click="delete()" ng-if="d2Event[d2DataElementId]" style="border-top-left-radius: 0px; border-bottom-left-radius: 0px;">
                         <span title="{{'delete' | translate}}"
                               d2-file-input-name="d2FileNames[d2Event.event][d2DataElementId]"
                               d2-file-input-delete="d2Event[d2DataElementId]">
                             <i class="fa fa-trash"></i>
                         </span>
                     </span>
-                    <span class="btn btn-grp btn-file" ng-if="!d2Event[d2DataElementId]">
+                    <span class="btn btn-grp btn-file" ng-if="!d2Event[d2DataElementId]" style="border-top-left-radius: 0px; border-bottom-left-radius: 0px;">
                         <span title="{{'upload' | translate}}">
                             <i class="fa fa-upload"></i>
                             <input type="file"
@@ -42,7 +42,15 @@
                         </span>
                     </span>
                 </span>
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-default" ng-disabled="!d2Event[d2DataElementId]" ng-click="fetch()" style="border-radius: 4px; margin-left: 10px;">
+                        <i class="fa fa-refresh" aria-hidden="true"></i>
+                    </button>
+                </span>
             </div>               
         </accordion-group> 
     </accordion>
 </div>
+
+
+<h1>{{d2Event[d2DataElementId]}}</h1>
