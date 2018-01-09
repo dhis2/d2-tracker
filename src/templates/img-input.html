@@ -11,8 +11,19 @@
                 </div>	
             </div>
             <div ng-if="!d2Event[d2DataElementId]">
-                <h3 style="text-align: center;">{{'no_image_found' | translate}}</h3>
-                <br>
+                <div class="form-group inputDnD">
+                    <input type="file"
+                           name="foo"
+                           input-field-id={{d2DataElementId}}
+                           d2-file-input-ps="d2Ps"
+                           d2-file-input="d2Event"
+                           d2-file-input-current-name="d2CurrentImageName"
+                           d2-file-input-name="d2FileNames"
+                           accept="image/*"
+                           class="form-control-file text-primary font-weight-bold"
+                           id="inputFile"
+                           data-title="{{'drop_image'| translate}}">
+                </div>
             </div>
             <div class="input-group" ng-show="d2CanEdit" style="margin-top: 5px;">
                 <div class="form-control">
@@ -51,3 +62,45 @@
         </accordion-group> 
     </accordion>
 </div>
+
+<style>
+    .inputDnD .form-control-file {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        min-height: 6em;
+        outline: none;
+        visibility: hidden;
+        cursor: pointer;
+        background-color: #c61c23;
+        box-shadow: 0 0 5px solid currentColor;
+    }
+    .inputDnD .form-control-file:before {
+        content: attr(data-title);
+        position: absolute;
+        top: 0.5em;
+        left: 0;
+        width: 100%;
+        min-height: 6em;
+        line-height: 2em;
+        padding-top: 1.5em;
+        opacity: 1;
+        visibility: visible;
+        text-align: center;
+        border: 0.15em dashed currentColor;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        overflow: hidden;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+        border-bottom-left-radius: 15px;
+        border-bottom-right-radius: 15px;
+    }
+    .inputDnD .form-control-file:hover:before {
+        border-style: solid;
+        box-shadow: inset 0px 0px 0px 0.05em currentColor;
+        border-bottom-right-radius: 15px;
+        border-top-right-radius: 15px;
+        border-bottom-left-radius: 15px;
+        border-top-left-radius: 15px;
+    }
+</style>
