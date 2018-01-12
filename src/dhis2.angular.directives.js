@@ -455,6 +455,56 @@ var d2Directives = angular.module('d2Directives', [])
     };
 })
 
+.directive('d2TrackerAssociate', function($parse, $timeout, $translate, CurrentSelection, TEIService){
+
+    return {
+        restrict: "E",
+        templateUrl: "./templates/tracker-associate-input.html",
+        scope: {
+            d2SelectedTei: '=',
+            d2Attribute: '=',
+            d2SelectedProgram: '=',
+            d2BlurMethode: '=',
+            d2SelectedOrgunit: '=',
+            d2GetTaPromise: "="
+        },
+        link: function (scope, element, attrs) {
+            var attributes = CurrentSelection.getAttributesById();
+            scope.userDetailsName = [];
+            scope.userDetailsData = [];
+
+            if(scope.d2SelectedTei[scope.d2Attribute.id]) {
+                TEIService.get(scope.d2SelectedTei[scope.d2Attribute.id], null, attributes).then(function (response) {
+                    for(var i = 0; i < response.attributes.length; i++) {
+                        scope.userDetailsName.push(response.attributes[i].displayName);
+                        scope.userDetailsData.push(response.attributes[i].value);
+                    }
+                });
+            }
+
+            scope.getTa = function() {
+                scope.userDetailsName = [];
+                scope.userDetailsData = [];
+
+                scope.d2GetTaPromise(scope.d2Attribute, scope.d2SelectedTei[scope.d2Attribute.id]).then(function(data) {
+                    TEIService.get(scope.d2SelectedTei[scope.d2Attribute.id], null, attributes).then(function (response) {
+                        for(var i = 0; i < response.attributes.length; i++) {
+                            scope.userDetailsName.push(response.attributes[i].displayName);
+                            scope.userDetailsData.push(response.attributes[i].value);
+                        }
+                    });
+                });
+            }
+
+            scope.delete = function() {
+                scope.d2SelectedTei[scope.d2Attribute.id] = null
+                scope.userDetailsName = [];
+                scope.userDetailsData = [];
+            }
+        }
+    };
+})
+
 .directive('d2Audit', function (CurrentSelection, MetaDataFactory ) {
     return {
         restrict: 'E',
