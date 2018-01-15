@@ -315,7 +315,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             dateAfterOffset = $filter('date')(dateAfterOffset, calendarSetting.keyDateFormat);
             return dateAfterOffset;
         },
-        verifyExpiryDate: function(date, expiryPeriodType, expiryDays){
+        verifyExpiryDate: function(date, expiryPeriodType, expiryDays, showNotifications){
             var eventPeriodEndDate, eventDate, eventPeriod;
             var isValid = true;
             var calendarSetting, dateFormat, generator, today;
@@ -329,7 +329,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             eventDate = moment(date, dateFormat);
             eventPeriod = generator.getPeriodForTheDate(eventDate.format("YYYY-MM-DD"), expiryPeriodType, true);
             if (eventPeriod && eventPeriod.endDate) {
-                eventPeriodEndDate = moment(eventPeriod.endDate, "YYYY-MM-DD").add(expiryDays, "day");
+                eventPeriodEndDate = moment(eventPeriod.endDate, "YYYY-MM-DD").add(expiryDays, "days");
                 if (today.isAfter(eventPeriodEndDate)) {
                     NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("event_date_out_of_range"));
                     isValid = false;
