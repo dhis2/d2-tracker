@@ -301,7 +301,6 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             }
             
             date = formatDate(date);
-            console.log(date);
             return date;
         },
         getDateAfterOffsetDays: function (offSetDays) {
