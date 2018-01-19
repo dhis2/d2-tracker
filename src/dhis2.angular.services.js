@@ -399,6 +399,22 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     };
 })
 
+.service('UsersService', function( $http, $translate) {
+    return {
+        getAll: function(){
+            var promise = $http.get("../api/users?paging=false&fields=*").then(function (response) {
+                var users = [];
+                angular.forEach(response.data.users, function (user) {
+                    var userObj = {username: user.userCredentials.username, orgUnits: user.organisationUnits};
+                    users.push(userObj);
+                });
+                return users;
+            });
+            return promise;
+        }
+    };
+}) 
+
 /* Service for option name<->code conversion */
 .factory('OptionSetService', function() {
     return {

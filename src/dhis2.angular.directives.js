@@ -505,6 +505,38 @@ var d2Directives = angular.module('d2Directives', [])
     };
 })
 
+.directive('d2UsersInput', function(){
+    return {
+        restrict: 'E',
+        templateUrl: './templates/users-input.html',
+        scope: {
+            d2Model: '=',
+            d2ModelId: '=',
+            d2Required: '=',
+            d2Disabled: '=',
+            d2SaveMethode: '&',
+            d2SaveMethodeParameter1: '=',
+            d2SaveMethodeParameter2: '=',
+            d2MaxOptionSize: '='
+            
+        },
+        link: function (scope, element, attrs) {
+
+        },
+        controller: function($scope, UsersService, OrgUnitFactory) {
+            $scope.allUsers = [];        
+            $scope.temp = UsersService.getAll().then(function(users){
+                $scope.allUsers = users;
+            });
+
+            $scope.saveOption = function() {
+                $scope.d2SaveMethode()($scope.d2SaveMethodeParameter1, $scope.d2SaveMethodeParameter2);
+            };
+        }
+
+    };
+})
+
 .directive('d2Audit', function (CurrentSelection, MetaDataFactory ) {
     return {
         restrict: 'E',
