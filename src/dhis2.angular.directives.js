@@ -517,7 +517,9 @@ var d2Directives = angular.module('d2Directives', [])
             d2SaveMethode: '&',
             d2SaveMethodeParameter1: '=',
             d2SaveMethodeParameter2: '=',
-            d2MaxOptionSize: '='
+            d2MaxOptionSize: '=',
+            d2UseNotification: '=',
+            d2Element: '='
             
         },
         link: function (scope, element, attrs) {
@@ -532,6 +534,23 @@ var d2Directives = angular.module('d2Directives', [])
             $scope.saveOption = function() {
                 $scope.d2SaveMethode()($scope.d2SaveMethodeParameter1, $scope.d2SaveMethodeParameter2);
             };
+
+            $scope.getInputNotifcationClass = function(id) {
+				event = $scope.d2Model;
+				
+				if($scope.d2Element && $scope.d2Element.id === id && $scope.d2Element.event && $scope.d2Element.event === event.event) {
+					if($scope.d2Element.pending) {
+						return 'input-pending';
+					}
+					
+					if($scope.d2Element.saved) {
+						return 'input-success';
+					} else {
+						return 'input-error';
+					}            
+				}  
+				return '';
+			};
         }
 
     };
