@@ -1611,7 +1611,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     };  
 })
 /* service for building variables based on the data in users fields */
-.service('VariableService', function(DateUtils,OptionSetService,OrgUnitFactory,$filter,$log){
+.service('VariableService', function(DateUtils,OptionSetService,OrgUnitFactory,$filter,$log,$q){
     var processSingleValue = function(processedValue,valueType){
         //First clean away single or double quotation marks at the start and end of the variable name.
         processedValue = $filter('trimquotes')(processedValue);
@@ -1880,11 +1880,17 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
             var orgUnitUid = selectedEnrollment ? selectedEnrollment.orgUnit : executingEvent.orgUnit;
             var orgUnitCode = '';
-            return OrgUnitFactory.getFromStoreOrServer( orgUnitUid ).then(function (response) {
-                orgUnitCode = response.code;
-                variables = pushVariable(variables, 'orgunit_code', orgUnitCode, null, 'TEXT', orgUnitCode ? true : false, 'V', '', false);
-                return variables;
-            });
+            var def = $q.defer();
+            if(orgUnitUid){
+                OrgUnitFactory.getFromStoreOrServer( orgUnitUid ).then(function (response) {
+                    orgUnitCode = response.code;
+                    variables = pushVariable(variables, 'orgunit_code', orgUnitCode, null, 'TEXT', orgUnitCode ? true : false, 'V', '', false);
+                    def.resolve(variables);
+                });
+            }else{
+                def.resolve(variables);
+            }
+            return def.promise;
         }
     };
 })

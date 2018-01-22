@@ -12,6 +12,13 @@ var d2Directives = angular.module('d2Directives', [])
         restrict: 'A',
         link: function (scope, element, attrs) {
             var orgUnitFromUrl;
+            window.onhashchange = function(a,b,c,d){
+                selection.load();
+            }
+            
+            $("#orgUnitTree").on("ouwtLoaded", function(event, ids, names){
+                console.log("on outree");
+            });
             $("#orgUnitTree").one("ouwtLoaded", function (event, ids, names) {
                 if (dhis2.tc && dhis2.tc.metaDataCached) {
                     $timeout(function () {
