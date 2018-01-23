@@ -512,6 +512,57 @@ var d2Directives = angular.module('d2Directives', [])
     };
 })
 
+.directive('d2UsersInput', function(){
+    return {
+        restrict: 'E',
+        templateUrl: './templates/users-input.html',
+        scope: {
+            d2Model: '=',
+            d2ModelId: '=',
+            d2Required: '=',
+            d2Disabled: '=',
+            d2SaveMethode: '&',
+            d2SaveMethodeParameter1: '=',
+            d2SaveMethodeParameter2: '=',
+            d2MaxOptionSize: '=',
+            d2UseNotification: '=',
+            d2Element: '='
+            
+        },
+        link: function (scope, element, attrs) {
+
+        },
+        controller: function($scope, UsersService, OrgUnitFactory) {
+            $scope.allUsers = [];        
+            $scope.temp = UsersService.getAll().then(function(users){
+                $scope.allUsers = users;
+            });
+
+            $scope.saveOption = function() {
+                $scope.d2SaveMethode()($scope.d2SaveMethodeParameter1, $scope.d2SaveMethodeParameter2);
+            };
+
+            $scope.getInputNotifcationClass = function(id) {
+				event = $scope.d2Model;
+				
+				if($scope.d2Element && $scope.d2Element.id === id && $scope.d2Element.event && $scope.d2Element.event === event.event) {
+					if($scope.d2Element.pending) {
+						return 'input-pending';
+					}
+					
+					if($scope.d2Element.saved) {
+						return 'input-success';
+					} else {
+						return 'input-error';
+					}            
+				}  
+				return '';
+			};
+        }
+
+    };
+})
+
 .directive('d2Audit', function (CurrentSelection, MetaDataFactory ) {
     return {
         restrict: 'E',
