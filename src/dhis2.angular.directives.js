@@ -512,17 +512,17 @@ var d2Directives = angular.module('d2Directives', [])
     return {
         restrict : 'E',
         scope : {
-            d2Disabled : "=",
-            d2Required : "=",
-            d2DisplayOpen : "=",
-            d2CanEdit : "=",
-            d2Event : "=",
-            d2DataElementId : "=",
-            d2FileNames : "=",
-            d2CurrentImageName : "=",
-            d2Ps : "=",
-            d2DeleteMethode : "=",
-            d2DownloadMethode : "="
+            d2Disabled: "=",
+            d2Required: "=",
+            d2DisplayOpen: "=",
+            d2CanEdit: "=",
+            d2Event: "=",
+            d2DataElementId: "=",
+            d2FileNames: "=",
+            d2CurrentImageName: "=",
+            d2Ps: "=",
+            d2DeleteMethode: "=",
+            d2DownloadMethode: "="
         },
         templateUrl: "./templates/img-input.html",
         link : function(scope,elem,attrs){
