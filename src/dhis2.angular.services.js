@@ -88,14 +88,11 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             var authority = {};
             var allAuth = auth['ALL'];
 
-            authority.canDeleteTei = auth['TEI_Delete'] || allAuth;
-            authority.canDeleteEnrollment = auth['Enrollment_Delete'] || allAuth;
-            authority.canDeleteEnrollmentIncludingAllEvents = auth['Enrollment_Delete_Including_All_Events'] || allAuth;
-            authority.canDeleteEvent = auth['Event_Delete'] = auth['Event_Delete'] || allAuth;
-            authority.canReopenDataSet = auth['DataSet_Re-open'] || allAuth;
-            authority.canEditExpiredStuff = auth['Edit_Expired_Stuff'] || allAuth;
+            authority.canCascadeDeleteTei = auth['F_TEI_CASCADE_DELETE'] || allAuth;
+            authority.canCascadeDeleteEnrollment = auth['F_ENROLLMENT_CASCADE_DELETE'] || allAuth;
+            authority.canReopenDataSet = auth['F_DATASET_REOPEN'] || allAuth;
+            authority.canEditExpiredStuff = auth['F_EDIT_EXPIRED_STUFF'] || allAuth;
             authority.canAdministerDashboard = auth['F_PROGRAM_DASHBOARD_CONFIG_ADMIN'] || allAuth;
-            authority.canUnCompleteEvent = auth['F_UNCOMPLETE_EVENT'] || auth['ALL'] || allAuth;
             return authority;
         }
     };
