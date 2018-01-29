@@ -2930,6 +2930,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             var hiddenFields = {};
             var assignedFields = {};
             var hiddenSections = {};
+            var mandatoryFields = {};
             var warningMessages = [];
             
             angular.forEach($rootScope.ruleeffects[context], function (effect) {
@@ -2989,14 +2990,17 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         //For "ASSIGN" actions where we have a dataelement, we save the calculated value to the dataelement:
                         currentTei[effect.trackedEntityAttribute.id] = processedValue;
                         assignedFields[effect.trackedEntityAttribute.id] = true;
+                    }else if(effect.action === "SETMANDATORYFIELD" && effect.trackedEntityAttribute){
+                        mandatoryFields[effect.trackedEntityAttribute.id] = effect.ineffect;
                     }
                 }
             });
-            return {currentTei: currentTei, hiddenFields: hiddenFields, hiddenSections: hiddenSections, warningMessages: warningMessages, assignedFields: assignedFields};
+            return {currentTei: currentTei, hiddenFields: hiddenFields, hiddenSections: hiddenSections, warningMessages: warningMessages, assignedFields: assignedFields, mandatoryFields: mandatoryFields};
         },
         processRuleEffectsForEvent: function(eventId, currentEvent, currentEventOriginalValues, prStDes, optionSets ) {
             var hiddenFields = {};
             var assignedFields = {};
+            var mandatoryFields = {};
             var hiddenSections = {};
             var warningMessages = [];
             
@@ -3048,12 +3052,15 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         currentEvent[effect.dataElement.id] = processedValue;
                         assignedFields[effect.dataElement.id] = true;
                     }
+                    else if (effect.action === "SETMANDATORYFIELD" && effect.dataElement) {
+                        mandatoryFields[effect.dataElement.id] = effect.ineffect;
+                    }
                 }
             });
         
-            return {currentEvent: currentEvent, hiddenFields: hiddenFields, hiddenSections: hiddenSections, warningMessages: warningMessages, assignedFields: assignedFields};
+            return {currentEvent: currentEvent, hiddenFields: hiddenFields, hiddenSections: hiddenSections, warningMessages: warningMessages, assignedFields: assignedFields, mandatoryFields: mandatoryFields};
         },
-        processRuleEffectAttribute: function(context, selectedTei, tei, currentEvent, currentEventOriginialValue, affectedEvent, attributesById, prStDes, hiddenFields, hiddenSections, warningMessages, assignedFields, optionSets){
+        processRuleEffectAttribute: function(context, selectedTei, tei, currentEvent, currentEventOriginialValue, affectedEvent, attributesById, prStDes, hiddenFields, hiddenSections, warningMessages, assignedFields, optionSets, mandatoryFields){
             //Function used from registration controller to process effects for the tracked entity instance and for the events in the same operation
             var teiAttributesEffects = this.processRuleEffectsForTrackedEntityAttributes(context, selectedTei, tei, attributesById, optionSets );
             teiAttributesEffects.selectedTei = teiAttributesEffects.currentTei;
@@ -3061,9 +3068,10 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             if(context === "SINGLE_EVENT" && currentEvent && prStDes ) {
                 var eventEffects = this.processRuleEffectsForEvent("SINGLE_EVENT", currentEvent, currentEventOriginialValue, prStDes, optionSets);
                 teiAttributesEffects.warningMessages = angular.extend(teiAttributesEffects.warningMessages,eventEffects.warningMessages);
-                teiAttributesEffects.hiddenFields = angular.extend(teiAttributesEffects.hiddenFields,eventEffects.hiddenFields);
-                teiAttributesEffects.hiddenSections = angular.extend(teiAttributesEffects.hiddenSections,eventEffects.hiddenSections);
-                teiAttributesEffects.assignedFields = angular.extend(teiAttributesEffects.assignedFields,eventEffects.assignedFields);
+                teiAttributesEffects.hiddenFields[context] = eventEffects.hiddenFields;
+                teiAttributesEffects.hiddenSections[context] = eventEffects.hiddenSections;
+                teiAttributesEffects.assignedFields[context] = eventEffects.assignedFields;
+                teiAttributesEffects.mandatoryFields[context] = eventEffects.mandatoryFields;
                 teiAttributesEffects.currentEvent = eventEffects.currentEvent;
             }
             
