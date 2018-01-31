@@ -852,9 +852,9 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 this.getAttributesAsString(attributes) +
                                 ' d2-focus-next-on-enter' +
                                 ' ng-model="selectedTei.' + attId + '" ' +
-                                ' attribute-data="attributesById.' + attId + '" ' +
-                                ' selected-program-id="selectedProgram.id" ' +
-                                ' selected-tei-id="selectedTei.trackedEntityInstance" ' +
+                                ' attribute-data={{attributesById.' + attId + '}} ' +
+                                ' selected-program-id={{selectedProgram.id}} ' +
+                                ' selected-tei-id={{selectedTei.trackedEntityInstance}} ' +
                                 ' ng-disabled="' + disableInputField + '"'+ 
                                 ' d2-attribute-validator ' +
                                 ' ng-required=" ' + att.mandatory + '" ';
