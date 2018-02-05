@@ -601,7 +601,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 ' d2-date-validator ' +
                                 ' max-date="' + 0 + '"' +
                                 ' placeholder="{{dhis2CalendarFormat.keyDateFormat}}" ' +
-                                ' ng-change="verifyExpiryDate()"'+
+                                ' ng-change="verifyExpiryDate(currentEvent.' + fieldId + ')"'+
                                 ' ng-class="getInputNotifcationClass(prStDes.' + fieldId + '.dataElement.id,true)"' +
                                 ' blur-or-change="saveDatavalue(prStDes.' + fieldId + ')"' +
                                 ' ng-required="{{true}}"></span><span class="not-for-screen"><input type="text" value={{currentEvent.' + fieldId + '}}></span>';
@@ -678,7 +678,6 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                             ' d2-date ' +
                                             ' d2-date-validator ' +
                                             ' max-date="' + maxDate + '"' +
-                                            ' ng-change="verifyExpiryDate()"'+
                                             ' blur-or-change="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')"' +
                                             commonInputFieldProperty + ' ></span><span class="not-for-screen"><input type="text" value={{currentEvent.' + fieldId + '}}></span>';
                                     }
