@@ -631,7 +631,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
                             if (prStDe && prStDe.dataElement && prStDe.dataElement.valueType) {
 
-                                var disableInputField = 'model.editingDisabled || isHidden(prStDes.' + fieldId + '.dataElement.id) || selectedEnrollment.status===\'CANCELLED\' || selectedEnrollment.status===\'COMPLETED\' || currentEvent[uid]==\'uid\' || currentEvent.editingNotAllowed ';
+                                var disableInputField = '!dataElementEditable(prStDes.' + fieldId+')';
                                 var commonInputFieldProperty = this.getAttributesAsString(attributes) +
                                     ' ng-model="currentEvent.' + fieldId + '" ' +
                                     ' input-field-id="' + fieldId + '"' +
@@ -858,7 +858,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         if (att) {
                             var attMaxDate = att.allowFutureDate ? '' : 0;
                             var isTrackerAssociate = att.valueType === 'TRACKER_ASSOCIATE';
-                            var disableInputField = 'selectedOrgUnit.closedStatus || editingDisabled || isHidden(attributesById.' + attId + '.id) || ' + isTrackerAssociate+ '|| attributesById.' + attId + '.generated';
+                            var disableInputField = 'attributeFieldDisabled(attributesById.'+attId+')';
                             var commonInputFieldProperty = ' name="' + fieldName + '"' +
                                 ' element-id="' + i + '"' +
                                 this.getAttributesAsString(attributes) +
