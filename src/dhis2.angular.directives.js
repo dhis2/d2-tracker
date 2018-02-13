@@ -407,7 +407,6 @@ var d2Directives = angular.module('d2Directives', [])
                 var update = scope.d2FileInput.event &&  scope.d2FileInput.event !== 'SINGLE_EVENT' ? true : false;
 
                 FileService.upload(element[0].files[0]).then(function(data){
-
                     if(data && data.status === 'OK' && data.response && data.response.fileResource && data.response.fileResource.id && data.response.fileResource.name){
                         scope.d2FileInput[de] = data.response.fileResource.id;
                         scope.d2FileInputCurrentName[de] = data.response.fileResource.name;
@@ -615,6 +614,47 @@ var d2Directives = angular.module('d2Directives', [])
             };
         }
     };
+})
+
+.directive("d2Image",function($http, $compile, DHIS2URL){
+    return {
+        restrict : 'E',
+        scope : {
+            d2Disabled: "=",
+            d2Required: "=",
+            d2DisplayOpen: "=",
+            d2IsAttribute: "=",
+            d2CanEdit: "=",
+            d2HideImage: "=",
+            d2Event: "=",
+            d2Tei: "=",
+            d2DataElementId: "=",
+            d2FileNames: "=",
+            d2CurrentImageName: "=",
+            d2Ps: "=",
+            d2DeleteMethode: "=",
+            d2DownloadMethode: "="
+        },
+        templateUrl: "./templates/img-input.html",
+        link : function(scope,elem,attrs){
+            if(scope.d2IsAttribute) {
+                scope.path = DHIS2URL + "/trackedEntityInstances/" + scope.d2Tei.trackedEntityInstance + "/" + scope.d2DataElementId + "/image";
+            } else {
+                scope.path = DHIS2URL + "/events/files?eventUid=" + scope.d2Event.event + "&dataElementUid=" + scope.d2DataElementId;
+            }
+            
+
+            scope.fetch = function() {
+                if(!scope.d2IsAttribute) {
+                    scope.path = scope.path + "&" + new Date().getTime();
+                }
+            };
+
+            scope.delete = function() {
+                scope.d2DeleteMethode(scope.d2Event, scope.d2DataElementId);
+            };
+        }
+    }
 })
 
 .directive('d2RadioButton', function (){
