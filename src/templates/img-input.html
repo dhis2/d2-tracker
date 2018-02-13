@@ -7,7 +7,7 @@
             </accordion-heading>
             <div class="preview clearfix" ng-if="d2Event[d2DataElementId]">
                 <div class="previewData clearfix" ng-init="fetch()">
-                    <img class="img" ng-src={{path}} style="max-width:100%;"></img>
+                    <img ng-if="!d2HideImage" class="img" ng-src={{path}} style="max-width:100%;"></img>
                 </div>	
             </div>
             <div ng-if="!d2Event[d2DataElementId]">
@@ -27,7 +27,7 @@
             </div>
             <div class="input-group" ng-show="d2CanEdit" style="margin-top: 5px;">
                 <div class="form-control">
-                    <a href ng-click="d2DownloadMethode(d2Event.event, d2DataElementId)" title="{{d2FileNames[d2Event.event][d2DataElementId]}}">{{d2FileNames[d2Event.event][d2DataElementId].length > 20 ? d2FileNames[d2Event.event][d2DataElementId].substring(0,20).concat('...') : d2FileNames[d2Event.event][d2DataElementId]}}</a>
+                    <a href ng-click="d2IsAttribute ? d2DownloadMethode(d2Tei, d2DataElementId) : d2DownloadMethode(d2Event.event, d2DataElementId)" title="{{d2FileNames[d2Event.event][d2DataElementId]}}">{{d2FileNames[d2Event.event][d2DataElementId].length > 20 ? d2FileNames[d2Event.event][d2DataElementId].substring(0,20).concat('...') : d2FileNames[d2Event.event][d2DataElementId]}}</a>
                 </div>
                 <span class="input-group-btn">
                     <span class="btn btn-grp btn-file" ng-click="delete()" ng-if="d2Event[d2DataElementId]" style="border-top-left-radius: 0px; border-bottom-left-radius: 0px;">
@@ -54,7 +54,7 @@
                     </span>
                 </span>
                 <span class="input-group-btn">
-                    <button type="button" class="btn btn-default" ng-disabled="!d2Event[d2DataElementId]" ng-click="fetch()" style="border-radius: 4px; margin-left: 10px;">
+                    <button ng-if="!d2IsAttribute" type="button" class="btn btn-default" ng-disabled="!d2Event[d2DataElementId]" ng-click="fetch()" style="border-radius: 4px; margin-left: 10px;">
                         <i class="fa fa-refresh" aria-hidden="true"></i>
                     </button>
                 </span>

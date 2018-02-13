@@ -515,8 +515,11 @@ var d2Directives = angular.module('d2Directives', [])
             d2Disabled: "=",
             d2Required: "=",
             d2DisplayOpen: "=",
+            d2IsAttribute: "=",
             d2CanEdit: "=",
+            d2HideImage: "=",
             d2Event: "=",
+            d2Tei: "=",
             d2DataElementId: "=",
             d2FileNames: "=",
             d2CurrentImageName: "=",
@@ -526,10 +529,17 @@ var d2Directives = angular.module('d2Directives', [])
         },
         templateUrl: "./templates/img-input.html",
         link : function(scope,elem,attrs){
-            scope.path = DHIS2URL + "/events/files?eventUid=" + scope.d2Event.event + "&dataElementUid=" + scope.d2DataElementId;
+            if(scope.d2IsAttribute) {
+                scope.path = DHIS2URL + "/trackedEntityInstances/" + scope.d2Tei.trackedEntityInstance + "/" + scope.d2DataElementId + "/image";
+            } else {
+                scope.path = DHIS2URL + "/events/files?eventUid=" + scope.d2Event.event + "&dataElementUid=" + scope.d2DataElementId;
+            }
+            
 
             scope.fetch = function() {
-                scope.path = scope.path + "&" + new Date().getTime();
+                if(!scope.d2IsAttribute) {
+                    scope.path = scope.path + "&" + new Date().getTime();
+                }
             };
 
             scope.delete = function() {
