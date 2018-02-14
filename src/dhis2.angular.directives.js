@@ -647,6 +647,8 @@ var d2Directives = angular.module('d2Directives', [])
             scope.fetch = function() {
                 if(!scope.d2IsAttribute) {
                     scope.path = scope.path + "&" + new Date().getTime();
+                } else {
+                    scope.path = scope.path + "?" + new Date().getTime();
                 }
             };
 
