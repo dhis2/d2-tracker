@@ -657,6 +657,20 @@ var d2Directives = angular.module('d2Directives', [])
     }
 })
 
+.directive("d2ImageInList",function($http, $compile, DHIS2URL){
+    return {
+        restrict : 'E',
+        scope : {
+            d2Tei: "=",
+            d2AttributeId: "="
+        },
+        template: '<img ng-src="{{path}}" class="img-thumbnail" style="max-width: 150px; max-height: 150px; display: block; margin: auto;">',
+        link : function(scope,elem,attrs){
+            scope.path = DHIS2URL + "/trackedEntityInstances/" + scope.d2Tei.id  + "/" + scope.d2AttributeId + "/image";
+        }
+    }
+})
+
 .directive('d2RadioButton', function (){
     return {
         restrict: 'E',
