@@ -637,9 +637,13 @@ var d2Directives = angular.module('d2Directives', [])
         },
         templateUrl: "./templates/img-input.html",
         link : function(scope,elem,attrs){
-            if(scope.d2IsAttribute) {
+            if(scope.d2IsAttribute && scope.d2FileNames['undefined'] && scope.d2Tei && !scope.d2Tei.trackedEntityInstance) {
+                scope.d2FileNames['undefined'] = null;
+            }
+            
+            if(scope.d2IsAttribute && scope.d2Tei) {
                 scope.path = DHIS2URL + "/trackedEntityInstances/" + scope.d2Tei.trackedEntityInstance + "/" + scope.d2DataElementId + "/image";
-            } else {
+            } else if(!scope.d2IsAttribute && scope.d2Event) {
                 scope.path = DHIS2URL + "/events/files?eventUid=" + scope.d2Event.event + "&dataElementUid=" + scope.d2DataElementId;
             }
             
@@ -666,9 +670,9 @@ var d2Directives = angular.module('d2Directives', [])
             d2Tei: "=",
             d2AttributeId: "="
         },
-        template: '<img ng-src="{{path}}" class="img-thumbnail" style="max-height: 150px; display: block; margin: auto;">',
+        template: '<img ng-src="{{path}}" class="img-thumbnail" style="display: block; margin: auto;">',
         link : function(scope,elem,attrs){
-            scope.path = DHIS2URL + "/trackedEntityInstances/" + scope.d2Tei.id  + "/" + scope.d2AttributeId + "/image";
+            scope.path = DHIS2URL + "/trackedEntityInstances/" + scope.d2Tei.id  + "/" + scope.d2AttributeId + "/image?height=100&width=100";
         }
     }
 })
