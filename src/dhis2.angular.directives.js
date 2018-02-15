@@ -616,7 +616,7 @@ var d2Directives = angular.module('d2Directives', [])
     };
 })
 
-.directive("d2Image",function($http, $compile, DHIS2URL){
+.directive("d2Image",function($http, $compile, DHIS2URL, CurrentSelection){
     return {
         restrict : 'E',
         scope : {
@@ -639,6 +639,8 @@ var d2Directives = angular.module('d2Directives', [])
         link : function(scope,elem,attrs){
             if(scope.d2IsAttribute && scope.d2FileNames['undefined'] && scope.d2Tei && !scope.d2Tei.trackedEntityInstance) {
                 scope.d2FileNames['undefined'] = null;
+            } else if(!scope.d2IsAttribute && scope.d2FileNames['SINGLE_EVENT'] && scope.d2Event && scope.d2Event.event === 'SINGLE_EVENT') {
+                scope.d2FileNames['SINGLE_EVENT'] = null;
             }
             
             if(scope.d2IsAttribute && scope.d2Tei) {
