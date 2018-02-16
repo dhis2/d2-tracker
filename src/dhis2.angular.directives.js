@@ -1311,7 +1311,7 @@ var d2Directives = angular.module('d2Directives', [])
                         return 'form-control input-pending';
                     }
                     
-                    if($scope.timeElement.saved) {
+                    if($scope.timeElement.saved || $scope.timeElement.updated) {
                         return 'form-control input-success';
                     } else {
                         return 'form-control input-error';
