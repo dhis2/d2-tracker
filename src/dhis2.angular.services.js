@@ -848,7 +848,6 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                     $(inputElement[0].attributes).each(function () {
                         attributes[this.nodeName] = this.value;
                     });
-                    selected-tet={{trackedEntityTypes.selected.id}}
                     var attId = '', fieldName = '', newInputField, programId;
                     if (attributes.hasOwnProperty('attributeid')) {
                         attId = attributes['attributeid'];
