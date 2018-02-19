@@ -848,7 +848,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                     $(inputElement[0].attributes).each(function () {
                         attributes[this.nodeName] = this.value;
                     });
-
+                    selected-tet={{trackedEntityTypes.selected.id}}
                     var attId = '', fieldName = '', newInputField, programId;
                     if (attributes.hasOwnProperty('attributeid')) {
                         attId = attributes['attributeid'];
@@ -869,6 +869,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 ' selected-tei-id={{selectedTei.trackedEntityInstance}} ' +
                                 ' ng-disabled="' + disableInputField + '"'+ 
                                 ' d2-attribute-validator ' +
+                                ' selected-tet={{trackedEntityTypes.selected.id}}' +
                                 ' ng-required=" ' + att.mandatory + '" ';
 
                             //check if attribute has optionset
