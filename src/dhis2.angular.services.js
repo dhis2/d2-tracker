@@ -3541,7 +3541,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         get: function (container, name) {
             var deferred = $q.defer();
 
-            if(cached[container] && cached[container][name]){
+            if(cached[container] && angular.isDefined(cached[container][name])){
                 deferred.resolve(cached[container][name]);
             }else{
                 $http.get(getUrl(container,name)).then(function (response) {
@@ -3552,8 +3552,10 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         deferred.resolve(null);
                     }
                 }, function (error) {
+                    setCached(container,name, null);
                     deferred.resolve(null);
                 });
+                
             }
 
             return deferred.promise;
