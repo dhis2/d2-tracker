@@ -328,7 +328,9 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             if (eventPeriod && eventPeriod.endDate) {
                 eventPeriodEndDate = moment(eventPeriod.endDate, "YYYY-MM-DD").add(expiryDays, "days");
                 if (today.isAfter(eventPeriodEndDate)) {
-                    NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("event_date_out_of_range"));
+                    if(showNotifications){
+                        NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("event_date_out_of_range"));
+                    }
                     isValid = false;
                 }
             }
