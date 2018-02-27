@@ -670,11 +670,17 @@ var d2Directives = angular.module('d2Directives', [])
         restrict : 'E',
         scope : {
             d2Tei: "=",
-            d2AttributeId: "="
+            d2AttributeId: "=",
+            d2EventId: "=",
+            d2DeId: "="
         },
-        template: '<img ng-src="{{path}}" class="img-thumbnail" style="display: block; margin: auto;">',
+        template: '<img ng-if="path" ng-src="{{path}}" class="img-thumbnail" style="display: block; margin: auto;">',
         link : function(scope,elem,attrs){
-            scope.path = DHIS2URL + "/trackedEntityInstances/" + scope.d2Tei.id  + "/" + scope.d2AttributeId + "/image?height=100&width=100";
+            if(!scope.d2Tei && scope.d2EventId && scope.d2DeId) {
+                scope.path = DHIS2URL + "/events/files?eventUid=" + scope.d2EventId + "&dataElementUid=" + scope.d2DeId;
+            } else if(scope.d2Tei && scope.d2AttributeId) {
+                scope.path = DHIS2URL + "/trackedEntityInstances/" + scope.d2Tei.id  + "/" + scope.d2AttributeId + "/image?height=100&width=100";
+            }
         }
     }
 })
