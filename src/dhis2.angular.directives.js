@@ -674,7 +674,7 @@ var d2Directives = angular.module('d2Directives', [])
             d2EventId: "=",
             d2DeId: "="
         },
-        template: '<img ng-if="path" ng-src="{{path}}" class="img-thumbnail" style="display: block; margin: auto;">',
+        template: '<img ng-if="path" ng-src="{{path}}" onerror="this.onerror=null;this.src=\'\';" style="display: block; margin: auto; max-height: 150px; max-width: 100%;">',
         link : function(scope,elem,attrs){
             if(!scope.d2Tei && scope.d2EventId && scope.d2DeId) {
                 scope.path = DHIS2URL + "/events/files?eventUid=" + scope.d2EventId + "&dataElementUid=" + scope.d2DeId;
