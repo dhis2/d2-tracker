@@ -87,7 +87,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             var auth = getAuthorities(roles);
             var authority = {};
             var allAuth = auth['ALL'];
-
+            authority.ALL = allAuth;
             authority.canCascadeDeleteTei = auth['F_TEI_CASCADE_DELETE'] || allAuth;
             authority.canCascadeDeleteEnrollment = auth['F_ENROLLMENT_CASCADE_DELETE'] || allAuth;
             authority.canReopenDataSet = auth['F_DATASET_REOPEN'] || allAuth;
