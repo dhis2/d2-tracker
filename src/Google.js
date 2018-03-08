@@ -4,7 +4,7 @@
 
 /* global google: true */
 
-L.Google = L.Class.extend({
+L.Google = L.Layer.extend({
 	includes: L.Mixin.Events,
 
 	options: {
@@ -43,7 +43,7 @@ L.Google = L.Class.extend({
 		// set up events
 		map.on('viewreset', this._resetCallback, this);
 
-		this._limitedUpdate = L.Util.limitExecByInterval(this._update, 150, this);
+		this._limitedUpdate = L.Util.throttle(this._update, 150, this);
 		map.on('move', this._update, this);
 
 		map.on('zoomanim', this._handleZoomAnim, this);
@@ -64,7 +64,7 @@ L.Google = L.Class.extend({
 
 		map.off('zoomanim', this._handleZoomAnim, this);
 
-		map._controlCorners.bottomright.style.marginBottom = '0em';
+		//map._controlCorners.bottomright.style.marginBottom = '0em';
 	},
 
 	getAttribution: function() {
