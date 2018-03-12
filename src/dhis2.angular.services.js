@@ -663,7 +663,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                                                     ' dh-current-element="currentElement" ' +
                                                                     ' dh-event="currentEvent.event" ' +
                                                                     ' dh-id="prStDes.' + fieldId + '.dataElement.id" ' +
-                                                                    ' dh-click="saveDatavalue(prStDes.' + fieldId + ', currentEvent, value )">' +
+                                                                    ' dh-click="saveDataValueForRadio(prStDes.' + fieldId + ', currentEvent, value )">' +
                                                             ' </d2-radio-button></span> ' +
                                                             '<span class="not-for-screen">' +
                                                             	'<label class="radio-inline"><input type="radio" value="true" ng-model="currentEvent.' + fieldId +'">{{\'yes\' | translate}}</label>' +
