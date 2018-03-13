@@ -628,6 +628,11 @@ var d2Directives = angular.module('d2Directives', [])
                 }                
             });
 
+            //In cases where the value is assigned with a program rule we need to set model.radio so that the UI updates.
+            $scope.$watch('d2Object[id]',function(){
+                $scope.model = {radio: $scope.d2Object[$scope.id] ? $scope.d2Object[$scope.id] : null};         
+            });
+
             $scope.model = {radio: $scope.d2Object[$scope.id] ? $scope.d2Object[$scope.id] : null};
             
             $scope.saveValue = function( value ){
