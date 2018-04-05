@@ -94,6 +94,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             authority.canEnrollTei = auth['F_PROGRAM_ENROLLMENT'] || auth['ALL'] ? true : false;
             authority.canUnEnrollTei = auth['F_PROGRAM_UNENROLLMENT'] || auth['ALL'] ? true : false;
             authority.canAdministerDashboard = auth['F_PROGRAM_DASHBOARD_CONFIG_ADMIN'] || auth['ALL'] ? true : false;
+            authority.canUncompleteEvent = auth['F_UNCOMPLETE_EVENT'] || auth['ALL'] ? true : false;
             return authority;
         }
     };
