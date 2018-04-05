@@ -89,6 +89,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             var allAuth = auth['ALL'];
             authority.ALL = allAuth;
             authority.canCascadeDeleteTei = auth['F_TEI_CASCADE_DELETE'] || allAuth;
+            authority.canUncompleteEvent = auth['F_UNCOMPLETE_EVENT'] || allAuth;
             authority.canCascadeDeleteEnrollment = auth['F_ENROLLMENT_CASCADE_DELETE'] || allAuth;
             authority.canReopenDataSet = auth['F_DATASET_REOPEN'] || allAuth;
             authority.canEditExpiredStuff = auth['F_EDIT_EXPIRED_STUFF'] || allAuth;
