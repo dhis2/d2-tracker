@@ -2248,7 +2248,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             {
                                 if( variableObject.hasValue )
                                 {
-                                    if( variableObject.allValues )
+                                    if( variableObject.allValues && variableObject.allValues.length > 0 )
                                     {
                                         for(var i = 0; i < variableObject.allValues.length; i++)
                                         {
