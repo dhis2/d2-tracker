@@ -51,7 +51,8 @@ var d2Controllers = angular.module('d2Controllers', [])
                 DHIS2URL,
                 NotificationService,
                 location) {
-    
+
+                    
     $scope.tilesDictionary = {
         openstreetmap: {
             url: "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -100,11 +101,6 @@ var d2Controllers = angular.module('d2Controllers', [])
         NotificationService.showNotifcationDialog($translate.instant("warning"), $translate.instant("missing_google_maps_api_key"));
         systemSetting.keyGoogleMapsApiKey = 'AIzaSyBjlDmwuON9lJbPMDlh_LI3zGpGtpK9erc';
     }
-    
-    if( !systemSetting.keyMapzenSearchApiKey || systemSetting.keyMapzenSearchApiKey === '' ){
-        NotificationService.showNotifcationDialog($translate.instant("warning"), $translate.instant("missing_mapzen_search_api_key"));
-        systemSetting.keyMapzenSearchApiKey = 'search-Se1CFzK';
-    }    
     
     var setCoordinateLabel = '<i class="fa fa-map-marker fa-2x"></i><span class="small-horizontal-spacing">' + $translate.instant('set_coordinate') + '</span>';
     var zoomInLabel = '<i class="fa fa-search-plus fa-2x"></i><span class="small-horizontal-spacing">' + $translate.instant('zoom_in') + '</span>';
@@ -375,7 +371,7 @@ var d2Controllers = angular.module('d2Controllers', [])
         $scope.center.lng = e.latlng.lng;
     };
     
-    function integrateMapzen(){
+    function integrateGeoCoder(){
         
         leafletData.getMap($scope.selectedTileKey).then(function( map ){
                         
@@ -383,22 +379,17 @@ var d2Controllers = angular.module('d2Controllers', [])
                 map.setView([$scope.marker.m1.lat, $scope.marker.m1.lng], $scope.maxZoom);
             }
             
-            $scope.geocoder = L.control.geocoder(systemSetting.keyMapzenSearchApiKey,{
-                markers: {
-                    draggable: true
-                }
-            }).addTo(map);            
-            
-            $scope.geocoder.on('select', function (e) {
-                $scope.marker = {m1: {lat: e.latlng.lat, lng: e.latlng.lng, draggable: true}};
-                $scope.location = {lat: e.latlng.lat, lng: e.latlng.lng};
+            $scope.geocoder = L.Control.geocoder({
+                defaultMarkGeocode: false
+            }).addTo(map);
 
-                $scope.geocoder.marker.on('dragend', function(e){                
-                    var c = e.target.getLatLng();
-                    $scope.marker = {m1: {lat: c.lat, lng: c.lng, draggable: true}};
-                    $scope.location = {lat: c.lat, lng: c.lng};
-                });
-            });
+            $scope.geocoder.on('markgeocode', function(e) {
+                $scope.marker = {m1: {lat: e.geocode.center.lat, lng: e.geocode.center.lng, draggable: true}};
+                $scope.location = {lat: e.geocode.center.lat, lng: e.geocode.center.lng};
+                map.setView([$scope.marker.m1.lat, $scope.marker.m1.lng], 16);
+            })
+            .addTo(map);
+        
         });
     }
     
@@ -417,7 +408,7 @@ var d2Controllers = angular.module('d2Controllers', [])
     
     getGeoJsonByOuLevel(true);
     
-    integrateMapzen();
+    integrateGeoCoder();
             
     $scope.setTile = function( tileKey ){        
         if( tileKey === $scope.selectedTileKey ){
@@ -427,17 +418,17 @@ var d2Controllers = angular.module('d2Controllers', [])
             if( tileKey === 'openstreetmap' ){
                 $scope.googleMapLayers = null;
                 $scope.selectedTileKey = tileKey;
-                integrateMapzen();
+                integrateGeoCoder();
             }
             else if( tileKey === 'googlemap' ){
                 if ($window.google && $window.google.maps) {
                     $scope.selectedTileKey = tileKey;
-                    integrateMapzen();
+                    integrateGeoCoder();
                     
                 }else {
                     loadGoogleMapApi().then(function () {
                         $scope.selectedTileKey = tileKey;
-                        integrateMapzen();
+                        integrateGeoCoder();
                     }, function () {
                         console.log('Google map loading failed.');
                     });
