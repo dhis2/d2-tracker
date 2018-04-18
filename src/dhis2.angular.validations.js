@@ -256,8 +256,8 @@ angular.module("d2Directives")
                         var attUrl = 'filter=' + attributeData.id + ':EQ:' + attributeData.value;
                         var ouId = SessionStorageService.get('ouSelected');
                         
-                        if(attrs.selectedProgram && attributeData.programScope){
-                            programOrTetUrl = 'program=' + attrs.selectedProgram;
+                        if(attrs.selectedProgramId){
+                            programOrTetUrl = 'program=' + attrs.selectedProgramId;
                         }else{
                             programOrTetUrl = "trackedEntityType="+attrs.selectedTet;
                         }
