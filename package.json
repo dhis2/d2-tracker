@@ -16,7 +16,8 @@
   },
   "dependencies": {
     "gulp": "^3.9.1",
-    "gulp-angular-templatecache": "^2.0.0"
+    "gulp-angular-templatecache": "^2.0.0",
+    "leaflet-draw": "^1.0.2"
   },
   "bugs": {
     "url": "https://github.com/dhis2/d2-tracker/issues"

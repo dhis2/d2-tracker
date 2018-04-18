@@ -392,6 +392,53 @@ var d2Controllers = angular.module('d2Controllers', [])
         
         });
     }
+
+    function integratePolygon(){
+        leafletData.getMap($scope.selectedTileKey).then(function( map ){
+            var polygonLayer = new L.FeatureGroup();
+            map.addLayer(polygonLayer);
+    
+            var drawPluginOptions = {
+                position: 'bottomright',
+                draw: {
+                    polygon: {
+                    allowIntersection: false, // Restricts shapes to simple polygons
+                    drawError: {
+                        color: '#e1e100', // Color the shape will turn when intersects
+                        message: '<strong>Oh snap!<strong> you can\'t draw that!' // Message that will show when intersect
+                    },
+                    shapeOptions: {
+                        color: '#e74c3c'
+                    }
+                    },
+                    // disable toolbar item by setting it to false
+                    polyline: false,
+                    circle: false,
+                    rectangle: false,
+                    marker: false,
+                    circlemarker: false,
+                    },
+                edit: {
+                    featureGroup: polygonLayer, //REQUIRED!!
+                    remove: true
+                }
+            };
+    
+            // Initialise the draw control and pass it the FeatureGroup of editable layers
+            var drawControl = new L.Control.Draw(drawPluginOptions);
+            map.addControl(drawControl);
+    
+            var polygonLayer = new L.FeatureGroup();
+            map.addLayer(polygonLayer);
+    
+            map.on('draw:created', function(e) {
+                var type = e.layerType, layer = e.layer;
+    
+                polygonLayer.addLayer(layer);
+                console.log(polygonLayer);
+            });
+        });
+    }
     
     function loadGoogleMapApi() {
         
@@ -409,6 +456,7 @@ var d2Controllers = angular.module('d2Controllers', [])
     getGeoJsonByOuLevel(true);
     
     integrateGeoCoder();
+    integratePolygon();
             
     $scope.setTile = function( tileKey ){        
         if( tileKey === $scope.selectedTileKey ){
@@ -419,16 +467,19 @@ var d2Controllers = angular.module('d2Controllers', [])
                 $scope.googleMapLayers = null;
                 $scope.selectedTileKey = tileKey;
                 integrateGeoCoder();
+                integratePolygon();
             }
             else if( tileKey === 'googlemap' ){
                 if ($window.google && $window.google.maps) {
                     $scope.selectedTileKey = tileKey;
                     integrateGeoCoder();
+                    integratePolygon();
                     
                 }else {
                     loadGoogleMapApi().then(function () {
                         $scope.selectedTileKey = tileKey;
                         integrateGeoCoder();
+                        integratePolygon();
                     }, function () {
                         console.log('Google map loading failed.');
                     });
