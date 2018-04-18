@@ -395,47 +395,33 @@ var d2Controllers = angular.module('d2Controllers', [])
 
     function integratePolygon(){
         leafletData.getMap($scope.selectedTileKey).then(function( map ){
-            var polygonLayer = new L.FeatureGroup();
-            map.addLayer(polygonLayer);
-    
-            var drawPluginOptions = {
-                position: 'bottomright',
-                draw: {
-                    polygon: {
+            var featureGroup = L.geoJson().addTo(map);
+            var drawControl = new L.Control.Draw({
+            edit: {
+                featureGroup: featureGroup
+            },
+            draw: {
+                polygon: {
                     allowIntersection: false, // Restricts shapes to simple polygons
                     drawError: {
-                        color: '#e1e100', // Color the shape will turn when intersects
-                        message: '<strong>Oh snap!<strong> you can\'t draw that!' // Message that will show when intersect
+                        color: '#e74c3c', // Color the shape will turn when intersects
+                        message: '<strong>Intersecting<strong> not allowed!' // Message that will show when intersect
                     },
                     shapeOptions: {
-                        color: '#e74c3c'
+                        color: '#3498db',
                     }
-                    },
-                    // disable toolbar item by setting it to false
-                    polyline: false,
-                    circle: false,
-                    rectangle: false,
-                    marker: false,
-                    circlemarker: false,
-                    },
-                edit: {
-                    featureGroup: polygonLayer, //REQUIRED!!
-                    remove: true
-                }
-            };
-    
-            // Initialise the draw control and pass it the FeatureGroup of editable layers
-            var drawControl = new L.Control.Draw(drawPluginOptions);
-            map.addControl(drawControl);
-    
-            var polygonLayer = new L.FeatureGroup();
-            map.addLayer(polygonLayer);
-    
+                },
+                polyline: false,
+                circle: false,
+                rectangle: false,
+                marker: false,
+                circlemarker: false,
+            }
+            }).addTo(map);
+
             map.on('draw:created', function(e) {
-                var type = e.layerType, layer = e.layer;
-    
-                polygonLayer.addLayer(layer);
-                console.log(polygonLayer);
+                //e.layer.options.color='red';
+                featureGroup.addLayer(e.layer);
             });
         });
     }
