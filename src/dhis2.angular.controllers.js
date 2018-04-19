@@ -414,14 +414,24 @@ var d2Controllers = angular.module('d2Controllers', [])
                 polyline: false,
                 circle: false,
                 rectangle: false,
-                marker: false,
+                marker: true,
                 circlemarker: false,
             }
             }).addTo(map);
 
             map.on('draw:created', function(e) {
                 //e.layer.options.color='red';
+                featureGroup.clearLayers(); 
                 featureGroup.addLayer(e.layer);
+                if(e.layer._latlngs) {
+                    $scope.location = e.layer._latlngs;
+                } else if(e.layer._latlng) {
+                    $scope.location = {lat: e.layer._latlng.lat, lng: e.layer._latlng.lng};
+                } else {
+                    console.log("Unsupported marker!");
+                }
+                console.log($scope.location);
+                
             });
         });
     }
@@ -481,8 +491,9 @@ var d2Controllers = angular.module('d2Controllers', [])
     $scope.captureCoordinate = function(){
         if( $scope.location && $scope.location.lng && $scope.location.lat ){
             $modalInstance.close( $scope.location );
-    	}
-    	else{
+    	} else if($scope.location && $scope.location.length > 0) {
+            $modalInstance.close( $scope.location);
+        } else {
             //notify user
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("nothing_captured"));
             return;
