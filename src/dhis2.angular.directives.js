@@ -1060,22 +1060,27 @@ var d2Directives = angular.module('d2Directives', [])
                     windowClass: 'modal-map-window',
                     resolve: {
                         location: function () {
-                            return {lat: $scope.coordinateObject.coordinate.latitude, lng:  $scope.coordinateObject.coordinate.longitude};
+                            if($scope.coordinateObject.coordinate.polygon) {
+                                return $scope.coordinateObject.coordinate.polygon
+                            } else if($scope.coordinateObject.coordinate.latitude && $scope.coordinateObject.coordinate.longitude) {
+                                return {lat: $scope.coordinateObject.coordinate.latitude, lng:  $scope.coordinateObject.coordinate.longitude};
+                            } else {
+                                return null;
+                            }
                         }
                     }
                 });
                 
                 modalInstance.result.then(function (location) {                    
                     if(angular.isObject(location)){
-                    	
-                    	if( dhis2.validation.isNumber( location.lat ) ){
-                    		location.lat = parseFloat( $filter('number')(location.lat, DHIS2COORDINATESIZE) );
-                    	}
-                    	
-                    	if( dhis2.validation.isNumber( location.lng ) ){
-                    		location.lng = parseFloat( $filter('number')(location.lng, DHIS2COORDINATESIZE) );
-                    	}
-                    	
+                        if( dhis2.validation.isNumber( location.lat ) ){
+                            location.lat = parseFloat( $filter('number')(location.lat, DHIS2COORDINATESIZE) );
+                        }
+                        
+                        if( dhis2.validation.isNumber( location.lng ) ){
+                            location.lng = parseFloat( $filter('number')(location.lng, DHIS2COORDINATESIZE) );
+                        }
+                        
                         $scope.coordinateObject.coordinate.latitude = location.lat;
                         $scope.coordinateObject.coordinate.longitude = location.lng;                        
 
@@ -1091,7 +1096,12 @@ var d2Directives = angular.module('d2Directives', [])
                             if( angular.isDefined( $scope.d2CallbackFunction ) ){
                                 $scope.d2CallbackFunction( {arg1: $scope.d2CallbackFunctionParamCoordinate} );
                             }
-                        }                                                
+                        }                                            
+                    } else {
+                        $scope.coordinateObject.coordinate.polygon = location;
+                        if( angular.isDefined( $scope.d2CallbackFunction ) ){
+                            $scope.d2CallbackFunction( {arg1: $scope.d2CallbackFunctionParamCoordinate} );
+                        }
                     }
                 }, function () {
                 });

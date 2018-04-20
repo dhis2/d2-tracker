@@ -160,6 +160,12 @@ var d2Controllers = angular.module('d2Controllers', [])
 
     $scope.marker = $scope.location && $scope.location.lat && $scope.location.lng ? {m1: {lat: $scope.location.lat, lng: $scope.location.lng, draggable: true}} : {};
     
+    if($scope.location && !$scope.location.lat && !$scope.location.lng) {
+        leafletData.getMap($scope.selectedTileKey).then(function( map ){
+            var polygon = JSON.parse($scope.location);
+            L.geoJSON(polygon).addTo(map);
+        });
+    }
     function pointToLayer( feature, latlng ){
         return L.circleMarker(latlng, geojsonMarkerOptions);
     };
@@ -420,11 +426,15 @@ var d2Controllers = angular.module('d2Controllers', [])
             }).addTo(map);
 
             map.on('draw:created', function(e) {
-                //e.layer.options.color='red';
+                var layer = e.layer;
+
                 featureGroup.clearLayers(); 
-                featureGroup.addLayer(e.layer);
-                if(e.layer._latlngs) {
-                    $scope.location = e.layer._latlngs;
+                featureGroup.addLayer(layer);
+                
+                if(layer._latlngs) {
+                    var polygons = layer.toGeoJSON()
+                    var polygonsForDB = JSON.stringify(polygons);
+                    $scope.location = polygonsForDB;
                 } else if(e.layer._latlng) {
                     $scope.location = {lat: e.layer._latlng.lat, lng: e.layer._latlng.lng};
                 } else {
