@@ -1100,7 +1100,7 @@ var d2Directives = angular.module('d2Directives', [])
                     } else {
                         $scope.coordinateObject.coordinate.polygon = location;
                         if( angular.isDefined( $scope.d2CallbackFunction ) ){
-                            $scope.d2CallbackFunction( {arg1: $scope.d2CallbackFunctionParamCoordinate} );
+                            $scope.d2CallbackFunction( {arg1: location} );
                         }
                     }
                 }, function () {
