@@ -1082,6 +1082,8 @@ var d2Directives = angular.module('d2Directives', [])
                     
                     if($scope.datetimeElement.saved) {
                         return 'form-control input-success';
+                    } else if($scope.datetimeElement.updated) {
+                        return 'form-control input-success';
                     } else {
                         return 'form-control input-error';
                     }            

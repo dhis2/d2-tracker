@@ -559,6 +559,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         getForProgramStage: function (programStage, programStageDataElements) {
 
             var htmlCode = programStage.dataEntryForm ? programStage.dataEntryForm.htmlCode : null;
+            var timeFormat = "24h"
 
             if (htmlCode) {
                 var inputRegex = /<input.*?\/>/g,
@@ -775,6 +776,18 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                             commonInputFieldProperty +
                                             ' ng-model="currentEvent.' + fieldId + '">' +
                                             '<span class="not-for-screen"><input type="email" value={{currentEvent.' + fieldId + '}}></span>';
+                                    }
+                                    else if (prStDe.dataElement.valueType === "TIME") {
+                                        newInputField = '<d2-time time-model="currentEvent" time-model-id="\'' + fieldId + '\'"' +
+                                            ' time-required="prStDes.' + fieldId + '.compulsory" time-save-methode="saveDatavalue"' +
+                                            ' time-element="currentElement" time-use-notification="true"' +
+                                            '  time-disabled="' + disableInputField + '" time-format="timeFormat" time-save-methode-parameter1="prStDes.' + fieldId + '" time-save-methode-parameter2="\'' + fieldId + '\'"></d2-time>';
+                                    }
+                                    else if (prStDe.dataElement.valueType === "DATETIME") {
+                                        newInputField = '<d2-date-time datetime-model="currentEvent" datetime-model-id="\'' + fieldId + '\'"' +
+                                            ' datetime-required="prStDes.' + fieldId + '.compulsory" datetime-save-methode="saveDatavalue"' +
+                                            ' datetime-date-placeholder="{{dhis2CalendarFormat.keyDateFormat}}" datetime-use-notification="true"' +
+                                            '  datetime-disabled="' + disableInputField + '" datetime-save-methode-parameter1="prStDes.' + fieldId + '" datetime-save-methode-parameter2="\'' + fieldId + '\'"></d2-date-time>';
                                     }
                                     else if (prStDe.dataElement.valueType === "TEXT") {
                                         newInputField = '<span class="hideInPrint"><input type="text" ' +
