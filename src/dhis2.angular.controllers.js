@@ -420,7 +420,7 @@ var d2Controllers = angular.module('d2Controllers', [])
                 polyline: false,
                 circle: false,
                 rectangle: false,
-                marker: true,
+                marker: false,
                 circlemarker: false,
             }
             }).addTo(map);
@@ -435,8 +435,6 @@ var d2Controllers = angular.module('d2Controllers', [])
                     var polygons = layer.toGeoJSON()
                     var polygonsForDB = JSON.stringify(polygons);
                     $scope.location = polygonsForDB;
-                } else if(e.layer._latlng) {
-                    $scope.location = {lat: e.layer._latlng.lat, lng: e.layer._latlng.lng};
                 } else {
                     console.log("Unsupported marker!");
                 }
