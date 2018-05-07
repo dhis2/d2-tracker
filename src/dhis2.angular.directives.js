@@ -871,8 +871,9 @@ var d2Directives = angular.module('d2Directives', [])
                     $scope.coordinateObject.coordinate = {};
                 }
             };
-            
-            processCoordinate();
+            if($scope.d2Object) {
+                processCoordinate();
+            }
             
             $scope.showMap = function(){                
                 
