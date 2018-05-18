@@ -1626,7 +1626,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     };  
 })
 /* service for building variables based on the data in users fields */
-.service('VariableService', function(DateUtils,OptionSetService,OrgUnitFactory,$filter,$log,$q){
+.service('VariableService', function(DateUtils,OptionSetService,$filter,$log,$q){
     var processSingleValue = function(processedValue,valueType){
         //First clean away single or double quotation marks at the start and end of the variable name.
         processedValue = $filter('trimquotes')(processedValue);
@@ -1716,7 +1716,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         getTrackedEntityValueOrCodeForValue: function(useCodeForOptionSet, value, trackedEntityAttributeId, allTeis, optionSets) {
             return geTrackedEntityAttributeValueOrCodeForValueInternal(useCodeForOptionSet, value, trackedEntityAttributeId, allTeis, optionSets);
         },
-        getVariables: function(allProgramRules, executingEvent, evs, allDes, allTeis, selectedEntity, selectedEnrollment, optionSets) {
+        getVariables: function(allProgramRules, executingEvent, evs, allDes, allTeis, selectedEntity, selectedEnrollment, optionSets, selectedOrgUnit) {
 
             var variables = {};
 
@@ -1894,25 +1894,17 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 variables = pushVariable(variables, constant.id, constant.value, null, 'INTEGER', true, 'C', '', false);
             });
 
-            var orgUnitUid = selectedEnrollment ? selectedEnrollment.orgUnit : executingEvent.orgUnit;
-            var orgUnitCode = '';
-            var def = $q.defer();
-            if(orgUnitUid){
-                OrgUnitFactory.getFromStoreOrServer( orgUnitUid ).then(function (response) {
-                    orgUnitCode = response.code;
-                    variables = pushVariable(variables, 'orgunit_code', orgUnitCode, null, 'TEXT', orgUnitCode ? true : false, 'V', '', false);
-                    def.resolve(variables);
-                });
-            }else{
-                def.resolve(variables);
+            if(selectedOrgUnit){
+                variables = pushVariable(variables, 'orgunit_code', selectedOrgUnit.code, null, 'TEXT', selectedOrgUnit.code ? true : false, 'V', '', false);
             }
-            return def.promise;
+
+            return variables;
         }
     };
 })
 
 /* service for executing tracker rules and broadcasting results */
-.service('TrackerRulesExecutionService', function($translate, VariableService, DateUtils, NotificationService, DHIS2EventFactory, RulesFactory, CalendarService, OptionSetService, $rootScope, $q, $log, $filter, orderByFilter){
+.service('TrackerRulesExecutionService', function($translate, VariableService, DateUtils, NotificationService, DHIS2EventFactory, OrgUnitFactory, RulesFactory, CalendarService, OptionSetService, $rootScope, $q, $log, $filter, orderByFilter){
     var NUMBER_OF_EVENTS_IN_SCOPE = 10;
 
     //Variables for storing scope and rules in memory from rules execution to rules execution:
@@ -2016,7 +2008,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         return expression;
     };
 
-    var runDhisFunctions = function(expression, variablesHash, flag){
+    var runDhisFunctions = function(expression, variablesHash, flag, selectedOrgUnit){
         //Called from "runExpression". Only proceed with this logic in case there seems to be dhis function calls: "d2:" is present.
         if(angular.isDefined(expression) && expression.indexOf("d2:") !== -1){
             var dhisFunctions = [{name:"d2:daysBetween",parameters:2},
@@ -2043,7 +2035,8 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 {name:"d2:right",parameters:2},
                 {name:"d2:substring",parameters:3},
                 {name:"d2:split",parameters:3},
-                {name:"d2:length",parameters:1}];
+                {name:"d2:length",parameters:1},
+                {name:"d2:inOrgUnitGroup",parameters:1}];
             var continueLooping = true;
             //Safety harness on 10 loops, in case of unanticipated syntax causing unintencontinued looping
             for(var i = 0; i < 10 && continueLooping; i++ ) {
@@ -2078,7 +2071,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         //In case the function call is nested, the parameter itself contains an expression, run the expression.
                         if(!brokenExecution && angular.isDefined(parameters) && parameters !== null) {
                             for (var i = 0; i < parameters.length; i++) {
-                                parameters[i] = runExpression(parameters[i],dhisFunction.name,"parameter:" + i, flag, variablesHash);
+                                parameters[i] = runExpression(parameters[i],dhisFunction.name,"parameter:" + i, flag, variablesHash, selectedOrgUnit);
                             }
                         }
 
@@ -2450,6 +2443,18 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             expression = expression.replace(callToThisFunction, String(parameters[0]).length);
                             expressionUpdated = true;
                         }
+                        else if(dhisFunction.name === "d2:inOrgUnitGroup") {
+                            var group = parameters[0];
+                            var isInGroup = "false";
+
+                           if( selectedOrgUnit.isInGroup(group) )
+                           {
+                                isInGroup = "true"
+                           }
+
+                            expression = expression.replace(callToThisFunction, isInGroup);
+                            expressionUpdated = true;
+                        }
                     });
                 });
 
@@ -2469,14 +2474,14 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         return expression;
     };
 
-    var runExpression = function(expression, beforereplacement, identifier, flag, variablesHash ){
+    var runExpression = function(expression, beforereplacement, identifier, flag, variablesHash, selectedOrgUnit){
         //determine if expression is true, and actions should be effectuated
         //If DEBUG mode, use try catch and report errors. If not, omit the heavy try-catch loop.:
         var answer = false;
         if(flag && flag.debug) {
             try{
 
-                var dhisfunctionsevaluated = runDhisFunctions(expression, variablesHash, flag);
+                var dhisfunctionsevaluated = runDhisFunctions(expression, variablesHash, flag, selectedOrgUnit);
                 answer = eval(dhisfunctionsevaluated);
 
                 if(flag.verbose)
@@ -2646,8 +2651,10 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             //Run rules in priority - lowest number first(priority null is last)
             rules = orderByFilter(rules, 'priority');
 
-            return VariableService.getVariables(allProgramRules, executingEvent, evs, allDataElements,
-                allTrackedEntityAttributes, selectedEntity, selectedEnrollment, optionSets).then( function(variablesHash) {
+            return OrgUnitFactory.getFromStoreOrServer( selectedEnrollment ? selectedEnrollment.orgUnit : executingEvent.orgUnit ).then(function (selectedOrgUnit) { 
+                var variablesHash = VariableService.getVariables(allProgramRules, executingEvent, evs, allDataElements,
+                    allTrackedEntityAttributes, selectedEntity, selectedEnrollment, optionSets, selectedOrgUnit);
+                
                 if(angular.isObject(rules) && angular.isArray(rules)){
                     //The program has rules, and we want to run them.
                     //Prepare repository unless it is already prepared:
@@ -2678,7 +2685,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             }
 
                             //run expression:
-                            if( runExpression(expression, rule.condition, "rule:" + rule.id, flag, variablesHash) ){
+                            if( runExpression(expression, rule.condition, "rule:" + rule.id, flag, variablesHash, selectedOrgUnit) ){
                                 ruleEffective = true;
                             }
                         } else {
@@ -2729,7 +2736,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                     //Now we will have to make a thorough replacement and separate evaluation to find the correct value:
                                     $rootScope.ruleeffects[ruleEffectKey][action.id].data = replaceVariables(action.data, variablesHash);
                                     //In a scenario where the data contains a complex expression, evaluate the expression to compile(calculate) the result:
-                                    $rootScope.ruleeffects[ruleEffectKey][action.id].data = runExpression($rootScope.ruleeffects[ruleEffectKey][action.id].data, action.data, "action:" + action.id, flag, variablesHash);
+                                    $rootScope.ruleeffects[ruleEffectKey][action.id].data = runExpression($rootScope.ruleeffects[ruleEffectKey][action.id].data, action.data, "action:" + action.id, flag, variablesHash, selectedOrgUnit);
                                 }
 
                                 if(oldData !== $rootScope.ruleeffects[ruleEffectKey][action.id].data) {
@@ -3454,7 +3461,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 deferred.resolve(e.target.result);
                             }
                             else{
-                                $http.get( DHIS2URL + '/organisationUnits/'+ uid + '.json?fields=id,displayName,code,closedDate,openingDate' ).then(function(response){
+                                $http.get( DHIS2URL + '/organisationUnits/'+ uid + '.json?fields=id,displayName,code,closedDate,openingDate,organisationUnitGroups[id,code,name]' ).then(function(response){
                                     if( response && response.data ){
                                         deferred.resolve({
                                             id: response.data.id,
