@@ -1739,9 +1739,12 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
             angular.forEach(programVariables, function(programVariable) {
                 var dataElementId = programVariable.dataElement;
+                
                 if(programVariable.dataElement && programVariable.dataElement.id) {
                     dataElementId = programVariable.dataElement.id;
                 }
+
+                var dataElementExists = dataElementId && allDes && allDes[dataElementId];
 
                 var trackedEntityAttributeId = programVariable.trackedEntityAttribute;
                 if(programVariable.trackedEntityAttribute && programVariable.trackedEntityAttribute.id) {
@@ -1755,7 +1758,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
                 var valueFound = false;
                 //If variable evs is not defined, it means the rules is run before any events is registered, skip the types that require an event
-                if(programVariable.programRuleVariableSourceType === "DATAELEMENT_NEWEST_EVENT_PROGRAM_STAGE" && evs && evs.byStage){
+                if(programVariable.programRuleVariableSourceType === "DATAELEMENT_NEWEST_EVENT_PROGRAM_STAGE" && evs && evs.byStage && dataElementExists){
                     if(programStageId) {
                         var allValues = [];
                         angular.forEach(evs.byStage[programStageId], function(event) {
@@ -1776,7 +1779,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             + " despite that the variable has sourcetype DATAELEMENT_NEWEST_EVENT_PROGRAM_STAGE" );
                     }
                 }
-                else if(programVariable.programRuleVariableSourceType === "DATAELEMENT_NEWEST_EVENT_PROGRAM" && evs){
+                else if(programVariable.programRuleVariableSourceType === "DATAELEMENT_NEWEST_EVENT_PROGRAM" && evs && dataElementExists){
                     var allValues = [];
                     angular.forEach(evs.all, function(event) {
                         if(angular.isDefined(event[dataElementId])
@@ -1790,7 +1793,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         }
                     });
                 }
-                else if(programVariable.programRuleVariableSourceType === "DATAELEMENT_CURRENT_EVENT" && evs){
+                else if(programVariable.programRuleVariableSourceType === "DATAELEMENT_CURRENT_EVENT" && evs && dataElementExists){
                     if(angular.isDefined(executingEvent[dataElementId])
                         && executingEvent[dataElementId] !== null 
                         && executingEvent[dataElementId] !== ""){
@@ -1800,7 +1803,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         variables = pushVariable(variables, programVariable.displayName, value, null, allDes[dataElementId].dataElement.valueType, valueFound, '#', executingEvent.eventDate, programVariable.useCodeForOptionSet );
                     }
                 }
-                else if(programVariable.programRuleVariableSourceType === "DATAELEMENT_PREVIOUS_EVENT" && evs){
+                else if(programVariable.programRuleVariableSourceType === "DATAELEMENT_PREVIOUS_EVENT" && evs && dataElementExists){
                     //Only continue checking for a value if there is more than one event.
                     if(evs.all && evs.all.length > 1) {
                         var allValues = [];
