@@ -2469,11 +2469,12 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         else if(dhisFunction.name === "d2:inOrgUnitGroup") {
                             var group = parameters[0];
                             var isInGroup = "false";
-
-                           if( selectedOrgUnit.isInGroup(group) )
-                           {
+                            var orgUnitGroups = (selectedOrgUnit && selectedOrgUnit.g) || [];
+                            var foundGroup = orgUnitGroups.find(o => o.id === group || o.code === group);
+                            if(foundGroup)
+                            {
                                 isInGroup = "true"
-                           }
+                            }
 
                             expression = expression.replace(callToThisFunction, isInGroup);
                             expressionUpdated = true;
