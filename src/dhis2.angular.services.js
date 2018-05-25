@@ -1898,6 +1898,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
             //add context variables:
             //last parameter "valuefound" is always true for event date
+            variables = pushVariable(variables, 'environment', 'WebClient',null,'TEXT',true,'V','',false);
             variables = pushVariable(variables, 'current_date', DateUtils.getToday(), null, 'DATE', true, 'V', '', false );
 
             variables = pushVariable(variables, 'event_date', executingEvent.eventDate, null, 'DATE', true, 'V', '', false );
