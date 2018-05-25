@@ -1729,7 +1729,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         getTrackedEntityValueOrCodeForValue: function(useCodeForOptionSet, value, trackedEntityAttributeId, allTeis, optionSets) {
             return geTrackedEntityAttributeValueOrCodeForValueInternal(useCodeForOptionSet, value, trackedEntityAttributeId, allTeis, optionSets);
         },
-        getVariables: function(allProgramRules, executingEvent, evs, allDes, allTeis, selectedEntity, selectedEnrollment, optionSets, selectedOrgUnit) {
+        getVariables: function(allProgramRules, executingEvent, evs, allDes, allTeis, selectedEntity, selectedEnrollment, optionSets, selectedOrgUnit, selectedProgramStage) {
 
             var variables = {};
 
@@ -1912,6 +1912,10 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             variables = pushVariable(variables, 'enrollment_count', selectedEnrollment ? 1 : 0, null, 'INTEGER', true, 'V', '', false);
             variables = pushVariable(variables, 'tei_count', selectedEnrollment ? 1 : 0, null, 'INTEGER', true, 'V', '', false);
             
+            variables = pushVariable(variables, 'program_stage_id',(selectedProgramStage && selectedProgramStage.id) || '', null, 'TEXT', selectedProgramStage && selectedProgramStage.id ? true : false, 'V', '', false);
+            variables = pushVariable(variables, 'program_stage_name',(selectedProgramStage && selectedProgramStage.name) || '', null, 'TEXT', selectedProgramStage && selectedProgramStage.name ? true : false, 'V', '', false);
+
+
             //Push all constant values:
             angular.forEach(allProgramRules.constants, function(constant){
                 variables = pushVariable(variables, constant.id, constant.value, null, 'INTEGER', true, 'C', '', false);
@@ -1927,7 +1931,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 })
 
 /* service for executing tracker rules and broadcasting results */
-.service('TrackerRulesExecutionService', function($translate, VariableService, DateUtils, NotificationService, DHIS2EventFactory, OrgUnitFactory, RulesFactory, CalendarService, OptionSetService, $rootScope, $q, $log, $filter, orderByFilter){
+.service('TrackerRulesExecutionService', function($translate, VariableService, DateUtils, NotificationService, DHIS2EventFactory, OrgUnitFactory, RulesFactory, CalendarService, OptionSetService, $rootScope, $q, $log, $filter, orderByFilter, MetaDataFactory){
     var NUMBER_OF_EVENTS_IN_SCOPE = 10;
 
     //Variables for storing scope and rules in memory from rules execution to rules execution:
@@ -2654,6 +2658,25 @@ var d2Services = angular.module('d2Services', ['ngResource'])
      * @param {*} optionSets all optionsets(matedata)
      * @param {*} flag execution flags
      */
+    var internalFetchContextData = function(selectedEnrollment,executingEvent){
+        return OrgUnitFactory.getFromStoreOrServer( selectedEnrollment ? selectedEnrollment.orgUnit : executingEvent.orgUnit )
+            .then(function (orgUnit) {
+                var data = { selectedOrgUnit: orgUnit, selectedProgramStage: null};
+                if(executingEvent && executingEvent.program && executingEvent.programStage){
+                    return MetaDataFactory.get("programs", executingEvent.program).then(function(program){
+                        if(program && program.programStages){
+                            data.selectedProgramStage = program.programStages.find(ps => ps.id === executingEvent.programStage);
+                        }
+                        return data;
+                    });
+                }
+                return data;
+            });
+
+
+    }
+
+
     var internalExecuteRules = function(allProgramRules, executingEvent, evs, allDataElements, allTrackedEntityAttributes, selectedEntity, selectedEnrollment, optionSets, flag) {
         if(allProgramRules) {
             var variablesHash = {};
@@ -2675,9 +2698,11 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             //Run rules in priority - lowest number first(priority null is last)
             rules = orderByFilter(rules, 'priority');
 
-            return OrgUnitFactory.getFromStoreOrServer( selectedEnrollment ? selectedEnrollment.orgUnit : executingEvent.orgUnit ).then(function (selectedOrgUnit) { 
+            return internalFetchContextData(selectedEnrollment, executingEvent).then(function (data) {
+                var selectedOrgUnit = data.selectedOrgUnit;
+                var selectedProgramStage = data.selectedProgramStage;
                 var variablesHash = VariableService.getVariables(allProgramRules, executingEvent, evs, allDataElements,
-                    allTrackedEntityAttributes, selectedEntity, selectedEnrollment, optionSets, selectedOrgUnit);
+                    allTrackedEntityAttributes, selectedEntity, selectedEnrollment, optionSets, selectedOrgUnit, selectedProgramStage);
                 
                 if(angular.isObject(rules) && angular.isArray(rules)){
                     //The program has rules, and we want to run them.
