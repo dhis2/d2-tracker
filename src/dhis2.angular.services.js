@@ -2673,8 +2673,6 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 }
                 return data;
             });
-
-
     }
 
 
