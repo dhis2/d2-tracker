@@ -2019,7 +2019,8 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 {name:"d2:right",parameters:2},
                 {name:"d2:substring",parameters:3},
                 {name:"d2:split",parameters:3},
-                {name:"d2:length",parameters:1}];
+                {name:"d2:length",parameters:1},
+                {name:"d2:condition",parameters:3}];
             var continueLooping = true;
             //Safety harness on 10 loops, in case of unanticipated syntax causing unintencontinued looping
             for(var i = 0; i < 10 && continueLooping; i++ ) {
@@ -2424,6 +2425,11 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         }
                         else if(dhisFunction.name === "d2:length") {
                             expression = expression.replace(callToThisFunction, String(parameters[0]).length);
+                            expressionUpdated = true;
+                        }else if(dhisFunction.name === "d2:condition"){
+                            var toEvaluate = parameters[0]+"? "+parameters[1]+" : "+parameters[2];
+                            var result = eval(toEvaluate);
+                            expression = expression.replace(callsToThisFunction,result);
                             expressionUpdated = true;
                         }
                     });
