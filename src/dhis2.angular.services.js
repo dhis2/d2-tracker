@@ -3226,7 +3226,8 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     this.location = null;
     this.advancedSearchOptions = null;
     this.frontPageData = null;
-	this.trackedEntityTypes = null;
+    this.trackedEntityTypes = null;
+    this.optionGroupsById = null;
 
     this.set = function(currentSelection){
         this.currentSelection = currentSelection;
@@ -3327,6 +3328,14 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         if(this.frontPageData && this.frontPageData.trackedEntityList){
             this.frontPageData.trackedEntityList.refresh = refresh;
         }
+    }
+
+    this.getOptionGroupsById = function(){
+        return this.optionGroupsById;
+    }
+
+    this.setOptionGroupsById = function(optionGroupsById){
+        this.optionGroupsById = optionGroupsById;
     }
 })
 
