@@ -178,7 +178,8 @@ dhis2.tracker.getTrackerObject = function( id, store, url, filter, storage, db )
 dhis2.tracker.getBatches = function( ids, batchSize, data, store, objs, url, filter, storage, db )
 {
     if( !ids || !ids.length || ids.length < 1){
-        return;
+        
+        return data;
     }
     
     var batches = dhis2.tracker.chunk( ids, batchSize );
