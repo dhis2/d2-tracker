@@ -1515,20 +1515,66 @@ var d2Directives = angular.module('d2Directives', [])
 			d2AllOptions: '=',
 			d2MaxOptionSize: '=',
 			d2UseNotification: '=',
-			d2Element: '='
+            d2Element: '=',
+            d2OptionFilter: "="
 		},
 		link: function (scope, element, attrs) {
             
         },
         controller: function($scope) {
+            $scope.loadMoreId = "loadMore";
+            var filteredOptions;
+            var options = [];
+            $scope.displayOptions = [];
+
+
+            var filterOptions = function(){
+                if($scope.d2OptionFilter && $scope.d2OptionFilter[$scope.d2ModelId] && ($scope.d2OptionFilter[$scope.d2ModelId].showOnly || $scope.d2OptionFilter[$scope.d2ModelId].hidden)){
+                    var deFilter = $scope.d2OptionFilter[$scope.d2ModelId];
+                    filteredOptions = $scope.d2AllOptions.filter(o => {
+                        if(deFilter.showOnly && !deFilter.showOnly[o.id]) return false;
+                        if(deFilter.hidden && deFilter.hidden[o.id]) return false;
+                        return true;
+                    });
+                }else{
+                    filteredOptions = $scope.d2AllOptions;
+                }
+            }
+
+            $scope.search = function(searchParam){
+                if(searchParam && searchParam != ""){
+                    $scope.displayOptions = filteredOptions.filter(o => o.displayName)
+                }
+            }
+
+            var setOptions = function(){
+                $scope.options = filteredOptions.slice(0, $scope.d2MaxOptionSize);
+                if(filteredOptions.length > $scope.d2MaxOptionSize){
+                    $scope.options.push({id: $scope.loadMoreId, displayName:'Load more' });
+                }
+            }
+
+            filterOptions();
+            setOptions();
+
+            $scope.$watch("d2OptionFilter", function(newValue,oldValue){
+                if(newValue != oldValue){
+                    filterOptions();
+                    setOptions();
+                }
+            });
+
+
+
             $scope.showMore = function($select, $event) {
                 if($event){
                     $event.stopPropagation();
                     $event.preventDefault();
                     $scope.d2MaxOptionSize = $scope.d2MaxOptionSize + 10;
+                    setOptions();
                 }
                 
-			};
+            };        
 
 			$scope.saveOption = function() {
 				$scope.d2SaveMethode()($scope.d2SaveMethodeParameter1, $scope.d2SaveMethodeParameter2);
