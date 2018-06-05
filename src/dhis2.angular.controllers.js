@@ -433,11 +433,9 @@ var d2Controllers = angular.module('d2Controllers', [])
                 
                 if(layer._latlngs) {
                     var polygons = layer.toGeoJSON()
-                    var polygonsForDB = JSON.stringify(polygons);
-                    $scope.location = polygonsForDB;
-                } else {
-                    console.log("Unsupported marker!");
+                    $scope.location = polygons.geometry;
                 }
+                
                 console.log($scope.location);
                 
             });
