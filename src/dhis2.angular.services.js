@@ -3120,10 +3120,15 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                     else if(effect.action === "SHOWOPTIONGROUP"){
                         if(effect.ineffect && effect.trackedEntityAttribute && effect.optionGroup){
                             if(!optionVisibility[effect.trackedEntityAttribute.id]) optionVisibility[effect.trackedEntityAttribute.id] = { hidden: {}};
-                            if(!optionVisibility[effect.trackedEntityAttribute.id].showOnly) optionVisibility[effect.trackedEntityAttribute.id].showOnly = {};
                             var optionGroup = optionGroupsById[effect.optionGroup.id];
-                            angular.extend(optionVisibility[effect.trackedEntityAttribute.id].showOnly, optionGroup.optionsById);
-                            if(attributeOptionsChanged.indexOf(effect.trackedEntityAttribute.id) === -1) attributeOptionsChanged.push(effect.trackedEntityAttribute.id);
+                            if(optionGroup){
+                                if(!optionVisibility[effect.trackedEntityAttribute.id].showOnly) optionVisibility[effect.trackedEntityAttribute.id].showOnly = {};
+                                angular.extend(optionVisibility[effect.trackedEntityAttribute.id].showOnly, optionGroup.optionsById);
+                                if(attributeOptionsChanged.indexOf(effect.trackedEntityAttribute.id) === -1) attributeOptionsChanged.push(effect.trackedEntityAttribute.id);
+                            }else{
+                                $log.warn("OptionGroup "+effect.optionGroup.id+" was not found");
+                            }
+
                         }
                     }
                 }
@@ -3202,10 +3207,15 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                     else if(effect.action === "SHOWOPTIONGROUP"){
                         if(effect.ineffect && effect.dataElement && effect.optionGroup){
                             if(!optionVisibility[effect.dataElement.id]) optionVisibility[effect.dataElement.id] = { hidden: {}};
-                            if(!optionVisibility[effect.dataElement.id].showOnly) optionVisibility[effect.dataElement.id].showOnly = {};
                             var optionGroup = optionGroupsById[effect.optionGroup.id];
-                            angular.extend(optionVisibility[effect.dataElement.id].showOnly, optionGroup.optionsById);
-                            if(dataElementOptionsChanged.indexOf(effect.dataElement.id) === -1) dataElementOptionsChanged.push(effect.dataElement.id);
+                            if(optionGroup){
+                                if(!optionVisibility[effect.dataElement.id].showOnly) optionVisibility[effect.dataElement.id].showOnly = {};
+                                angular.extend(optionVisibility[effect.dataElement.id].showOnly, optionGroup.optionsById);
+                                if(dataElementOptionsChanged.indexOf(effect.dataElement.id) === -1) dataElementOptionsChanged.push(effect.dataElement.id);
+                            }else{
+                                $log.warn("OptionGroup "+effect.optionGroup.id+" was not found");
+                            }
+
                         }
                     }
                 }

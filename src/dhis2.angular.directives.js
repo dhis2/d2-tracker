@@ -825,13 +825,17 @@ var d2Directives = angular.module('d2Directives', [])
             d2Disabled: '=',
             d2Required: '=',
             d2Options: '=',
-            d2CallbackFunction: '&d2Function'
+            d2CallbackFunction: '&d2Function',
+            d2OptionFilter: '='
         },
         link: function (scope, element, attrs) {
             
         },
         controller: function($scope){
-            
+            var filteredOptions;
+            var currentFilteredOptions;
+            $scope.displayOptions = [];
+
             $scope.$watch('d2Object',function(newObj, oldObj){
                 if( angular.isObject(newObj) ){
                     $scope.d2Object = newObj;
@@ -857,6 +861,34 @@ var d2Directives = angular.module('d2Directives', [])
                     $scope.d2CallbackFunction({value: $scope.model.radio});
                 }
             };
+
+            var filterOptions = function(){
+                if($scope.d2OptionFilter && $scope.d2OptionFilter[$scope.id] && ($scope.d2OptionFilter[$scope.id].showOnly || $scope.d2OptionFilter[$scope.id].hidden)){
+                    var deFilter = $scope.d2OptionFilter[$scope.id];
+                    filteredOptions = $scope.d2Options.filter(o => {
+                        if(deFilter.showOnly && !deFilter.showOnly[o.id]) return false;
+                        if(deFilter.hidden && deFilter.hidden[o.id]) return false;
+                        return true;
+                    });
+                }else{
+                    filteredOptions = $scope.d2Options;
+                }
+                currentFilteredOptions = filteredOptions;
+            }
+
+            var setOptions = function(){
+                $scope.displayOptions = currentFilteredOptions;
+            }
+
+            filterOptions();
+            setOptions();
+
+            $scope.$watch("d2OptionFilter", function(newValue,oldValue){
+                if(newValue != oldValue){
+                    filterOptions();
+                    setOptions();
+                }
+            });
         }
     };
 })
