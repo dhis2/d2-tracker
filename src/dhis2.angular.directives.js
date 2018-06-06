@@ -1509,9 +1509,7 @@ var d2Directives = angular.module('d2Directives', [])
 			d2ModelId: '=',
             d2Required: '=',
             d2Disabled: '=',
-			d2SaveMethode: '&',
-			d2SaveMethodeParameter1: '=',
-			d2SaveMethodeParameter2: '=',
+			d2Change: '&',
 			d2AllOptions: '=',
 			d2MaxOptionSize: '=',
 			d2UseNotification: '=',
@@ -1521,10 +1519,10 @@ var d2Directives = angular.module('d2Directives', [])
 		link: function (scope, element, attrs) {
             
         },
-        controller: function($scope) {
+        controller: function($scope,$filter) {
             $scope.loadMoreId = "loadMore";
             var filteredOptions;
-            var options = [];
+            var currentFilteredOptions;
             $scope.displayOptions = [];
 
 
@@ -1539,18 +1537,18 @@ var d2Directives = angular.module('d2Directives', [])
                 }else{
                     filteredOptions = $scope.d2AllOptions;
                 }
+                currentFilteredOptions = filteredOptions;
             }
 
             $scope.search = function(searchParam){
-                if(searchParam && searchParam != ""){
-                    $scope.displayOptions = filteredOptions.filter(o => o.displayName)
-                }
+                currentFilteredOptions = $filter('filter')(filteredOptions, searchParam);
+                setOptions();
             }
 
             var setOptions = function(){
-                $scope.options = filteredOptions.slice(0, $scope.d2MaxOptionSize);
-                if(filteredOptions.length > $scope.d2MaxOptionSize){
-                    $scope.options.push({id: $scope.loadMoreId, displayName:'Load more' });
+                $scope.displayOptions = currentFilteredOptions.slice(0, $scope.d2MaxOptionSize);
+                if(currentFilteredOptions.length > $scope.d2MaxOptionSize){
+                    $scope.displayOptions.push({id: $scope.loadMoreId, displayName:'Load more' });
                 }
             }
 
@@ -1573,11 +1571,10 @@ var d2Directives = angular.module('d2Directives', [])
                     $scope.d2MaxOptionSize = $scope.d2MaxOptionSize + 10;
                     setOptions();
                 }
-                
             };        
 
 			$scope.saveOption = function() {
-				$scope.d2SaveMethode()($scope.d2SaveMethodeParameter1, $scope.d2SaveMethodeParameter2);
+                $scope.d2Change();
 			};
 
 			$scope.getInputNotifcationClass = function(id) {
