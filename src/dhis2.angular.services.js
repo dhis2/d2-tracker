@@ -3534,7 +3534,8 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                             odate: response.data.openingDate,
                                             code: response.data.code,
                                             closedStatus: getOrgUnitClosedStatus(response.data),
-                                            reportDateRange: orgUnitFactory.getOrgUnitReportDateRange(response.data)
+                                            reportDateRange: orgUnitFactory.getOrgUnitReportDateRange(response.data),
+                                            g: response.data.organisationUnitGroups
                                         });
                                     }
                                 });
