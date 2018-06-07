@@ -2979,6 +2979,55 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             return $q.when(allProgramRules);
         }
     };
+
+    var clearDataElementValueForShowHideOptionActions = function(dataElements, affectedEvent, optionVisibility, prStDes, optionSets){
+        dataElements.forEach(de => {
+            var value = affectedEvent[de];
+            //Only process if has selected value
+            if(angular.isDefined(value) && value !== "") {
+                var optionSet = optionSets[prStDes[de].dataElement.optionSet.id];
+                //Find selectedOption by displayName
+                var selectedOption = optionSet.options.find(o => o.displayName === value);
+                var shouldClear = !selectedOption;
+                
+                //If has selected option and a option is not in showOnly or is in hidden, field should be cleared.
+                if(selectedOption){
+                    shouldClear = (optionVisibility[de].showOnly && !optionVisibility[de].showOnly[selectedOption.id]) || optionVisibility[de].hidden[selectedOption.id];
+                }
+    
+                if(shouldClear){
+                    var message = (prStDes[de].dataElement.displayName + ' was blanked out because the option "'+value+'" got hidden by your last action');
+                    alert(message);
+                    affectedEvent[de] = "";
+                }
+            }
+        });
+    }
+
+    var clearAttributeValueForShowHideOptionActions = function(attributes, affectedTei, optionVisibility, attributesById, optionSets){
+        attributes.forEach(attr => {
+            var value = affectedTei[attr];
+            //Only process if has selected value
+            if(angular.isDefined(value) && value !== "") {
+                var optionSet = optionSets[attributesById[attr].optionSet.id];
+                //Find selectedOption by displayName
+                var selectedOption = optionSet.options.find(o => o.displayName === value);
+                var shouldClear = !selectedOption;
+                
+                //If has selected option and a option is not in showOnly or is in hidden, field should be cleared.
+                if(selectedOption){
+                    shouldClear = (optionVisibility[attr].showOnly && !optionVisibility[attr].showOnly[selectedOption.id]) || optionVisibility[attr].hidden[selectedOption.id];
+                }
+    
+                if(shouldClear){
+                    var message = (attributesById[attr].displayName + ' was blanked out because the option "'+value+'" got hidden by your last action');
+                    alert(message);
+                    affectedTei[attr] = "";
+                }
+            }
+        });
+    }
+
     return {
         executeRules: function(allProgramRules, executingEvent, evs, allDataElements, allTrackedEntityAttributes, selectedEntity, selectedEnrollment, optionSets, flags) {
             return internalExecuteRules(allProgramRules, executingEvent, evs, allDataElements, allTrackedEntityAttributes, selectedEntity, selectedEnrollment, optionSets, flags);
@@ -2990,13 +3039,16 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 });
             });
         },
-        processRuleEffectsForTrackedEntityAttributes: function(context, currentTei, teiOriginalValues, attributesById, optionSets ) {
+        processRuleEffectsForTrackedEntityAttributes: function(context, currentTei, teiOriginalValues, attributesById, optionSets,optionGroupsById) {
             var hiddenFields = {};
             var assignedFields = {};
             var hiddenSections = {};
             var mandatoryFields = {};
             var warningMessages = [];
+            var optionVisibility = { showOnly: null, hidden: {}};
             
+            var attributeOptionsChanged = [];
+
             angular.forEach($rootScope.ruleeffects[context], function (effect) {
                 if (effect.ineffect) {
                     if (effect.action === "HIDEFIELD" && effect.trackedEntityAttribute) {
@@ -3057,17 +3109,42 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                     }else if(effect.action === "SETMANDATORYFIELD" && effect.trackedEntityAttribute){
                         mandatoryFields[effect.trackedEntityAttribute.id] = effect.ineffect;
                     }
+                    else if(effect.action === "HIDEOPTION"){
+                        if(effect.ineffect && effect.trackedEntityAttribute && effect.option){
+                            if(!optionVisibility[effect.trackedEntityAttribute.id]) optionVisibility[effect.trackedEntityAttribute.id] = { hidden: {}};
+                            if(!optionVisibility[effect.trackedEntityAttribute.id].hidden) optionVisibility[effect.trackedEntityAttribute.id].hidden = {};
+                            optionVisibility[effect.trackedEntityAttribute.id].hidden[effect.option.id] = effect.ineffect;
+                            if(attributeOptionsChanged.indexOf(effect.trackedEntityAttribute.id) === -1) attributeOptionsChanged.push(effect.trackedEntityAttribute.id);
+                        }
+                    }
+                    else if(effect.action === "SHOWOPTIONGROUP"){
+                        if(effect.ineffect && effect.trackedEntityAttribute && effect.optionGroup){
+                            if(!optionVisibility[effect.trackedEntityAttribute.id]) optionVisibility[effect.trackedEntityAttribute.id] = { hidden: {}};
+                            var optionGroup = optionGroupsById[effect.optionGroup.id];
+                            if(optionGroup){
+                                if(!optionVisibility[effect.trackedEntityAttribute.id].showOnly) optionVisibility[effect.trackedEntityAttribute.id].showOnly = {};
+                                angular.extend(optionVisibility[effect.trackedEntityAttribute.id].showOnly, optionGroup.optionsById);
+                                if(attributeOptionsChanged.indexOf(effect.trackedEntityAttribute.id) === -1) attributeOptionsChanged.push(effect.trackedEntityAttribute.id);
+                            }else{
+                                $log.warn("OptionGroup "+effect.optionGroup.id+" was not found");
+                            }
+
+                        }
+                    }
                 }
             });
-            return {currentTei: currentTei, hiddenFields: hiddenFields, hiddenSections: hiddenSections, warningMessages: warningMessages, assignedFields: assignedFields, mandatoryFields: mandatoryFields};
+            clearAttributeValueForShowHideOptionActions(attributeOptionsChanged, currentTei,optionVisibility,attributesById,optionSets);
+            return {currentTei: currentTei, hiddenFields: hiddenFields, hiddenSections: hiddenSections, warningMessages: warningMessages, assignedFields: assignedFields, mandatoryFields: mandatoryFields, optionVisibility: optionVisibility};
         },
-        processRuleEffectsForEvent: function(eventId, currentEvent, currentEventOriginalValues, prStDes, optionSets ) {
+        processRuleEffectsForEvent: function(eventId, currentEvent, currentEventOriginalValues, prStDes, optionSets,optionGroupsById) {
             var hiddenFields = {};
             var assignedFields = {};
             var mandatoryFields = {};
             var hiddenSections = {};
             var warningMessages = [];
-            
+            var optionVisibility = { showOnly: null, hidden: {}};
+
+            var dataElementOptionsChanged = [];
             angular.forEach($rootScope.ruleeffects[eventId], function (effect) {
                 if (effect.ineffect) {
                     if (effect.action === "HIDEFIELD" && effect.dataElement) {
@@ -3119,23 +3196,46 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                     else if (effect.action === "SETMANDATORYFIELD" && effect.dataElement) {
                         mandatoryFields[effect.dataElement.id] = effect.ineffect;
                     }
+                    else if(effect.action === "HIDEOPTION"){
+                        if(effect.ineffect && effect.dataElement && effect.option){
+                            if(!optionVisibility[effect.dataElement.id]) optionVisibility[effect.dataElement.id] = { hidden: {}};
+                            if(!optionVisibility[effect.dataElement.id].hidden) optionVisibility[effect.dataElement.id].hidden = {};
+                            optionVisibility[effect.dataElement.id].hidden[effect.option.id] = effect.ineffect;
+                            if(dataElementOptionsChanged.indexOf(effect.dataElement.id) === -1) dataElementOptionsChanged.push(effect.dataElement.id);
+                        }
+                    }
+                    else if(effect.action === "SHOWOPTIONGROUP"){
+                        if(effect.ineffect && effect.dataElement && effect.optionGroup){
+                            if(!optionVisibility[effect.dataElement.id]) optionVisibility[effect.dataElement.id] = { hidden: {}};
+                            var optionGroup = optionGroupsById[effect.optionGroup.id];
+                            if(optionGroup){
+                                if(!optionVisibility[effect.dataElement.id].showOnly) optionVisibility[effect.dataElement.id].showOnly = {};
+                                angular.extend(optionVisibility[effect.dataElement.id].showOnly, optionGroup.optionsById);
+                                if(dataElementOptionsChanged.indexOf(effect.dataElement.id) === -1) dataElementOptionsChanged.push(effect.dataElement.id);
+                            }else{
+                                $log.warn("OptionGroup "+effect.optionGroup.id+" was not found");
+                            }
+
+                        }
+                    }
                 }
             });
-        
-            return {currentEvent: currentEvent, hiddenFields: hiddenFields, hiddenSections: hiddenSections, warningMessages: warningMessages, assignedFields: assignedFields, mandatoryFields: mandatoryFields};
+            clearDataElementValueForShowHideOptionActions(dataElementOptionsChanged, currentEvent,optionVisibility,prStDes,optionSets);
+            return {currentEvent: currentEvent, hiddenFields: hiddenFields, hiddenSections: hiddenSections, warningMessages: warningMessages, assignedFields: assignedFields, mandatoryFields: mandatoryFields,optionVisibility};
         },
-        processRuleEffectAttribute: function(context, selectedTei, tei, currentEvent, currentEventOriginialValue, affectedEvent, attributesById, prStDes, hiddenFields, hiddenSections, warningMessages, assignedFields, optionSets, mandatoryFields){
+        processRuleEffectAttribute: function(context, selectedTei, tei, currentEvent, currentEventOriginialValue, affectedEvent, attributesById, prStDes,optionSets,optionGroupsById){
             //Function used from registration controller to process effects for the tracked entity instance and for the events in the same operation
-            var teiAttributesEffects = this.processRuleEffectsForTrackedEntityAttributes(context, selectedTei, tei, attributesById, optionSets );
+            var teiAttributesEffects = this.processRuleEffectsForTrackedEntityAttributes(context, selectedTei, tei, attributesById, optionSets,optionGroupsById);
             teiAttributesEffects.selectedTei = teiAttributesEffects.currentTei;
             
             if(context === "SINGLE_EVENT" && currentEvent && prStDes ) {
-                var eventEffects = this.processRuleEffectsForEvent("SINGLE_EVENT", currentEvent, currentEventOriginialValue, prStDes, optionSets);
+                var eventEffects = this.processRuleEffectsForEvent("SINGLE_EVENT", currentEvent, currentEventOriginialValue, prStDes, optionSets,optionGroupsById);
                 teiAttributesEffects.warningMessages = angular.extend(teiAttributesEffects.warningMessages,eventEffects.warningMessages);
                 teiAttributesEffects.hiddenFields[context] = eventEffects.hiddenFields;
                 teiAttributesEffects.hiddenSections[context] = eventEffects.hiddenSections;
                 teiAttributesEffects.assignedFields[context] = eventEffects.assignedFields;
                 teiAttributesEffects.mandatoryFields[context] = eventEffects.mandatoryFields;
+                teiAttributesEffects.optionVisibility[context] = eventEffects.optionVisibility;
                 teiAttributesEffects.currentEvent = eventEffects.currentEvent;
             }
             
