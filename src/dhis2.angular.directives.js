@@ -1567,7 +1567,7 @@ var d2Directives = angular.module('d2Directives', [])
                         return true;
                     });
                 }else{
-                    filteredOptions = $scope.d2AllOptions;
+                    filteredOptions = $scope.d2AllOptions || [];
                 }
                 currentFilteredOptions = filteredOptions;
             }
@@ -1588,6 +1588,13 @@ var d2Directives = angular.module('d2Directives', [])
             setOptions();
 
             $scope.$watch("d2OptionFilter", function(newValue,oldValue){
+                if(newValue != oldValue){
+                    filterOptions();
+                    setOptions();
+                }
+            });
+
+            $scope.$watch("d2AllOptions", function(newValue,oldValue){
                 if(newValue != oldValue){
                     filterOptions();
                     setOptions();
