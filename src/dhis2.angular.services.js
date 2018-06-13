@@ -455,13 +455,13 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     
     return {
         formatDataValue: function(event, val, obj, optionSets, destination){
-            if(val &&
+            if(val && (
                 obj.valueType === 'NUMBER' ||
                 obj.valueType === 'PERCENTAGE' ||
                 obj.valueType === 'INTEGER' ||
                 obj.valueType === 'INTEGER_POSITIVE' ||
                 obj.valueType === 'INTEGER_NEGATIVE' ||
-                obj.valueType === 'INTEGER_ZERO_OR_POSITIVE'){
+                obj.valueType === 'INTEGER_ZERO_OR_POSITIVE')){
                 if( dhis2.validation.isNumber(val)){
                     if(obj.valueType === 'NUMBER'){
                         val = parseFloat(val);
