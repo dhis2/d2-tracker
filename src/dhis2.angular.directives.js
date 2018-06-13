@@ -996,6 +996,118 @@ var d2Directives = angular.module('d2Directives', [])
         
     };
 })
+.directive('d2Geometry', function(){
+    return {
+        restrict: 'E',            
+        templateUrl: "./templates/geometry-input.html",
+        scope: {
+            d2ObjectId: '@',            
+            d2Object: '=',            
+            d2CallbackFunction: '&',
+            d2Disabled: '=',
+            d2Required: '=',
+            d2GeometryType: '='
+        },
+        controller: function($scope, $modal, $filter, $translate, DHIS2COORDINATESIZE){
+            var geometryTypeDefinitions = {
+                //TEXT is handled as a POINT value
+                TEXT: {
+                    template: './templates/geometry-input-point.html',
+                    setGeometry: function(){
+                        $scope.geometry = { type:"Point", coordinates:[]};
+                        if($scope.d2Object[$scope.d2ObjectId] && typeof($scope.d2Object[$scope.d2ObjectId]) === 'string' && $scope.d2Object[$scope.d2ObjectId].startsWith("[") && $scope.d2Object[$scope.d2ObjectId].endsWith("]")){
+                            var coordinates = $scope.d2Object[$scope.id].slice(1,-1).split( ",");
+                            $scope.geometry.coordinate[0] = coordinates[0];
+                            $scope.geometry.coordinate[1] = coordinates[1];
+                        }
+                        
+                    },
+                    parseValues: function(){
+                        $scope.geometry.coordinate[0] = coordinateParser($scope.geometry.coordinate[0]);
+                        $scope.geometry.coordinate[1] = coordinateParser($scope.geometry.coordinate[1]);
+                    },
+                    setD2ObjectValue: function(){
+                        $scope.d2Object[$scope.d2ObjectId] = '['+$scope.geometry.coordinates[0]+','+$scope.geometry.coordinates[1]+']';
+                    }
+                },
+
+                POINT: {
+                    template: './templates/geometry-input-point.html',
+                    setGeometry: function(){
+                        $scope.geometry = { type:"Point", coordinates:[]};
+                        if($scope.d2Object && $scope.d2Object[$scope.d2ObjectId] && $scope.d2Object[$scope.d2ObjectId].coordinates && $scope.d2Object[$scope.d2ObjectId].type ==='POINT'){
+                            $scope.geometry = angular.copy($scope.d2Object[$scope.d2ObjectId]);
+                        }
+                    },
+                    parseValues: function(){
+                        $scope.geometry.coordinates[0] = coordinateParser($scope.geometry.coordinates[0]);
+                        $scope.geometry.coordinate[1] = coordinateParser($scope.geometry.coordinate[1]);
+                    },
+                    setD2ObjectValue: function(){
+                        $scope.d2Object[$scope.d2ObjectId] = angular.copy($scope.geometry);
+                    }
+                    
+                },
+
+                POLYGON: {
+                    template: './templates/geometry-input-polygon.html',
+                    setGeoObject: function(){
+                        $scope.geometry =  { type: "Polygon", coordinates: []};
+                        if($scope.d2Object && $scope.d2Object[$scope.d2ObjectId] && $scope.d2Object[$scope.d2ObjectId].coordinates && $scope.d2Object[$scope.d2ObjectId].type ==='POLYGON'){
+                            $scope.geometry = angular.copy($scope.d2Object[$scope.d2Object[$scope.d2ObjectId]]);
+                        }
+                    },
+                    parseValues: function(){
+                        $scope.geometry.coordinates = $scope.geometry.coordinates.map(coordinate => coordinateParser(coordinate));
+                    },
+                    setD2ObjectValue: function(){
+                        $scope.d2Object[$scope.d2ObjectId] = angular.copy($scope.geometry);
+                    }
+                }
+            }
+
+            $scope.currentGeometryTypeDefinition = geometryTypeDefinitions[$scope.d2GeometryType];
+            $scope.currentGeometryTypeDefinition.setGeoObject();
+
+            $scope.$watch('d2Object',function(newObj, oldObj){
+                if(newObj !== oldObj){
+                    $scope.currentGeometryTypeDefinition.setGeoObject();
+                }
+            });
+
+            $scope.saveGeometry = function(){
+                $scope.currentGeometryTypeDefinition.parseValues();
+                $scope.currentGeometryTypeDefinition.setD2ObjectValue();
+                $scope.d2CallbackFunction();
+            }
+
+            $scope.showMap = function(){        
+                var modalInstance = $modal.open({
+                    templateUrl: './templates/map.html',
+                    controller: 'MapController',
+                    windowClass: 'modal-map-window',
+                    resolve: {
+                        geometry: function () {
+                            return $scope.geometry;
+                        }
+                    }
+                });
+                
+                modalInstance.result.then(function (location){
+                    
+                });
+            }
+
+            function coordinateParser(coordinate){
+                var c;
+                if(dhis2.validation.isNumber(coordinate)){
+                    c = parseFloat($filter('number')(coordinate, DHIS2COORDINATESIZE));
+                }
+                return c || coordinate;
+            }
+        }
+    }
+})
 
 .directive('d2Map', function(){
     return {
