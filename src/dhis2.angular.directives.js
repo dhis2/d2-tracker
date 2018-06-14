@@ -1032,10 +1032,11 @@ var d2Directives = angular.module('d2Directives', [])
                 },
 
                 POINT: {
+                    type: "Point",
                     template: './templates/geometry-input-point.html',
                     setGeometry: function(){
                         $scope.geometry = { type:"Point", coordinates:[]};
-                        if($scope.d2Object && $scope.d2Object[$scope.d2ObjectId] && $scope.d2Object[$scope.d2ObjectId].coordinates && $scope.d2Object[$scope.d2ObjectId].type ==='POINT'){
+                        if($scope.d2Object && $scope.d2Object[$scope.d2ObjectId] && $scope.d2Object[$scope.d2ObjectId].coordinates && $scope.d2Object[$scope.d2ObjectId].type ==='Point'){
                             $scope.geometry = angular.copy($scope.d2Object[$scope.d2ObjectId]);
                         }
                     },
@@ -1050,11 +1051,12 @@ var d2Directives = angular.module('d2Directives', [])
                 },
 
                 POLYGON: {
+                    type: "Polygon",
                     template: './templates/geometry-input-polygon.html',
                     setGeoObject: function(){
                         $scope.geometry =  { type: "Polygon", coordinates: []};
-                        if($scope.d2Object && $scope.d2Object[$scope.d2ObjectId] && $scope.d2Object[$scope.d2ObjectId].coordinates && $scope.d2Object[$scope.d2ObjectId].type ==='POLYGON'){
-                            $scope.geometry = angular.copy($scope.d2Object[$scope.d2Object[$scope.d2ObjectId]]);
+                        if($scope.d2Object && $scope.d2Object[$scope.d2ObjectId] && $scope.d2Object[$scope.d2ObjectId].coordinates && $scope.d2Object[$scope.d2ObjectId].type ==='Polygon'){
+                            $scope.geometry = angular.copy($scope.d2Object[$scope.d2ObjectId]);
                         }
                     },
                     parseValues: function(){
@@ -1087,14 +1089,21 @@ var d2Directives = angular.module('d2Directives', [])
                     controller: 'MapController',
                     windowClass: 'modal-map-window',
                     resolve: {
-                        geometry: function () {
+                        geometryType: function(){
+                            return $scope.currentGeometryTypeDefinition.type;
+                        },
+                        geoJson: function () {
                             return $scope.geometry;
                         }
                     }
                 });
                 
-                modalInstance.result.then(function (location){
-                    
+                modalInstance.result.then(function (geoJson){
+                    $scope.d2Object[$scope.d2ObjectId] = geoJson;
+                    $scope.d2CallbackFunction();
+                    $scope.currentGeometryTypeDefinition.setGeoObject();
+                },function(){
+
                 });
             }
 

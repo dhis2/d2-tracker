@@ -51,28 +51,9 @@ var d2Controllers = angular.module('d2Controllers', [])
                 CurrentSelection,
                 DHIS2URL,
                 NotificationService,
-                geometry) {
+                geometryType,
+                geoJson) {
 
-    var featuregrouptest = [
-        {
-            type:"Feature",
-            properties:
-            {
-                name: "B2"
-            },
-            geometry:{
-                type:"Polygon",coordinates:[
-                    [
-                        [-11.334343, 9.217795],
-                        [-10.960929, 9.131711],
-                        [-11.184432, 8.744321],
-                        [-11.699178, 8.864453],
-                        [-11.334343, 9.217795]
-                    ]
-                ]
-            }
-        }
-    ];
     $scope.tilesDictionaryKeys = ['openstreetmap', 'googlemap'];   
     $scope.selectedTileKey = 'openstreetmap';           
     $scope.tilesDictionary = {
@@ -106,45 +87,30 @@ var d2Controllers = angular.module('d2Controllers', [])
     };
     
     var polygonFeatureGroup;
-
+    var geoJsonHasCoordinates = geoJson && geoJson.coordinates && geoJson.coordinates.length > 0;
     var geometryTypes = {
-        MultiPolygon: {
-            markerEnabled: false,
-            initialize: function(){
-
-            },
-            runIntegrations: function(){
-                integrateGeoCoder();
-                integratePolygon(true);
-            },
-            getGeoJson: function(){
-                var geoJson = polygonFeatureGroup.toGeoJSON();
-                if(geoJson && geoJson.features && geoJson.features.length > 0){
-                    var multiPolygonGeoJson = {
-                        type: 'MultiPolygon',
-                        coordinates: []
-                    }
-                    geoJson.features.forEach(feature => {
-                        multiPolygonGeoJson.coordinates.push(feature.geometry.coordinates);
-                    });
-                    return multiPolygonGeoJson;
-                }
-                return null;
-            }
-        },
         Polygon: {
             markerEnabled: false,
             initialize: function(){
-
+                leafletData.getMap($scope.selectedTileKey).then(function( map ){
+                    if(geoJsonHasCoordinates){
+                        var firstCoordinate = geoJson.coordinates[0][0];
+                        map.setView([firstCoordinate[1],firstCoordinate[0]], $scope.maxZoom);
+                    }
+                });
+                    /*         
+                 if( $scope.marker && $scope.marker.m1 && $scope.marker.m1.lat && $scope.marker.m1.lng ){
+                     map.setView([$scope.marker.m1.lat, $scope.marker.m1.lng], $scope.maxZoom);
+                 }*/
             },
             runIntegrations: function(){
                 integrateGeoCoder();
-                integratePolygon(true);
+                integratePolygon();
             },
             getGeoJson: function(){
-                var geoJson = polygonFeatureGroup.toGeoJSON();
-                if(geoJson && geoJson.features && geoJson.features.length > 0){
-                    return geoJson.features[0].geometry;
+                var geoJsonFeatureGroup = polygonFeatureGroup.toGeoJSON();
+                if(geoJsonFeatureGroup && geoJsonFeatureGroup.features && geoJsonFeatureGroup.features.length > 0){
+                    return geoJsonFeatureGroup.features[0].geometry;
                 }
                 return null;
             }
@@ -152,8 +118,13 @@ var d2Controllers = angular.module('d2Controllers', [])
         Point: {
             markerEnabled: true,
             initialize: function(){
-                if(geometry.coordinates.length === 2){
-                    $scope.marker = {m1: {lat: geometry.coordinates[0], lng: geometry.coordinates[1], draggable: true}};
+                if(geoJson && geoJson.coordinates.length === 2){
+                    $scope.marker = {m1: {lat: geoJson.coordinates[1], lng: geoJson.coordinates[0], draggable: true}};
+                }
+                if($scope.marker){
+                    leafletData.getMap($scope.selectedTileKey).then(function( map ){
+                        map.setView([$scope.marker.m1.lat, $scope.marker.m1.lng], $scope.maxZoom);
+                    });
                 }
             },
             runIntegrations: function(){
@@ -163,7 +134,7 @@ var d2Controllers = angular.module('d2Controllers', [])
                 if($scope.marker && $scope.marker.m1 && $scope.marker.m1.lat && $scope.marker.m1.lng){
                     var geoJson = {
                         type: "Point",
-                        coordinates: [$scope.marker.m1.lat, $scope.marker.m1.lng]
+                        coordinates: [$scope.marker.m1.lng, $scope.marker.m1.lat]
                     }
                     return geoJson;
                 }
@@ -172,19 +143,17 @@ var d2Controllers = angular.module('d2Controllers', [])
         }
     }
 
-    var currentGeometryType = geometryTypes[geometry.type];
-
-    currentGeometryType.initialize();
-    currentGeometryType.runIntegrations();
-    
-    var selectedGeoJson = geometry;
-    var selectedGeoJsonHasCoordinates = selectedGeoJson.coordinates && selectedGeoJson.coordinates.length > 0;
+    var currentGeometryType = geometryTypes[geometryType];
     
     var ouLevels = CurrentSelection.getOuLevels();
     var ouLevelsHashMap = ouLevels.reduce((map, ouLevel) => {
         map[ouLevel.level] = ouLevel;
         return map;
     },{});
+    
+    getGeoJsonByOuLevel(ouLevels[0].level);
+    currentGeometryType.initialize();
+    currentGeometryType.runIntegrations();
     
     $scope.maxZoom = 8;
     
@@ -203,11 +172,6 @@ var d2Controllers = angular.module('d2Controllers', [])
     var centerMapLabel = '<i class="fa fa-crosshairs fa-2x"></i><span class="small-horizontal-spacing">' + $translate.instant('center_map') + '</span>';
     
                         
-    $scope.mapDefaults = {map: {
-                            contextmenu: true,
-                            contextmenuWidth: 180,
-                            contextmenuItems: getContextMenuItems(geometry)
-                        }};
     
     var geojsonMarkerOptions = {
 			    radius: 15,
@@ -241,14 +205,15 @@ var d2Controllers = angular.module('d2Controllers', [])
         });
         layer.on("mouseout",function(e){
             $("#polygon-label").text('');
-        });        
+        });       
+        layer.bringToBack(); 
         
         if( layer._layers ){
             layer.eachLayer(function (l) {
                 l.bindContextMenu({
                     contextmenu: true,
                     contextmenuWidth: 180,                
-                    contextmenuItems: getContextMenuItems(geometry,feature)
+                    contextmenuItems: getContextMenuItems(feature)
                 });
             });
         }
@@ -257,12 +222,12 @@ var d2Controllers = angular.module('d2Controllers', [])
                     contextmenu: true,
                     contextmenuWidth: 180,
                     contextmenuInheritItems: false,
-                    contextmenuItems: getContextMenuItems(geometry,feature)
+                    contextmenuItems: getContextMenuItems(feature)
                 });
         }        
     }
 
-    function getContextMenuItems(geometry,feature){
+    function getContextMenuItems(feature){
 
         var items = [];
         var featureProperties = feature && feature.properties;
@@ -298,7 +263,7 @@ var d2Controllers = angular.module('d2Controllers', [])
                 centerMap(e, feature);
             }
         });
-        if(geometry && geometry.type === "Point"){
+        if(geometryType === "Point"){
             items.unshift({
                 text: setCoordinateLabel,
                 callback: function(e){
@@ -322,13 +287,10 @@ var d2Controllers = angular.module('d2Controllers', [])
             url+="&parent="+parent;
         }
 
-        return $http.get(url).then(function(response){
-            $scope.currentGeojson = {data: response.data, style: style, onEachFeature: onEachFeature, pointToLayer: pointToLayer};
-                
+        return $http.get(url).then(function(response){                
             return leafletData.getMap().then(function( map ){
                 var latlngs = [];
-
-                $scope.currentGeojson.data.features.forEach(feature => {
+                response.data.features.forEach(feature => {
                     feature.properties.type = "ou";
                     if(feature.geometry.type != "Point"){
                         feature.geometry.coordinates.forEach(coordinate => {
@@ -338,7 +300,16 @@ var d2Controllers = angular.module('d2Controllers', [])
                         });
                     }
                 });
-                if( latlngs.length > 0 ){                            
+                var layer = L.geoJson(response.data,{
+                    style: style,
+                    onEachFeature: onEachFeature,
+                    pointToLayer: pointToLayer
+                });
+                layer.addTo(map);
+                layer.bringToBack();
+
+
+                if(!geoJsonHasCoordinates && latlngs.length > 0 ){                            
                     map.fitBounds(latlngs, {maxZoom: $scope.maxZoom});
                 }
             });
@@ -398,11 +369,7 @@ var d2Controllers = angular.module('d2Controllers', [])
             }).addTo(map);
 
             $scope.geocoder.on('markgeocode', function(e) {
-                if(geometry && geometry.type ==='Point'){
-                    /*$scope.marker = {m1: {lat: e.geocode.center.lat, lng: e.geocode.center.lng, draggable: true}};
-                    $scope.location = {lat: e.geocode.center.lat, lng: e.geocode.center.lng};*/
-                }
-                
+                $scope.marker = {m1: {lat: e.geocode.center.lat, lng: e.geocode.center.lng, draggable: true}};
                 map.setView([e.geocode.center.lat, e.geocode.center.lng], 16);
             })
             .addTo(map);
@@ -410,15 +377,24 @@ var d2Controllers = angular.module('d2Controllers', [])
         });
     }
 
-    function integratePolygon(allowMultiple){
+    function integratePolygon(){
         leafletData.getMap($scope.selectedTileKey).then(function( map ){
-            var s = featuregrouptest;
-            polygonFeatureGroup = L.geoJson();
-            
+            var options = {
+                clickable:true,
+                color:"#3498db",
+                fill:true,
+                fillColor:null,
+                fillOpacity:0.2,
+                opacity:0.5,
+                stroke:true,
+                weight:4
+            }
+            polygonFeatureGroup = L.geoJson(geoJson);
             polygonFeatureGroup.addTo(map);
             var drawControl = new L.Control.Draw({
             edit: {
-                featureGroup: polygonFeatureGroup
+                featureGroup: polygonFeatureGroup,
+                remove: true,
             },
             draw: {
                 polygon: {
@@ -438,12 +414,12 @@ var d2Controllers = angular.module('d2Controllers', [])
                 circlemarker: false,
             }
             }).addTo(map);
-
+            polygonFeatureGroup.eachLayer(function(layer){
+                layer.bringToFront();
+            });
             map.on('draw:created', function(e) {
                 var layer = e.layer;
-                if(!allowMultiple){
-                    polygonFeatureGroup.clearLayers(); 
-                }
+                polygonFeatureGroup.clearLayers(); 
                 polygonFeatureGroup.addLayer(layer);
                 
                 if(layer._latlngs) {
@@ -453,6 +429,14 @@ var d2Controllers = angular.module('d2Controllers', [])
                 
                 console.log($scope.location);
                 
+            });
+            map.on('draw:deleted', function(e){
+                var g = 1;
+                var u = 2;
+            });
+            map.on('draw:deletestarted', function(e){
+                var g = 1;
+                var u = 2;
             });
         });
     }
@@ -470,60 +454,56 @@ var d2Controllers = angular.module('d2Controllers', [])
         return deferred.promise;
     }
     
-    getGeoJsonByOuLevel(ouLevels[0].level);
+  
             
     $scope.setTile = function( tileKey ){        
         if( tileKey === $scope.selectedTileKey ){
             return;
         }        
         if( tileKey ){
+            var promise;
             if( tileKey === 'openstreetmap' ){
                 $scope.googleMapLayers = null;
                 $scope.selectedTileKey = tileKey;
-                integrateGeoCoder();
-                integratePolygon();
+                promise = $q.when();
             }
             else if( tileKey === 'googlemap' ){
                 if ($window.google && $window.google.maps) {
                     $scope.selectedTileKey = tileKey;
-                    integrateGeoCoder();
-                    integratePolygon();
+                    promise = $q.when();
                     
                 }else {
-                    loadGoogleMapApi().then(function () {
+                    promise =loadGoogleMapApi().then(function () {
                         $scope.selectedTileKey = tileKey;
-                        integrateGeoCoder();
-                        integratePolygon();
                     }, function () {
                         console.log('Google map loading failed.');
                     });
                 }
-            }            
+            }
+            return promise.then(function(){
+                integrateGeoCoder();
+                integratePolygon();
+            });
         }
+        
     };        
     
     $scope.close = function () {
-        $modalInstance.close();
+        $modalInstance.dismiss();
     };
     
     $scope.captureCoordinate = function(){
-        if( $scope.location && $scope.location.lng && $scope.location.lat ){
-            $modalInstance.close( $scope.location );
-    	} else if($scope.location && $scope.location.length > 0) {
-            $modalInstance.close( $scope.location);
-        } else {
-            //notify user
-            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("nothing_captured"));
-            return;
-    	}
+        var geoJson = currentGeometryType.getGeoJson();
+        if(!geoJson){
+            NotificationService.showNotifcationDialog($translate.instant("warning"), $translate.instant("no_geometry_captured"));
+        }
+        $modalInstance.close(geoJson);
     };
     
-    function setLocation( args ){
+    function setDraggedMarker( args ){
         if( args ){
             $scope.marker.m1.lng = args.model.lng;
             $scope.marker.m1.lat = args.model.lat;
-
-            $scope.location = {lng: args.model.lng, lat: args.model.lat};
         }
     }
     
