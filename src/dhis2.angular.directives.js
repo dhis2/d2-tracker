@@ -1028,6 +1028,153 @@ var d2Directives = angular.module('d2Directives', [])
         
     };
 })
+.directive('d2Geometry', function(){
+    return {
+        restrict: 'E',            
+        templateUrl: "./templates/geometry-input.html",
+        scope: {
+            d2ObjectId: '@',            
+            d2Object: '=',            
+            d2CallbackFunction: '&',
+            d2Disabled: '=',
+            d2Required: '=',
+            d2GeometryType: '='
+        },
+        controller: function($scope, $modal, $filter, $translate, DHIS2COORDINATESIZE){
+            var geometryTypeDefinitions = {
+                //TEXT is handled as a POINT value
+                TEXT: {
+                    template: './templates/geometry-input-point.html',
+                    setGeoObject: function(){
+                        $scope.geometry = { type:"Point", coordinates:[], coordinate: {}};
+                        if($scope.d2Object[$scope.d2ObjectId] && typeof($scope.d2Object[$scope.d2ObjectId]) === 'string' && $scope.d2Object[$scope.d2ObjectId].startsWith("[") && $scope.d2Object[$scope.d2ObjectId].endsWith("]")){
+                            var coordinates = $scope.d2Object[$scope.id].slice(1,-1).split( ",");
+                            $scope.geometry.coordinates[0] = $scope.geometry.coordinate.longitude = coordinates[0];
+                            $scope.geometry.coordinates[1] = $scope.geometry.coordinate.latitude = coordinates[1];
+                        }
+                        
+                    },
+                    parseValues: function(){
+                        $scope.geometry.coordinates[0] = $scope.geometry.coordinate.longitude = coordinateParser($scope.geometry.coordinates[0]);
+                        $scope.geometry.coordinates[1] = $scope.geometry.coordinate.latitude = coordinateParser($scope.geometry.coordinates[1]);
+                    },
+                    setD2ObjectValue: function(){
+                        var geo = angular.copy($scope.geometry);
+                        delete geo.coordinate;
+                        $scope.d2Object[$scope.d2ObjectId] = '['+$scope.geometry.coordinates[0]+','+$scope.geometry.coordinates[1]+']';
+                    }
+                },
+
+                POINT: {
+                    type: "Point",
+                    template: './templates/geometry-input-point.html',
+                    setGeoObject: function(){
+                        $scope.geometry = { type:"Point", coordinates:[], coordinate: {}};
+                        if($scope.d2Object && $scope.d2Object[$scope.d2ObjectId] && $scope.d2Object[$scope.d2ObjectId].coordinates && $scope.d2Object[$scope.d2ObjectId].type ==='Point'){
+                            $scope.geometry = angular.copy($scope.d2Object[$scope.d2ObjectId]);
+                            if($scope.geometry && $scope.geometry.coordinates && $scope.geometry.coordinates.length===2){
+                                $scope.geometry.coordinate = {
+                                    longitude: $scope.geometry.coordinates[0],
+                                    latitude: $scope.geometry.coordinates[1]
+                                }
+                            }
+                        }
+                    },
+                    parseValues: function(){
+                        $scope.geometry.coordinates[0] = $scope.geometry.coordinate.longitude = coordinateParser($scope.geometry.coordinates[0]);
+                        $scope.geometry.coordinates[1] = $scope.geometry.coordinate.latitude = coordinateParser($scope.geometry.coordinates[1]);
+                    },
+                    setD2ObjectValue: function(){
+                        var geo = angular.copy($scope.geometry);
+                        delete geo.coordinate;
+                        $scope.d2Object[$scope.d2ObjectId] = angular.copy($scope.geometry);
+                    }
+                    
+                },
+
+                POLYGON: {
+                    type: "Polygon",
+                    template: './templates/geometry-input-polygon.html',
+                    setGeoObject: function(){
+                        $scope.geometry =  { type: "Polygon", coordinates: []};
+                        if($scope.d2Object && $scope.d2Object[$scope.d2ObjectId] && $scope.d2Object[$scope.d2ObjectId].coordinates && $scope.d2Object[$scope.d2ObjectId].type ==='Polygon'){
+                            $scope.geometry = angular.copy($scope.d2Object[$scope.d2ObjectId]);
+                        }
+                        if($scope.geometry && $scope.geometry.coordinates && $scope.geometry.coordinates.length >0){
+                            $scope.polygonIndicator = $translate.instant("polygon_captured");
+                            $scope.hasPolygon = true;
+                        }else{
+                            $scope.polygonIndicator = $translate.instant("no_polygon_captured");
+                            $scope.hasPolygon = false;
+                        }
+                    },
+                    parseValues: function(){
+                        $scope.geometry.coordinates = $scope.geometry.coordinates.map(coordinate => coordinateParser(coordinate));
+                    },
+                    setD2ObjectValue: function(){
+                        $scope.d2Object[$scope.d2ObjectId] = angular.copy($scope.geometry);
+                    }
+                }
+            }
+
+            $scope.currentGeometryTypeDefinition = geometryTypeDefinitions[$scope.d2GeometryType];
+            $scope.currentGeometryTypeDefinition.setGeoObject();
+
+            $scope.$watch('d2Object',function(newObj, oldObj){
+                if(newObj !== oldObj){
+                    $scope.currentGeometryTypeDefinition.setGeoObject();
+                }
+            });
+
+            $scope.saveGeometry = function(){
+                $scope.currentGeometryTypeDefinition.parseValues();
+                $scope.currentGeometryTypeDefinition.setD2ObjectValue();
+                $scope.d2CallbackFunction();
+            }
+
+            $scope.showMap = function(){
+                var geo = angular.copy($scope.geometry);
+                delete geo.coordinate;    
+                var modalInstance = $modal.open({
+                    templateUrl: './templates/map.html',
+                    controller: 'MapController',
+                    windowClass: 'modal-map-window',
+                    resolve: {
+                        geometryType: function(){
+                            return $scope.currentGeometryTypeDefinition.type;
+                        },
+                        geoJson: function () {
+                            return $scope.geometry;
+                        }
+                    }
+                });
+                
+                modalInstance.result.then(function (geoJson){
+                    $scope.d2Object[$scope.d2ObjectId] = geoJson;
+                    $scope.d2CallbackFunction();
+                    $scope.currentGeometryTypeDefinition.setGeoObject();
+                },function(){
+
+                });
+            }
+
+            $scope.updateLatLng = function(form){
+                if(form.$valid){
+                    $scope.geometry.coordinates = [$scope.geometry.coordinate.longitude, $scope.geometry.coordinate.latitude];
+                    $scope.saveGeometry();
+                }
+            }
+
+            function coordinateParser(coordinate){
+                var c;
+                if(dhis2.validation.isNumber(coordinate)){
+                    c = parseFloat($filter('number')(coordinate, DHIS2COORDINATESIZE));
+                }
+                return c || coordinate;
+            }
+        }
+    }
+})
 
 .directive('d2Map', function(){
     return {
@@ -1092,22 +1239,27 @@ var d2Directives = angular.module('d2Directives', [])
                     windowClass: 'modal-map-window',
                     resolve: {
                         location: function () {
-                            return {lat: $scope.coordinateObject.coordinate.latitude, lng:  $scope.coordinateObject.coordinate.longitude};
+                            if($scope.coordinateObject.coordinate.polygon) {
+                                return $scope.coordinateObject.coordinate.polygon
+                            } else if($scope.coordinateObject.coordinate.latitude && $scope.coordinateObject.coordinate.longitude) {
+                                return {lat: $scope.coordinateObject.coordinate.latitude, lng:  $scope.coordinateObject.coordinate.longitude};
+                            } else {
+                                return null;
+                            }
                         }
                     }
                 });
                 
                 modalInstance.result.then(function (location) {                    
                     if(angular.isObject(location)){
-                    	
-                    	if( dhis2.validation.isNumber( location.lat ) ){
-                    		location.lat = parseFloat( $filter('number')(location.lat, DHIS2COORDINATESIZE) );
-                    	}
-                    	
-                    	if( dhis2.validation.isNumber( location.lng ) ){
-                    		location.lng = parseFloat( $filter('number')(location.lng, DHIS2COORDINATESIZE) );
-                    	}
-                    	
+                        if( dhis2.validation.isNumber( location.lat ) ){
+                            location.lat = parseFloat( $filter('number')(location.lat, DHIS2COORDINATESIZE) );
+                        }
+                        
+                        if( dhis2.validation.isNumber( location.lng ) ){
+                            location.lng = parseFloat( $filter('number')(location.lng, DHIS2COORDINATESIZE) );
+                        }
+                        
                         $scope.coordinateObject.coordinate.latitude = location.lat;
                         $scope.coordinateObject.coordinate.longitude = location.lng;                        
 
@@ -1123,7 +1275,12 @@ var d2Directives = angular.module('d2Directives', [])
                             if( angular.isDefined( $scope.d2CallbackFunction ) ){
                                 $scope.d2CallbackFunction( {arg1: $scope.d2CallbackFunctionParamCoordinate} );
                             }
-                        }                                                
+                        }                                            
+                    } else {
+                        $scope.coordinateObject.coordinate.polygon = location;
+                        if( angular.isDefined( $scope.d2CallbackFunction ) ){
+                            $scope.d2CallbackFunction( {arg1: location} );
+                        }
                     }
                 }, function () {
                 });

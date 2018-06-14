@@ -45,14 +45,17 @@ var d2Controllers = angular.module('d2Controllers', [])
                 $http,
                 $window,
                 $q,
+                $timeout,
                 CommonUtils,
                 leafletData,
                 CurrentSelection,
                 DHIS2URL,
                 NotificationService,
-                location) {
+                geometryType,
+                geoJson) {
 
-                    
+    $scope.tilesDictionaryKeys = ['openstreetmap', 'googlemap'];   
+    $scope.selectedTileKey = 'openstreetmap';           
     $scope.tilesDictionary = {
         openstreetmap: {
             url: "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -83,13 +86,74 @@ var d2Controllers = angular.module('d2Controllers', [])
         }
     };
     
-    $scope.tilesDictionaryKeys = ['openstreetmap', 'googlemap'];    
+    var polygonFeatureGroup;
+    var geoJsonHasCoordinates = geoJson && geoJson.coordinates && geoJson.coordinates.length > 0;
+    var geometryTypes = {
+        Polygon: {
+            markerEnabled: false,
+            initialize: function(){
+                leafletData.getMap($scope.selectedTileKey).then(function( map ){
+                    if(geoJsonHasCoordinates){
+                        var firstCoordinate = geoJson.coordinates[0][0];
+                        map.setView([firstCoordinate[1],firstCoordinate[0]], $scope.maxZoom);
+                    }
+                });
+                    /*         
+                 if( $scope.marker && $scope.marker.m1 && $scope.marker.m1.lat && $scope.marker.m1.lng ){
+                     map.setView([$scope.marker.m1.lat, $scope.marker.m1.lng], $scope.maxZoom);
+                 }*/
+            },
+            runIntegrations: function(){
+                integrateGeoCoder();
+                integratePolygon();
+            },
+            getGeoJson: function(){
+                var geoJsonFeatureGroup = polygonFeatureGroup.toGeoJSON();
+                if(geoJsonFeatureGroup && geoJsonFeatureGroup.features && geoJsonFeatureGroup.features.length > 0){
+                    return geoJsonFeatureGroup.features[0].geometry;
+                }
+                return null;
+            }
+        },
+        Point: {
+            markerEnabled: true,
+            initialize: function(){
+                if(geoJson && geoJson.coordinates.length === 2){
+                    $scope.marker = {m1: {lat: geoJson.coordinates[1], lng: geoJson.coordinates[0], draggable: true}};
+                }
+                if($scope.marker){
+                    leafletData.getMap($scope.selectedTileKey).then(function( map ){
+                        map.setView([$scope.marker.m1.lat, $scope.marker.m1.lng], $scope.maxZoom);
+                    });
+                }
+            },
+            runIntegrations: function(){
+                integrateGeoCoder();
+            },
+            getGeoJson: function(){
+                if($scope.marker && $scope.marker.m1 && $scope.marker.m1.lat && $scope.marker.m1.lng){
+                    var geoJson = {
+                        type: "Point",
+                        coordinates: [$scope.marker.m1.lng, $scope.marker.m1.lat]
+                    }
+                    return geoJson;
+                }
+                return null;
+            }
+        }
+    }
+
+    var currentGeometryType = geometryTypes[geometryType];
     
-    $scope.selectedTileKey = 'openstreetmap';
+    var ouLevels = CurrentSelection.getOuLevels();
+    var ouLevelsHashMap = ouLevels.reduce((map, ouLevel) => {
+        map[ouLevel.level] = ouLevel;
+        return map;
+    },{});
     
-    $scope.location = location;
-    
-    var currentLevel = 0, ouLevels = CurrentSelection.getOuLevels();
+    getGeoJsonByOuLevel(ouLevels[0].level);
+    currentGeometryType.initialize();
+    currentGeometryType.runIntegrations();
     
     $scope.maxZoom = 8;
     
@@ -107,40 +171,12 @@ var d2Controllers = angular.module('d2Controllers', [])
     var zoomOutLabel = '<i class="fa fa-search-minus fa-2x"></i><span class="small-horizontal-spacing">' + $translate.instant('zoom_out') + '</span>';
     var centerMapLabel = '<i class="fa fa-crosshairs fa-2x"></i><span class="small-horizontal-spacing">' + $translate.instant('center_map') + '</span>';
     
-    var contextmenuItems = [{
-                        text: setCoordinateLabel,
-                        callback: setCoordinate,
-                        index: 0
-                    },
-                    {
-                        separator: true,
-                        index: 1
-                    },
-                    {
-                        text: zoomInLabel,
-                        callback: zoomIn,
-                        index: 2
-                    },
-                    {
-                        text: zoomOutLabel,
-                        callback: zoomOut,
-                        index: 3
-                    },
-                    {
-                        separator: true,
-                        index: 4
-                    },
-                    {
-                        text: centerMapLabel,
-                        callback: centerMap,
-                        index: 5
-                    }];
-                        
     $scope.mapDefaults = {map: {
-                            contextmenu: true,
-                            contextmenuWidth: 180,
-                            contextmenuItems: contextmenuItems
-                        }};
+        contextmenu: true,
+        contextmenuWidth: 180,
+        contextmenuItems: getContextMenuItems()
+    }};
+                        
     
     var geojsonMarkerOptions = {
 			    radius: 15,
@@ -158,8 +194,11 @@ var d2Controllers = angular.module('d2Controllers', [])
                     fillOpacity: 0
                 };
 
-    $scope.marker = $scope.location && $scope.location.lat && $scope.location.lng ? {m1: {lat: $scope.location.lat, lng: $scope.location.lng, draggable: true}} : {};
+    //$scope.marker = $scope.geoObject && $scope.geoObject === "POINT" && $scope.geoObject.coordinates.length === 2 ? {m1: {lat: $scope.geoObject.coordinates[0], lng: $scope.location.lng, draggable: true}} : {};
     
+    leafletData.getMap($scope.selectedTileKey).then(function( map ){
+        L.geoJSON($scope.selectedGeoJson).addTo(map);
+    });
     function pointToLayer( feature, latlng ){
         return L.circleMarker(latlng, geojsonMarkerOptions);
     };
@@ -171,50 +210,15 @@ var d2Controllers = angular.module('d2Controllers', [])
         });
         layer.on("mouseout",function(e){
             $("#polygon-label").text('');
-        });        
+        });       
+        layer.bringToBack(); 
         
         if( layer._layers ){
             layer.eachLayer(function (l) {
                 l.bindContextMenu({
                     contextmenu: true,
                     contextmenuWidth: 180,                
-                    contextmenuItems: [{
-                                    text: setCoordinateLabel,
-                                    callback: function(e){
-                                        setCoordinate(e, feature);
-                                    },
-                                    index: 0
-                                },
-                                {
-                                    separator: true,
-                                    index: 1
-                                },
-                                {
-                                    text: zoomInLabel,
-                                    callback: function(e){
-                                        zoomIn(e, feature);
-                                    },
-                                    index: 2
-                                },
-                                {
-                                    text: zoomOutLabel,
-                                    callback: function(e){
-                                        zoomOut(e, feature);
-                                    },
-                                    index: 3,
-                                    disabled: currentLevel < 1
-                                },
-                                {
-                                    separator: true,
-                                    index: 4
-                                },
-                                {
-                                    text: centerMapLabel,
-                                    callback: function(e){
-                                        centerMap(e, feature);
-                                    },
-                                    index: 5
-                                }]
+                    contextmenuItems: getContextMenuItems(feature)
                 });
             });
         }
@@ -223,112 +227,103 @@ var d2Controllers = angular.module('d2Controllers', [])
                     contextmenu: true,
                     contextmenuWidth: 180,
                     contextmenuInheritItems: false,
-                    contextmenuItems: [{
-                                    text: setCoordinateLabel,
-                                    callback: function(e){
-                                        setCoordinate(e, feature, layer);
-                                    },
-                                    index: 0
-                                },
-                                {
-                                    separator: true,
-                                    index: 1
-                                },
-                                {
-                                    text: zoomInLabel,
-                                    callback: function(e){
-                                        zoomIn(e, feature);
-                                    },
-                                    disabled: true,
-                                    index: 2
-                                },
-                                {
-                                    text: zoomOutLabel,
-                                    callback: function(e){
-                                        zoomOut(e, feature);
-                                    },
-                                    index: 3
-                                },
-                                {
-                                    separator: true,
-                                    index: 4
-                                },
-                                {
-                                    text: centerMapLabel,
-                                    callback: function(e){
-                                        centerMap(e, feature);
-                                    },
-                                    index: 5
-                                }]
+                    contextmenuItems: getContextMenuItems(feature)
                 });
         }        
-    }    
-            
-    function getGeoJsonByOuLevel(initialize, event, mode) {                    
-        var url = null, parent = null;
-        if (initialize) {
-            currentLevel = 0;
-            url = DHIS2URL + '/organisationUnits.geojson?level=' + ouLevels[currentLevel].level;
-        }
-        else {
-            if (mode === 'IN') {
-                currentLevel++;
-                parent = event.id;
-            }
-            if (mode === 'OUT') {
-                currentLevel--;                
-                var parents = event.properties.parentGraph.substring(1, event.properties.parentGraph.length - 1).split('/');
-                parent = parents[parents.length - 2];
-            }
-            
-            if( ouLevels[currentLevel] && ouLevels[currentLevel].level && parent && !initialize ){
-                url = url = DHIS2URL + '/organisationUnits.geojson?level=' + ouLevels[currentLevel].level + '&parent=' + parent;
-            }
-        }
+    }
 
-        if( url ){
-            
-            $http.get(url).success(function (data) {
+    function getContextMenuItems(feature){
 
-                $scope.currentGeojson = {data: data, style: style, onEachFeature: onEachFeature, pointToLayer: pointToLayer};
-                
-                leafletData.getMap().then(function( map ){
-                    var latlngs = [];
-                    angular.forEach($scope.currentGeojson.data.features, function(feature){                
-                        if( feature.geometry.type === "Point"){
-                            //latlngs.push( L.latLng( $scope.currentGeojson.data.features[0].geometry.coordinates) );
-                            //isPoints = true;
-                        }
-                        else{
-                            for (var i in feature.geometry.coordinates) {                        
-                                var coord = feature.geometry.coordinates[i];                    
-                                for (var j in coord) {
-                                    var points = coord[j];
-                                    for (var k in points) {
-                                        latlngs.push(L.GeoJSON.coordsToLatLng(points[k]));
-                                    }
-                                }
-                            }                        
-                        }
-                    });
-                    
-                    if( $scope.location && $scope.location.lat && $scope.location.lng ){
-                        map.setView([$scope.location.lat, $scope.location.lng], $scope.maxZoom);
-                    } 
-                    else{
-                        if( latlngs.length > 0 ){                            
-                            map.fitBounds(latlngs, {maxZoom: $scope.maxZoom});
-                        }
+        var items = [];
+        var featureProperties = feature && feature.properties;
+        if(featureProperties && feature.properties.type==="ou"){
+            var ouLevel = ouLevelsHashMap[featureProperties.level];
+            var parentLevel = ouLevelsHashMap[ouLevel.level-1];
+            var childLevel = ouLevelsHashMap[ouLevel.level+1];
+            if(childLevel){
+                items.push({
+                    text: "Show "+childLevel.displayName.toLowerCase()+ " level",
+                    callback: function(){
+                        getGeoJsonByOuLevel(childLevel.level, feature.id);
                     }
                 });
+            }
+            if(parentLevel){
+                var parent;
+                var parentGraph = featureProperties.parentGraph.split("/");
+                //gets the parent of the currents parent
+                var parent = parentGraph.length > 1 ? parentGraph[parentGraph.length-2] : null;
+                items.push({
+                    text: "Show "+parentLevel.displayName.toLowerCase()+ " level",
+                    callback: function(){
+                        getGeoJsonByOuLevel(parentLevel.level, parent);
+                    }
+                });
+            }
+
+        }
+        items.push({
+            text: centerMapLabel,
+            callback: function(e){
+                centerMap(e, feature);
+            }
+        });
+        if(geometryType === "Point"){
+            items.unshift({
+                text: setCoordinateLabel,
+                callback: function(e){
+                    setCoordinate(e, feature);
+                }
+            },
+            {
+                separator: true
             });
         }
+        return items.map((item, index) => {
+            item.index = index;
+            return item;
+        });
+
     }
-    
-    function zoomMap(event, mode) {
-        if(ouLevels && ouLevels.length > 0){
-            getGeoJsonByOuLevel(false, event, mode);
-        }                    
+
+    var currentOuLayer;
+
+    function getGeoJsonByOuLevel(level, parent){
+        var url = DHIS2URL+'/organisationUnits.geojson?level='+level;
+        if(parent){
+            url+="&parent="+parent;
+        }
+
+        return $http.get(url).then(function(response){                
+            return leafletData.getMap().then(function( map ){
+                if(currentOuLayer){
+                    currentOuLayer.removeFrom(map);
+                }
+                var latlngs = [];
+                response.data.features.forEach(feature => {
+                    feature.properties.type = "ou";
+                    if(feature.geometry.type != "Point"){
+                        feature.geometry.coordinates.forEach(coordinate => {
+                            coordinate.forEach(point => {
+                                point.forEach(p => latlngs.push(L.GeoJSON.coordsToLatLng(p)));
+                            });
+                        });
+                    }
+                });
+                currentOuLayer = L.geoJson(response.data,{
+                    style: style,
+                    onEachFeature: onEachFeature,
+                    pointToLayer: pointToLayer
+                });
+                currentOuLayer.addTo(map);
+                currentOuLayer.bringToBack();
+
+
+                if(!geoJsonHasCoordinates && latlngs.length > 0 ){                            
+                    map.fitBounds(latlngs, {maxZoom: $scope.maxZoom});
+                }
+            });
+        });
     }
     
     function setCoordinate(e, feature, layer){
@@ -374,10 +369,10 @@ var d2Controllers = angular.module('d2Controllers', [])
     function integrateGeoCoder(){
         
         leafletData.getMap($scope.selectedTileKey).then(function( map ){
-                        
+               /*         
             if( $scope.marker && $scope.marker.m1 && $scope.marker.m1.lat && $scope.marker.m1.lng ){
                 map.setView([$scope.marker.m1.lat, $scope.marker.m1.lng], $scope.maxZoom);
-            }
+            }*/
             
             $scope.geocoder = L.Control.geocoder({
                 defaultMarkGeocode: false
@@ -385,11 +380,74 @@ var d2Controllers = angular.module('d2Controllers', [])
 
             $scope.geocoder.on('markgeocode', function(e) {
                 $scope.marker = {m1: {lat: e.geocode.center.lat, lng: e.geocode.center.lng, draggable: true}};
-                $scope.location = {lat: e.geocode.center.lat, lng: e.geocode.center.lng};
-                map.setView([$scope.marker.m1.lat, $scope.marker.m1.lng], 16);
+                map.setView([e.geocode.center.lat, e.geocode.center.lng], 16);
             })
             .addTo(map);
         
+        });
+    }
+
+    function integratePolygon(){
+        leafletData.getMap($scope.selectedTileKey).then(function( map ){
+            var options = {
+                clickable:true,
+                color:"#3498db",
+                fill:true,
+                fillColor:null,
+                fillOpacity:0.2,
+                opacity:0.5,
+                stroke:true,
+                weight:4
+            }
+            polygonFeatureGroup = L.geoJson(geoJson);
+            polygonFeatureGroup.addTo(map);
+            var drawControl = new L.Control.Draw({
+            edit: {
+                featureGroup: polygonFeatureGroup,
+                remove: true,
+            },
+            draw: {
+                polygon: {
+                    allowIntersection: false, // Restricts shapes to simple polygons
+                    drawError: {
+                        color: '#e74c3c', // Color the shape will turn when intersects
+                        message: '<strong>Intersecting<strong> not allowed!' // Message that will show when intersect
+                    },
+                    shapeOptions: {
+                        color: '#3498db',
+                    }
+                },
+                polyline: false,
+                circle: false,
+                rectangle: false,
+                marker: false,
+                circlemarker: false,
+            }
+            }).addTo(map);
+            polygonFeatureGroup.eachLayer(function(layer){
+                layer.bringToFront();
+            });
+            map.on('draw:created', function(e) {
+                var layer = e.layer;
+                polygonFeatureGroup.clearLayers(); 
+                polygonFeatureGroup.addLayer(layer);
+                
+                if(layer._latlngs) {
+                    var polygons = layer.toGeoJSON()
+                    $scope.location = polygons.geometry;
+                }
+                
+                console.log($scope.location);
+                
+            });
+            map.on('draw:deleted', function(e){
+                var g = 1;
+                var u = 2;
+            });
+            map.on('draw:deletestarted', function(e){
+                var g = 1;
+                var u = 2;
+            });
         });
     }
     
@@ -406,67 +464,65 @@ var d2Controllers = angular.module('d2Controllers', [])
         return deferred.promise;
     }
     
-    getGeoJsonByOuLevel(true);
-    
-    integrateGeoCoder();
+  
             
     $scope.setTile = function( tileKey ){        
         if( tileKey === $scope.selectedTileKey ){
             return;
         }        
         if( tileKey ){
+            var promise;
             if( tileKey === 'openstreetmap' ){
                 $scope.googleMapLayers = null;
                 $scope.selectedTileKey = tileKey;
-                integrateGeoCoder();
+                promise = $q.when();
             }
             else if( tileKey === 'googlemap' ){
                 if ($window.google && $window.google.maps) {
                     $scope.selectedTileKey = tileKey;
-                    integrateGeoCoder();
+                    promise = $q.when();
                     
                 }else {
-                    loadGoogleMapApi().then(function () {
+                    promise =loadGoogleMapApi().then(function () {
                         $scope.selectedTileKey = tileKey;
-                        integrateGeoCoder();
                     }, function () {
                         console.log('Google map loading failed.');
                     });
                 }
-            }            
+            }
+            return promise.then(function(){
+                integrateGeoCoder();
+                integratePolygon();
+            });
         }
+        
     };        
     
     $scope.close = function () {
-        $modalInstance.close();
+        $modalInstance.dismiss();
     };
     
     $scope.captureCoordinate = function(){
-        if( $scope.location && $scope.location.lng && $scope.location.lat ){
-            $modalInstance.close( $scope.location );
-    	}
-    	else{
-            //notify user
-            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("nothing_captured"));
-            return;
-    	}
+        var geoJson = currentGeometryType.getGeoJson();
+        if(!geoJson){
+            NotificationService.showNotifcationDialog($translate.instant("warning"), $translate.instant("no_geometry_captured"));
+        }
+        $modalInstance.close(geoJson);
     };
     
-    function setLocation( args ){
+    function setDraggedMarker( args ){
         if( args ){
             $scope.marker.m1.lng = args.model.lng;
             $scope.marker.m1.lat = args.model.lat;
-
-            $scope.location = {lng: args.model.lng, lat: args.model.lat};
         }
     }
     
     $scope.$on('leafletDirectiveMarker.googlemap.dragend', function (e, args) {
-        setLocation( args );
+        setDraggedMarker( args );
     });
     
     $scope.$on('leafletDirectiveMarker.openstreetmap.dragend', function (e, args) {
-        setLocation( args );
+        setDraggedMarker( args );
     });
 })
 
