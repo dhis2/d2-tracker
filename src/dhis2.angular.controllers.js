@@ -171,6 +171,11 @@ var d2Controllers = angular.module('d2Controllers', [])
     var zoomOutLabel = '<i class="fa fa-search-minus fa-2x"></i><span class="small-horizontal-spacing">' + $translate.instant('zoom_out') + '</span>';
     var centerMapLabel = '<i class="fa fa-crosshairs fa-2x"></i><span class="small-horizontal-spacing">' + $translate.instant('center_map') + '</span>';
     
+    $scope.mapDefaults = {map: {
+        contextmenu: true,
+        contextmenuWidth: 180,
+        contextmenuItems: getContextMenuItems()
+    }};
                         
     
     var geojsonMarkerOptions = {
@@ -267,7 +272,7 @@ var d2Controllers = angular.module('d2Controllers', [])
             items.unshift({
                 text: setCoordinateLabel,
                 callback: function(e){
-                    setCoordinate(e, feature, layer);
+                    setCoordinate(e, feature);
                 }
             },
             {
@@ -281,6 +286,8 @@ var d2Controllers = angular.module('d2Controllers', [])
 
     }
 
+    var currentOuLayer;
+
     function getGeoJsonByOuLevel(level, parent){
         var url = DHIS2URL+'/organisationUnits.geojson?level='+level;
         if(parent){
@@ -289,6 +296,9 @@ var d2Controllers = angular.module('d2Controllers', [])
 
         return $http.get(url).then(function(response){                
             return leafletData.getMap().then(function( map ){
+                if(currentOuLayer){
+                    currentOuLayer.removeFrom(map);
+                }
                 var latlngs = [];
                 response.data.features.forEach(feature => {
                     feature.properties.type = "ou";
@@ -300,13 +310,13 @@ var d2Controllers = angular.module('d2Controllers', [])
                         });
                     }
                 });
-                var layer = L.geoJson(response.data,{
+                currentOuLayer = L.geoJson(response.data,{
                     style: style,
                     onEachFeature: onEachFeature,
                     pointToLayer: pointToLayer
                 });
-                layer.addTo(map);
-                layer.bringToBack();
+                currentOuLayer.addTo(map);
+                currentOuLayer.bringToBack();
 
 
                 if(!geoJsonHasCoordinates && latlngs.length > 0 ){                            
@@ -508,11 +518,11 @@ var d2Controllers = angular.module('d2Controllers', [])
     }
     
     $scope.$on('leafletDirectiveMarker.googlemap.dragend', function (e, args) {
-        setLocation( args );
+        setDraggedMarker( args );
     });
     
     $scope.$on('leafletDirectiveMarker.openstreetmap.dragend', function (e, args) {
-        setLocation( args );
+        setDraggedMarker( args );
     });
 })
 

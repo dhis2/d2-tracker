@@ -1,25 +1,25 @@
 <div ng-form="geometryForm">
     <div class="input-group">
         <input type="number" 
-               ng-model="geoObject.coordinate.latitude" 
+               ng-model="geometry.coordinate.latitude" 
                placeholder="{{'latitude'| translate}}"
                ng-class="{'input-success': d2LatSaved}"
                name="latitude" 
                d2-coordinate-validator
                ng-required="d2Required"
                ng-disabled="d2Disabled"
-               ng-blur="saveGeometry()"
+               ng-blur="updateLatLng(geometryForm)"
                class="form-control no-right-radius"/>
         <span class="input-group-btn empty-span"></span>
         <input type="number" 
-               ng-model="geoObject.coordinate.longitude" 
+               ng-model="geometry.coordinate.longitude" 
                placeholder="{{'longitude'| translate}}"
                ng-class="{'input-success': d2LngSaved}"
                name="longitude" 
                d2-coordinate-validator
                ng-required="d2Required"
                ng-disabled="d2Disabled"
-               ng-blur="saveGeometry()"
+               ng-blur="updateLatLng(geometryForm)"
                class="form-control no-left-radius no-right-radius"/>
         <span class="input-group-btn hideInPrint">
             <button class="btn btn-grp trim hideInPrint" 

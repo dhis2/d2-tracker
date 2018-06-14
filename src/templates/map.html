@@ -9,10 +9,10 @@
 <div class="modal-body map-area">
     <span ng-switch="selectedTileKey">        
         <span ng-switch-when="openstreetmap">
-            <leaflet id="openstreetmap" lf-center="center" markers="marker" tiles="tilesDictionary[selectedTileKey]"></leaflet>
+            <leaflet id="openstreetmap" lf-center="center" defaults="mapDefaults" markers="marker" tiles="tilesDictionary[selectedTileKey]"></leaflet>
         </span>
         <span ng-switch-when="googlemap">
-            <leaflet id="googlemap" lf-center="center" markers="marker" layers="tilesDictionary[selectedTileKey].layers"></leaflet>
+            <leaflet id="googlemap" lf-center="center" defaults="mapDefaults" markers="marker" layers="tilesDictionary[selectedTileKey].layers"></leaflet>
         </span>
     </span>
 </div>
