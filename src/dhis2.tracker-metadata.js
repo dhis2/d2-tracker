@@ -46,7 +46,7 @@ dhis2.tracker.chunk = function( array, size ){
 dhis2.tracker.getTrackerMetaObjects = function( programs, objNames, url, filter )
 {
     if( !programs || !programs.programIds || programs.programIds.length === 0 ){
-        return;
+        return {programs: programs, programIds: programs ? programs.programIds : null};
     }       
 
     filter = filter + '[' + programs.programIds.toString() + ']';
