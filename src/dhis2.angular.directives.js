@@ -825,13 +825,17 @@ var d2Directives = angular.module('d2Directives', [])
             d2Disabled: '=',
             d2Required: '=',
             d2Options: '=',
-            d2CallbackFunction: '&d2Function'
+            d2CallbackFunction: '&d2Function',
+            d2OptionFilter: '='
         },
         link: function (scope, element, attrs) {
             
         },
         controller: function($scope){
-            
+            var filteredOptions;
+            var currentFilteredOptions;
+            $scope.displayOptions = [];
+
             $scope.$watch('d2Object',function(newObj, oldObj){
                 if( angular.isObject(newObj) ){
                     $scope.d2Object = newObj;
@@ -857,6 +861,34 @@ var d2Directives = angular.module('d2Directives', [])
                     $scope.d2CallbackFunction({value: $scope.model.radio});
                 }
             };
+
+            var filterOptions = function(){
+                if($scope.d2OptionFilter && $scope.d2OptionFilter[$scope.id] && ($scope.d2OptionFilter[$scope.id].showOnly || $scope.d2OptionFilter[$scope.id].hidden)){
+                    var deFilter = $scope.d2OptionFilter[$scope.id];
+                    filteredOptions = $scope.d2Options.filter(o => {
+                        if(deFilter.showOnly && !deFilter.showOnly[o.id]) return false;
+                        if(deFilter.hidden && deFilter.hidden[o.id]) return false;
+                        return true;
+                    });
+                }else{
+                    filteredOptions = $scope.d2Options;
+                }
+                currentFilteredOptions = filteredOptions;
+            }
+
+            var setOptions = function(){
+                $scope.displayOptions = currentFilteredOptions;
+            }
+
+            filterOptions();
+            setOptions();
+
+            $scope.$watch("d2OptionFilter", function(newValue,oldValue){
+                if(newValue != oldValue){
+                    filterOptions();
+                    setOptions();
+                }
+            });
         }
     };
 })
@@ -1415,6 +1447,8 @@ var d2Directives = angular.module('d2Directives', [])
                     
                     if($scope.datetimeElement.saved) {
                         return 'form-control input-success';
+                    } else if($scope.datetimeElement.updated) {
+                        return 'form-control input-success';
                     } else {
                         return 'form-control input-error';
                     }            
@@ -1664,29 +1698,79 @@ var d2Directives = angular.module('d2Directives', [])
 			d2ModelId: '=',
             d2Required: '=',
             d2Disabled: '=',
-			d2SaveMethode: '&',
-			d2SaveMethodeParameter1: '=',
-			d2SaveMethodeParameter2: '=',
+			d2Change: '&',
 			d2AllOptions: '=',
 			d2MaxOptionSize: '=',
 			d2UseNotification: '=',
-			d2Element: '='
+            d2Element: '=',
+            d2OptionFilter: "="
 		},
 		link: function (scope, element, attrs) {
             
         },
-        controller: function($scope) {
+        controller: function($scope,$filter) {
+            $scope.loadMoreId = "loadMore";
+            var filteredOptions;
+            var currentFilteredOptions;
+            $scope.displayOptions = [];
+
+
+            var filterOptions = function(){
+                if($scope.d2OptionFilter && $scope.d2OptionFilter[$scope.d2ModelId] && ($scope.d2OptionFilter[$scope.d2ModelId].showOnly || $scope.d2OptionFilter[$scope.d2ModelId].hidden)){
+                    var deFilter = $scope.d2OptionFilter[$scope.d2ModelId];
+                    filteredOptions = $scope.d2AllOptions.filter(o => {
+                        if(deFilter.showOnly && !deFilter.showOnly[o.id]) return false;
+                        if(deFilter.hidden && deFilter.hidden[o.id]) return false;
+                        return true;
+                    });
+                }else{
+                    filteredOptions = $scope.d2AllOptions || [];
+                }
+                currentFilteredOptions = filteredOptions;
+            }
+
+            $scope.search = function(searchParam){
+                currentFilteredOptions = $filter('filter')(filteredOptions, searchParam);
+                setOptions();
+            }
+
+            var setOptions = function(){
+                $scope.displayOptions = currentFilteredOptions.slice(0, $scope.d2MaxOptionSize);
+                if(currentFilteredOptions.length > $scope.d2MaxOptionSize){
+                    $scope.displayOptions.push({id: $scope.loadMoreId, displayName:'Load more' });
+                }
+            }
+
+            filterOptions();
+            setOptions();
+
+            $scope.$watch("d2OptionFilter", function(newValue,oldValue){
+                if(newValue != oldValue){
+                    filterOptions();
+                    setOptions();
+                }
+            });
+
+            $scope.$watch("d2AllOptions", function(newValue,oldValue){
+                if(newValue != oldValue){
+                    filterOptions();
+                    setOptions();
+                }
+            });
+
+
+
             $scope.showMore = function($select, $event) {
                 if($event){
                     $event.stopPropagation();
                     $event.preventDefault();
                     $scope.d2MaxOptionSize = $scope.d2MaxOptionSize + 10;
+                    setOptions();
                 }
-                
-			};
+            };        
 
 			$scope.saveOption = function() {
-				$scope.d2SaveMethode()($scope.d2SaveMethodeParameter1, $scope.d2SaveMethodeParameter2);
+                $scope.d2Change();
 			};
 
 			$scope.getInputNotifcationClass = function(id) {

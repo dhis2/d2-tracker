@@ -1,4 +1,4 @@
-<span ng-repeat="option in d2Options" 
+<span ng-repeat="option in displayOptions" 
       class="col-sm-12 form-control cursor-pointer" 
       ng-disabled="d2Disabled"
       ng-class="{'input-success': d2ValueSaved && model.radio === option.displayName}"
@@ -10,7 +10,7 @@
 
 
 <span ng-show="false">
-    <label ng-repeat="option in d2Options" class="radio-display-none">
+    <label ng-repeat="option in displayOptions" class="radio-display-none">
     <input type="radio" 
            name="{{name}}"
            ng-required="d2Required"
