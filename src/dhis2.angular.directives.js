@@ -542,7 +542,7 @@ var d2Directives = angular.module('d2Directives', [])
             };
 
             $scope.getInputNotifcationClass = function(id) {
-				event = $scope.d2Model;
+				var event = $scope.d2Model;
 				
 				if($scope.d2Element && $scope.d2Element.id === id && $scope.d2Element.event && $scope.d2Element.event === event.event) {
 					if($scope.d2Element.pending) {
@@ -865,7 +865,13 @@ var d2Directives = angular.module('d2Directives', [])
             var filterOptions = function(){
                 if($scope.d2OptionFilter && $scope.d2OptionFilter[$scope.id] && ($scope.d2OptionFilter[$scope.id].showOnly || $scope.d2OptionFilter[$scope.id].hidden)){
                     var deFilter = $scope.d2OptionFilter[$scope.id];
-                    filteredOptions = $scope.d2Options.filter(o => {
+                    /*filteredOptions = $scope.d2Options.filter(o => {
+                        if(deFilter.showOnly && !deFilter.showOnly[o.id]) return false;
+                        if(deFilter.hidden && deFilter.hidden[o.id]) return false;
+                        return true;
+                    });*/
+
+                    filteredOptions = $scope.d2Options.filter(function(o) {
                         if(deFilter.showOnly && !deFilter.showOnly[o.id]) return false;
                         if(deFilter.hidden && deFilter.hidden[o.id]) return false;
                         return true;
@@ -1109,7 +1115,8 @@ var d2Directives = angular.module('d2Directives', [])
                         }
                     },
                     parseValues: function(){
-                        $scope.geometry.coordinates = $scope.geometry.coordinates.map(coordinate => coordinateParser(coordinate));
+                        //$scope.geometry.coordinates = $scope.geometry.coordinates.map(coordinate => coordinateParser(coordinate));
+                        $scope.geometry.coordinates = $scope.geometry.coordinates.map(function(coordinate) { return coordinateParser(coordinate) });
                     },
                     setD2ObjectValue: function(){
                         $scope.d2Object[$scope.d2ObjectId] = angular.copy($scope.geometry);
@@ -1718,11 +1725,18 @@ var d2Directives = angular.module('d2Directives', [])
             var filterOptions = function(){
                 if($scope.d2OptionFilter && $scope.d2OptionFilter[$scope.d2ModelId] && ($scope.d2OptionFilter[$scope.d2ModelId].showOnly || $scope.d2OptionFilter[$scope.d2ModelId].hidden)){
                     var deFilter = $scope.d2OptionFilter[$scope.d2ModelId];
-                    filteredOptions = $scope.d2AllOptions.filter(o => {
+                    /*filteredOptions = $scope.d2AllOptions.filter(o => {
+                        if(deFilter.showOnly && !deFilter.showOnly[o.id]) return false;
+                        if(deFilter.hidden && deFilter.hidden[o.id]) return false;
+                        return true;
+                    });*/
+
+                    filteredOptions = $scope.d2AllOptions.filter(function(o) {
                         if(deFilter.showOnly && !deFilter.showOnly[o.id]) return false;
                         if(deFilter.hidden && deFilter.hidden[o.id]) return false;
                         return true;
                     });
+
                 }else{
                     filteredOptions = $scope.d2AllOptions || [];
                 }
@@ -1774,7 +1788,7 @@ var d2Directives = angular.module('d2Directives', [])
 			};
 
 			$scope.getInputNotifcationClass = function(id) {
-				event = $scope.d2Model;
+				var event = $scope.d2Model;
 				
 				if($scope.d2Element && $scope.d2Element.id === id && $scope.d2Element.event && $scope.d2Element.event === event.event) {
 					if($scope.d2Element.pending) {

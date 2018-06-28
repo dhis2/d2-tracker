@@ -184,7 +184,8 @@ dhis2.tracker.getBatches = function( ids, batchSize, data, store, objs, url, fil
     
     var batches = dhis2.tracker.chunk( ids, batchSize );
 
-    var promises = batches.map(batch => dhis2.tracker.fetchBatchItems(batch,store, objs, url, filter, storage,db));
+    //var promises = batches.map(batch => dhis2.tracker.fetchBatchItems(batch,store, objs, url, filter, storage,db));
+    var promises = batches.map(function(batch) { return dhis2.tracker.fetchBatchItems(batch,store, objs, url, filter, storage,db) });
 
     return $.when.apply($, promises).then(function(){
         return data;

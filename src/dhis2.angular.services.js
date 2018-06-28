@@ -2482,7 +2482,8 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             var group = parameters[0];
                             var isInGroup = "false";
                             var orgUnitGroups = (selectedOrgUnit && selectedOrgUnit.g) || [];
-                            var foundGroup = orgUnitGroups.find(o => o.id === group || o.code === group);
+                            //var foundGroup = orgUnitGroups.find(o => o.id === group || o.code === group);
+                            var foundGroup = orgUnitGroups.find(function(o) {return o.id === group || o.code === group});
                             if(foundGroup)
                             {
                                 isInGroup = "true"
@@ -2673,7 +2674,8 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 if(executingEvent && executingEvent.program && executingEvent.programStage){
                     return MetaDataFactory.get("programs", executingEvent.program).then(function(program){
                         if(program && program.programStages){
-                            data.selectedProgramStage = program.programStages.find(ps => ps.id === executingEvent.programStage);
+                            //data.selectedProgramStage = program.programStages.find(ps => ps.id === executingEvent.programStage);
+                            data.selectedProgramStage = program.programStages.find(function(ps) { return ps.id === executingEvent.programStage });
                         }
                         return data;
                     });
@@ -2981,7 +2983,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     };
 
     var clearDataElementValueForShowHideOptionActions = function(dataElements, affectedEvent, optionVisibility, prStDes, optionSets){
-        dataElements.forEach(de => {
+        /*dataElements.forEach(de => {
             var value = affectedEvent[de];
             //Only process if has selected value
             if(angular.isDefined(value) && value !== "") {
@@ -3001,17 +3003,64 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                     affectedEvent[de] = "";
                 }
             }
+        });*/
+
+        angular.forEach(dataElements, function(de){
+            var value = affectedEvent[de];
+            //Only process if has selected value
+            if(angular.isDefined(value) && value !== "") {
+                var optionSet = optionSets[prStDes[de].dataElement.optionSet.id];
+                //Find selectedOption by displayName
+                //var selectedOption = optionSet.options.find(o => o.displayName === value);
+                var selectedOption = optionSet.options.find(function(o) { return o.displayName === value });
+                var shouldClear = !selectedOption;
+                
+                //If has selected option and a option is not in showOnly or is in hidden, field should be cleared.
+                if(selectedOption){
+                    shouldClear = (optionVisibility[de].showOnly && !optionVisibility[de].showOnly[selectedOption.id]) || optionVisibility[de].hidden[selectedOption.id];
+                }
+    
+                if(shouldClear){
+                    var message = (prStDes[de].dataElement.displayName + ' was blanked out because the option "'+value+'" got hidden by your last action');
+                    alert(message);
+                    affectedEvent[de] = "";
+                }
+            }
         });
     }
 
     var clearAttributeValueForShowHideOptionActions = function(attributes, affectedTei, optionVisibility, attributesById, optionSets){
-        attributes.forEach(attr => {
+        /*attributes.forEach(attr => {
             var value = affectedTei[attr];
             //Only process if has selected value
             if(angular.isDefined(value) && value !== "") {
                 var optionSet = optionSets[attributesById[attr].optionSet.id];
                 //Find selectedOption by displayName
-                var selectedOption = optionSet.options.find(o => o.displayName === value);
+                //var selectedOption = optionSet.options.find(o => o.displayName === value);
+                var selectedOption = optionSet.options.find(function(o) { return o.displayName === value });
+                var shouldClear = !selectedOption;
+                
+                //If has selected option and a option is not in showOnly or is in hidden, field should be cleared.
+                if(selectedOption){
+                    shouldClear = (optionVisibility[attr].showOnly && !optionVisibility[attr].showOnly[selectedOption.id]) || optionVisibility[attr].hidden[selectedOption.id];
+                }
+    
+                if(shouldClear){
+                    var message = (attributesById[attr].displayName + ' was blanked out because the option "'+value+'" got hidden by your last action');
+                    alert(message);
+                    affectedTei[attr] = "";
+                }
+            }
+        });*/
+
+        angular.forEach(attributes, function(attr){
+            var value = affectedTei[attr];
+            //Only process if has selected value
+            if(angular.isDefined(value) && value !== "") {
+                var optionSet = optionSets[attributesById[attr].optionSet.id];
+                //Find selectedOption by displayName
+                //var selectedOption = optionSet.options.find(o => o.displayName === value);
+                var selectedOption = optionSet.options.find(function(o) { return o.displayName === value });
                 var shouldClear = !selectedOption;
                 
                 //If has selected option and a option is not in showOnly or is in hidden, field should be cleared.
@@ -3245,7 +3294,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 }
             });
             clearDataElementValueForShowHideOptionActions(dataElementOptionsChanged, currentEvent,optionVisibility,prStDes,optionSets);
-            return {currentEvent: currentEvent, hiddenFields: hiddenFields, hiddenSections: hiddenSections, warningMessages: warningMessages, assignedFields: assignedFields, mandatoryFields: mandatoryFields,optionVisibility};
+            return {currentEvent: currentEvent, hiddenFields: hiddenFields, hiddenSections: hiddenSections, warningMessages: warningMessages, assignedFields: assignedFields, mandatoryFields: mandatoryFields, optionVisibility: optionVisibility};
         },
         processRuleEffectAttribute: function(context, selectedTei, tei, currentEvent, currentEventOriginialValue, affectedEvent, attributesById, prStDes,optionSets,optionGroupsById){
             //Function used from registration controller to process effects for the tracked entity instance and for the events in the same operation
