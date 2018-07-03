@@ -1364,6 +1364,31 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
 .service('GridColumnService', function ($http, $q, DHIS2URL, $translate, SessionStorageService, NotificationService) {
     var GRIDCOLUMNS_URL = DHIS2URL+'/userDataStore/gridColumns/';
+    var set = function (gridColumns, name) {
+        var deferred = $q.defer();
+        var httpMessage = {
+            method: "put",
+            url: GRIDCOLUMNS_URL + name,
+            data: {"gridColumns": gridColumns},
+            headers: {'Content-Type': 'application/json;charset=UTF-8'}
+        };
+
+        $http(httpMessage).then(function (response) {
+            deferred.resolve(response.data);
+        },function (error) {
+            httpMessage.method = "post";
+            $http(httpMessage).then(function (response) {
+                deferred.resolve(response.data);
+            }, function (error) {
+                if (error && error.data) {
+                    deferred.resolve(error.data);
+                } else {
+                    deferred.resolve(null);
+                }
+            });
+        });
+        return deferred.promise;
+    }
     return {
         columnExists: function (cols, id) {
             var colExists = false;
@@ -1378,46 +1403,29 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             }
             return colExists;
         },
-        set: function (gridColumns, name) {
-            var deferred = $q.defer();
-            var httpMessage = {
-                method: "put",
-                url: GRIDCOLUMNS_URL + name,
-                data: {"gridColumns": gridColumns},
-                headers: {'Content-Type': 'application/json;charset=UTF-8'}
-            };
-
-            $http(httpMessage).then(function (response) {
-                deferred.resolve(response.data);
-            },function (error) {
-                httpMessage.method = "post";
-                $http(httpMessage).then(function (response) {
-                    deferred.resolve(response.data);
-                }, function (error) {
-                    if (error && error.data) {
-                        deferred.resolve(error.data);
-                    } else {
-                        deferred.resolve(null);
-                    }
-                });
-            });
-            return deferred.promise;
-        },
+        set: set,
         get: function (name) {
             var promise = $http.get(GRIDCOLUMNS_URL+name).then(function (response) {
                 if (response && response.data && response.data.gridColumns) {
                     SessionStorageService.set(name, {id:name, columns:response.data.gridColumns});
                     return response.data.gridColumns;
                 } else {
-                    NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("gridColumns_invalid"));
                     return null;
                 }
             }, function (error) {
-                var gridColumnsFromSessionStore = SessionStorageService.get(name);
-                if (gridColumnsFromSessionStore && gridColumnsFromSessionStore.columns) {
-                    return gridColumnsFromSessionStore.columns;
+                if(error.status === 404){
+                    return set(null, name).then(function(){
+                        var gridColumnsFromSessionStore = SessionStorageService.get(name);
+                        if (gridColumnsFromSessionStore && gridColumnsFromSessionStore.columns) {
+                            return gridColumnsFromSessionStore.columns;
+                        }
+                        return null;
+                    });
+                    NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("gridColumns_invalid"));
+                    return $q.when(null);
+
                 }
-                return null;
+
             });
             return promise;
         }
