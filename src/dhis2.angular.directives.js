@@ -865,12 +865,6 @@ var d2Directives = angular.module('d2Directives', [])
             var filterOptions = function(){
                 if($scope.d2OptionFilter && $scope.d2OptionFilter[$scope.id] && ($scope.d2OptionFilter[$scope.id].showOnly || $scope.d2OptionFilter[$scope.id].hidden)){
                     var deFilter = $scope.d2OptionFilter[$scope.id];
-                    /*filteredOptions = $scope.d2Options.filter(o => {
-                        if(deFilter.showOnly && !deFilter.showOnly[o.id]) return false;
-                        if(deFilter.hidden && deFilter.hidden[o.id]) return false;
-                        return true;
-                    });*/
-
                     filteredOptions = $scope.d2Options.filter(function(o) {
                         if(deFilter.showOnly && !deFilter.showOnly[o.id]) return false;
                         if(deFilter.hidden && deFilter.hidden[o.id]) return false;
@@ -1115,7 +1109,6 @@ var d2Directives = angular.module('d2Directives', [])
                         }
                     },
                     parseValues: function(){
-                        //$scope.geometry.coordinates = $scope.geometry.coordinates.map(coordinate => coordinateParser(coordinate));
                         $scope.geometry.coordinates = $scope.geometry.coordinates.map(function(coordinate) { return coordinateParser(coordinate) });
                     },
                     setD2ObjectValue: function(){
@@ -1725,18 +1718,11 @@ var d2Directives = angular.module('d2Directives', [])
             var filterOptions = function(){
                 if($scope.d2OptionFilter && $scope.d2OptionFilter[$scope.d2ModelId] && ($scope.d2OptionFilter[$scope.d2ModelId].showOnly || $scope.d2OptionFilter[$scope.d2ModelId].hidden)){
                     var deFilter = $scope.d2OptionFilter[$scope.d2ModelId];
-                    /*filteredOptions = $scope.d2AllOptions.filter(o => {
-                        if(deFilter.showOnly && !deFilter.showOnly[o.id]) return false;
-                        if(deFilter.hidden && deFilter.hidden[o.id]) return false;
-                        return true;
-                    });*/
-
                     filteredOptions = $scope.d2AllOptions.filter(function(o) {
                         if(deFilter.showOnly && !deFilter.showOnly[o.id]) return false;
                         if(deFilter.hidden && deFilter.hidden[o.id]) return false;
                         return true;
                     });
-
                 }else{
                     filteredOptions = $scope.d2AllOptions || [];
                 }
