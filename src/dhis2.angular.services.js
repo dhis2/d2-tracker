@@ -2987,7 +2987,6 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             if(angular.isDefined(value) && value !== "") {
                 var optionSet = optionSets[prStDes[de].dataElement.optionSet.id];
                 //Find selectedOption by displayName
-                //var selectedOption = optionSet.options.find(o => o.displayName === value);
                 var selectedOption = optionSet.options.find(function(o) { return o.displayName === value });
                 var shouldClear = !selectedOption;
                 
@@ -3012,7 +3011,6 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             if(angular.isDefined(value) && value !== "") {
                 var optionSet = optionSets[attributesById[attr].optionSet.id];
                 //Find selectedOption by displayName
-                //var selectedOption = optionSet.options.find(o => o.displayName === value);
                 var selectedOption = optionSet.options.find(function(o) { return o.displayName === value });
                 var shouldClear = !selectedOption;
                 
