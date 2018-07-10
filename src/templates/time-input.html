@@ -1,7 +1,7 @@
 <div class="hideInPrint">
         <input type="text"
                ng-model="timeModel[timeModelId]"
-               placeholder="{{'hours_and_minutes' | translate}}"
+               ng-attr-placeholder="{{'hours_and_minutes' | translate}}"
                class="form-control"
                ng-class="timeUseNotification ? getInputNotifcationClass(timeModelId, timeModel) : ''"
                d2-time-validator
@@ -13,5 +13,5 @@
                name="foo"/>
     </div>
     <div class="not-for-screen">
-        <input type="text" class="form-control" value={{timeModel[timeModelId]}}>
+        <input type="text" class="form-control" ng-attr-value={{timeModel[timeModelId]}}>
     </div>
