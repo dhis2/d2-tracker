@@ -423,7 +423,7 @@ var d2Directives = angular.module('d2Directives', [])
 .directive('d2Audit', function (CurrentSelection, MetaDataFactory ) {
     return {
         restrict: 'E',
-        template: '<span class="hideInPrint audit-icon" title="{{\'audit_history\' | translate}}" data-ng-click="showAuditHistory()">' +
+        template: '<span class="hideInPrint audit-icon" ng-attr-title="{{\'audit_history\' | translate}}" data-ng-click="showAuditHistory()">' +
         '<i class="glyphicon glyphicon-user""></i>' +
         '</span>',
         scope: {
