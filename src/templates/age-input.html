@@ -9,8 +9,8 @@
                blur-or-change="saveDOB()"
                ng-required="d2Required"
                ng-disabled="d2Disabled"
-               placeholder="{{'dob'| translate}}" 
-               title="{{'dob'| translate}}" 
+               ng-attr-placeholder="{{'dob'| translate}}" 
+               ng-attr-title="{{'dob'| translate}}" 
                class="form-control no-right-radius"
                ng-class="{'input-success': d2AgeSaved}"/>
         <span class="input-group-btn empty-span"></span>
@@ -24,8 +24,8 @@
                ng-disabled="d2Disabled"
                d2-number-validator
                number-type="INTEGER_ZERO_OR_POSITIVE"
-               placeholder="{{'years'| translate}}"
-               title="{{'years'| translate}}" 
+               ng-attr-placeholder="{{'years'| translate}}"
+               ng-attr-title="{{'years'| translate}}" 
                class="form-control no-right-radius no-left-radius"
                ng-class="{'input-success': d2AgeSaved}"/>
         <span class="input-group-btn empty-span"></span>
@@ -39,8 +39,8 @@
                ng-disabled="d2Disabled"
                d2-number-validator
                number-type="INTEGER_ZERO_OR_POSITIVE"
-               placeholder="{{'months'| translate}}"
-               title="{{'months'| translate}}" 
+               ng-attr-placeholder="{{'months'| translate}}"
+               ng-attr-title="{{'months'| translate}}" 
                class="form-control no-right-radius no-left-radius"
                ng-class="{'input-success': d2AgeSaved}"/>
         <span class="input-group-btn empty-span"></span>
@@ -54,12 +54,12 @@
                ng-disabled="d2Disabled"
                d2-number-validator
                number-type="INTEGER_ZERO_OR_POSITIVE"
-               placeholder="{{'days'| translate}}"
-               title="{{'days'| translate}}" 
+               ng-attr-placeholder="{{'days'| translate}}"
+               ng-attr-title="{{'days'| translate}}" 
                class="form-control no-left-radius no-right-radius"
                ng-class="{'input-success': d2AgeSaved}"/>
         <span class="input-group-btn"> 
-            <button class="btn btn-danger hideInPrint trim" type="button" title="{{'remove'| translate}}" ng-click="removeAge()" ng-disabled="!age.dob || d2Disabled"> 
+            <button class="btn btn-danger hideInPrint trim" type="button" ng-attr-title="{{'remove'| translate}}" ng-click="removeAge()" ng-disabled="!age.dob || d2Disabled"> 
                 <i class="fa fa-trash-o"></i> 
             </button>
         </span>
