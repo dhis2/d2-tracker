@@ -8,12 +8,12 @@
             d2-on-enter-blur
             d2-on-blur-change="filterOrgUnits()"
             ng-model="orgUnitFilterText" 
-            class="form-control" placeholder="{{'search' | translate}}"> 
+            class="form-control" ng-attr-placeholder="{{'search' | translate}}"> 
         <span class="input-group-btn"> 
-            <button class="btn btn-success hideInPrint trim" type="button" title="{{'search' | translate}}" ng-disabled="!orgUnitFilterText" ng-click="filterOrgUnits()"> 
+            <button class="btn btn-success hideInPrint trim" type="button" ng-attr-title="{{'search' | translate}}" ng-disabled="!orgUnitFilterText" ng-click="filterOrgUnits()"> 
                 <i class="fa fa-search"></i> 
             </button> 
-            <button class="btn btn-danger hideInPrint trim" type="button" title="{{'clear' | translate}}" ng-disabled="!orgUnitFilterText" ng-click="filterOrgUnits(true)"> 
+            <button class="btn btn-danger hideInPrint trim" type="button" ng-attr-title="{{'clear' | translate}}" ng-disabled="!orgUnitFilterText" ng-click="filterOrgUnits(true)"> 
                 <i class="fa fa-trash-o"></i>
             </button> 
         </span> 

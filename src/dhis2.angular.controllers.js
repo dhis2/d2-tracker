@@ -146,7 +146,7 @@ var d2Controllers = angular.module('d2Controllers', [])
     var currentGeometryType = geometryTypes[geometryType];
     
     var ouLevels = CurrentSelection.getOuLevels();
-    var ouLevelsHashMap = ouLevels.reduce((map, ouLevel) => {
+    var ouLevelsHashMap = ouLevels.reduce(function(map, ouLevel) {
         map[ouLevel.level] = ouLevel;
         return map;
     },{});
@@ -279,7 +279,8 @@ var d2Controllers = angular.module('d2Controllers', [])
                 separator: true
             });
         }
-        return items.map((item, index) => {
+
+        return items.map(function(item, index) {
             item.index = index;
             return item;
         });
@@ -300,16 +301,19 @@ var d2Controllers = angular.module('d2Controllers', [])
                     currentOuLayer.removeFrom(map);
                 }
                 var latlngs = [];
-                response.data.features.forEach(feature => {
+                angular.forEach(response.data.features, function(feature){
                     feature.properties.type = "ou";
                     if(feature.geometry.type != "Point"){
-                        feature.geometry.coordinates.forEach(coordinate => {
-                            coordinate.forEach(point => {
-                                point.forEach(p => latlngs.push(L.GeoJSON.coordsToLatLng(p)));
+                        angular.forEach(feature.geometry.coordinates, function(coordinate){
+                            angular.forEach(coordinate, function(point){
+                                angular.forEach(point, function(p){
+                                    return latlngs.push(L.GeoJSON.coordsToLatLng(p));
+                                });
                             });
                         });
                     }
                 });
+
                 currentOuLayer = L.geoJson(response.data,{
                     style: style,
                     onEachFeature: onEachFeature,

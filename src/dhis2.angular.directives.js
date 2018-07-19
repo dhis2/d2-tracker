@@ -565,7 +565,7 @@ var d2Directives = angular.module('d2Directives', [])
 .directive('d2Audit', function (CurrentSelection, MetaDataFactory ) {
     return {
         restrict: 'E',
-        template: '<span class="hideInPrint audit-icon" title="{{\'audit_history\' | translate}}" data-ng-click="showAuditHistory()">' +
+        template: '<span class="hideInPrint audit-icon" ng-attr-title="{{\'audit_history\' | translate}}" data-ng-click="showAuditHistory()">' +
         '<i class="glyphicon glyphicon-user""></i>' +
         '</span>',
         scope: {
@@ -865,7 +865,7 @@ var d2Directives = angular.module('d2Directives', [])
             var filterOptions = function(){
                 if($scope.d2OptionFilter && $scope.d2OptionFilter[$scope.id] && ($scope.d2OptionFilter[$scope.id].showOnly || $scope.d2OptionFilter[$scope.id].hidden)){
                     var deFilter = $scope.d2OptionFilter[$scope.id];
-                    filteredOptions = $scope.d2Options.filter(o => {
+                    filteredOptions = $scope.d2Options.filter(function(o) {
                         if(deFilter.showOnly && !deFilter.showOnly[o.id]) return false;
                         if(deFilter.hidden && deFilter.hidden[o.id]) return false;
                         return true;
@@ -1109,7 +1109,7 @@ var d2Directives = angular.module('d2Directives', [])
                         }
                     },
                     parseValues: function(){
-                        $scope.geometry.coordinates = $scope.geometry.coordinates.map(coordinate => coordinateParser(coordinate));
+                        $scope.geometry.coordinates = $scope.geometry.coordinates.map(function(coordinate) { return coordinateParser(coordinate) });
                     },
                     setD2ObjectValue: function(){
                         $scope.d2Object[$scope.d2ObjectId] = angular.copy($scope.geometry);
@@ -1718,7 +1718,7 @@ var d2Directives = angular.module('d2Directives', [])
             var filterOptions = function(){
                 if($scope.d2OptionFilter && $scope.d2OptionFilter[$scope.d2ModelId] && ($scope.d2OptionFilter[$scope.d2ModelId].showOnly || $scope.d2OptionFilter[$scope.d2ModelId].hidden)){
                     var deFilter = $scope.d2OptionFilter[$scope.d2ModelId];
-                    filteredOptions = $scope.d2AllOptions.filter(o => {
+                    filteredOptions = $scope.d2AllOptions.filter(function(o) {
                         if(deFilter.showOnly && !deFilter.showOnly[o.id]) return false;
                         if(deFilter.hidden && deFilter.hidden[o.id]) return false;
                         return true;

@@ -1,6 +1,6 @@
 <div class="hideInPrint input-group" ng-init="dateTimeInit()">
         <input type="text"
-               placeholder="{{datetimeDatePlaceholder}}"
+               ng-attr-placeholder="{{datetimeDatePlaceholder}}"
                class="form-control no-right-radius ng-valid-date-validator"
                ng-class="datetimeUseNotification ? getInputNotifcationClass(datetimeModelId, datetimeModel) : ''"
                d2-date
@@ -13,7 +13,7 @@
                name="foo">
         <span class="input-group-btn empty-span"></span>
         <input type="text"
-               placeholder="{{'hours_and_minutes' | translate}}"
+               ng-attr-placeholder="{{'hours_and_minutes' | translate}}"
                class="form-control no-left-radius no-right-radius"
                ng-class="datetimeUseNotification ? getInputNotifcationClass(datetimeModelId, datetimeModel) : ''"
                d2-time-validator
@@ -25,14 +25,14 @@
                ng-blur="saveDateTime(false, 'foo2')"
                name="foo2">
         <span class="input-group-btn hideInPrint">
-            <button class="btn btn-danger hideInPrint trim" type="button" ng-disabled="datetimeDisabled" title="Clear" ng-click="clearDateTime()"> 
+            <button class="btn btn-danger hideInPrint trim" type="button" ng-disabled="datetimeDisabled" ng-attr-title="Clear" ng-click="clearDateTime()"> 
                 <i class="fa fa-trash-o"></i>                             
             </button>
         </span>
 </div>
 
 <div class="not-for-screen">
-    <input type="text" class="form-control" value={{datetimeModel[datetimeModelId]}}>
+    <input type="text" class="form-control" ng-attr-value={{datetimeModel[datetimeModelId]}}>
 </div>
 
 <div ng-messages="datetimeField.foo2.$error" ng-if="interacted(datetimeField.foo2, datetimeOuterform)" class="required">

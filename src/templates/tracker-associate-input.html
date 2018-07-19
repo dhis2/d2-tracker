@@ -18,7 +18,7 @@
                         ng-class="{true: 'disable-clicks'} [editingDisabled]"
                         ng-disabled="d2SelectedOrgunit.closedStatus"
                         type="button" 
-                        title="{{'add'| translate}} {{d2Attribute.displayName}}"
+                        ng-attr-title="{{'add'| translate}} {{d2Attribute.displayName}}"
                         ng-click="getTa()">
                         <i class="fa fa-external-link"></i>                             
                 </button>
@@ -27,7 +27,7 @@
                         ng-class="{true: 'disable-clicks'} [editingDisabled]"
                         ng-disabled="d2SelectedOrgunit.closedStatus"
                         type="button" 
-                        title="{{'remove'| translate}} {{d2Attribute.displayName}}"
+                        ng-attr-title="{{'remove'| translate}} {{d2Attribute.displayName}}"
                         ng-click="delete()">
                         <i class="fa fa-trash-o"></i>                             
                 </button>
