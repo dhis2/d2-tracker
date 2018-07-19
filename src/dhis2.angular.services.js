@@ -92,7 +92,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             authority.canUncompleteEvent = auth['F_UNCOMPLETE_EVENT'] || allAuth;
             authority.canCascadeDeleteEnrollment = auth['F_ENROLLMENT_CASCADE_DELETE'] || allAuth;
             authority.canReopenDataSet = auth['F_DATASET_REOPEN'] || allAuth;
-            authority.canEditExpiredStuff = auth['F_EDIT_EXPIRED_STUFF'] || allAuth;
+            authority.canEditExpiredStuff = auth['F_EDIT_EXPIRED'] || allAuth;
             authority.canAdministerDashboard = auth['F_PROGRAM_DASHBOARD_CONFIG_ADMIN'] || allAuth;
             return authority;
         }

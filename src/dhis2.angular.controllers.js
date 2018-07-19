@@ -768,7 +768,7 @@ var d2Controllers = angular.module('d2Controllers', [])
         }
         
         OrgUnitFactory.getByName( $scope.orgUnitFilterText ).then(function( response ){            
-            $scope.orgUnits = response.organisationUnits;
+            $scope.orgUnitsDataElement = response.organisationUnits;
         });
     };
 
