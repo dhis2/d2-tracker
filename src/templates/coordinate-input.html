@@ -2,7 +2,7 @@
     <div class="input-group">
         <input type="number" 
                ng-model="coordinateObject.coordinate.latitude" 
-               placeholder="{{'latitude'| translate}}"
+               ng-attr-placeholder="{{'latitude'| translate}}"
                ng-class="{'input-success': d2LatSaved}"
                name="latitude" 
                d2-coordinate-validator
@@ -13,7 +13,7 @@
         <span class="input-group-btn empty-span"></span>
         <input type="number" 
                ng-model="coordinateObject.coordinate.longitude" 
-               placeholder="{{'longitude'| translate}}"
+               ng-attr-placeholder="{{'longitude'| translate}}"
                ng-class="{'input-success': d2LngSaved}"
                name="longitude" 
                d2-coordinate-validator
@@ -25,7 +25,7 @@
             <button class="btn btn-grp trim hideInPrint" 
                     type="button"
                     ng-disabled="{{d2Disabled}}"
-                    title="{{'get_from_map'| translate}}"
+                    ng-attr-title="{{'get_from_map'| translate}}"
                     ng-click="showMap(coordinateObject)"> 
                 <i class="fa fa-map-marker"></i>                             
             </button>
