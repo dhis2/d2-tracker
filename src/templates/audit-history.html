@@ -4,7 +4,7 @@
 <div class="modal-body page" ng-class="{'waiting-box':model.showStatus === 'waiting'}">
     <div ng-if="model.showStatus === 'data_available'">
         <span class="row">
-            <input class="form-control col-md-7" ng-model="model.searchText" placeholder="{{model.searchPlaceholder}}" type="search" />
+            <input class="form-control col-md-7" ng-model="model.searchText" ng-attr-placeholder="{{model.searchPlaceholder}}" type="search" />
         </span>
         <div class="scroll">
             <table class="listTable dhis2-table-striped-border">

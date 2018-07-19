@@ -5,7 +5,7 @@
                name="foo"
                on-select="saveOption()"
                class="ui-select-style">
-        <ui-select-match allow-clear="true" ng-class="d2UseNotification ? getInputNotifcationClass(d2ModelId) : ''"  class="form-control-ui-select"  placeholder="{{'select_or_search' | translate}}">{{$select.selected.displayName  || $select.selected}}</ui-select-match>
+        <ui-select-match allow-clear="true" ng-class="d2UseNotification ? getInputNotifcationClass(d2ModelId) : ''"  class="form-control-ui-select"  ng-attr-placeholder="{{'select_or_search' | translate}}">{{$select.selected.displayName  || $select.selected}}</ui-select-match>
         <ui-select-choices repeat="option.displayName as option in d2AllOptions | filter: $select.search | limitTo: (d2MaxOptionSize + 1)" ui-disable-choice="$index >= d2MaxOptionSize">
             <span ng-if="$index < d2MaxOptionSize" ng-bind-html="option.displayName | highlight: $select.search"></span>
             <div ng-if="$index >= d2MaxOptionSize">
