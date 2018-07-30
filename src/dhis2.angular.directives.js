@@ -1238,19 +1238,25 @@ var d2Directives = angular.module('d2Directives', [])
                     controller: 'MapController',
                     windowClass: 'modal-map-window',
                     resolve: {
-                        location: function () {
-                            if($scope.coordinateObject.coordinate.polygon) {
-                                return $scope.coordinateObject.coordinate.polygon
-                            } else if($scope.coordinateObject.coordinate.latitude && $scope.coordinateObject.coordinate.longitude) {
-                                return {lat: $scope.coordinateObject.coordinate.latitude, lng:  $scope.coordinateObject.coordinate.longitude};
-                            } else {
-                                return null;
+                        geometryType: function() {
+                            return "Point";
+                        },
+                        geoJson: function() {
+                            var geometry = { type:"Point", coordinates:[] };
+                            if($scope.coordinateObject.coordinate.latitude && $scope.coordinateObject.coordinate.longitude) {
+                                geometry.coordinates = [$scope.coordinateObject.coordinate.longitude, $scope.coordinateObject.coordinate.latitude];
                             }
-                        }
+                            return geometry;
+                        },
                     }
                 });
                 
-                modalInstance.result.then(function (location) {                    
+                modalInstance.result.then(function (geo) {
+                    if(!geo) return;
+                    var location = {
+                        lat: geo.coordinates[1],
+                        lng: geo.coordinates[0]
+                    }
                     if(angular.isObject(location)){
                         if( dhis2.validation.isNumber( location.lat ) ){
                             location.lat = parseFloat( $filter('number')(location.lat, DHIS2COORDINATESIZE) );
