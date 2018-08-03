@@ -378,10 +378,15 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         },
         getAge: function( _dob ){
             var calendarSetting = CalendarService.getSetting();
-            var now = moment();
+
+            var tdy = $.calendars.instance(calendarSetting.keyCalendar).newDate();
+            var now = moment(tdy._year + '-' + tdy._month + '-' + tdy._day, 'YYYY-MM-DD')._d;
+            now = Date.parse(now);
+            now = $filter('date')(now, calendarSetting.keyDateFormat);
+            now = moment( now, calendarSetting.momentFormat);
+
             var dob = moment( _dob, calendarSetting.momentFormat);
             var age = {};
-
             age.years = now.diff(dob, 'years');
             dob.add(age.years, 'years');
 
