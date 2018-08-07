@@ -94,6 +94,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             authority.canReopenDataSet = auth['F_DATASET_REOPEN'] || allAuth;
             authority.canEditExpiredStuff = auth['F_EDIT_EXPIRED'] || allAuth;
             authority.canAdministerDashboard = auth['F_PROGRAM_DASHBOARD_CONFIG_ADMIN'] || allAuth;
+            authority.ignoreRequiredTrackerValueValidation = auth['F_IGNORE_TRACKER_REQUIRED_VALUE_VALIDATION'] || allAuth;
             return authority;
         }
     };
@@ -878,6 +879,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         if (att) {
                             var attMaxDate = att.allowFutureDate ? '' : 0;
                             var isTrackerAssociate = att.valueType === 'TRACKER_ASSOCIATE';
+                            var requiredInputField = 'attributeIsRequired('+att+')';
                             var disableInputField = 'attributeFieldDisabled(attributesById.'+attId+')';
                             var commonInputFieldProperty = ' name="' + fieldName + '"' +
                                 ' element-id="' + i + '"' +
@@ -890,7 +892,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 ' ng-disabled="' + disableInputField + '"'+ 
                                 ' d2-attribute-validator ' +
                                 ' selected-tet={{trackedEntityTypes.selected.id}}' +
-                                ' ng-required=" ' + att.mandatory + '" ';
+                                ' ng-required="'+requiredInputField+'"';
 
                             //check if attribute has optionset
                             if (att.optionSetValue) {
@@ -919,7 +921,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 }
                                 else if (att.valueType === "BOOLEAN") {
                                 	newInputField = '<span class="hideInPrint"><d2-radio-button ' +
-                                                            ' dh-required=" ' + (att.mandatory || att.unique) + '" ' +
+                                                            ' dh-required="'+requiredInputField+'"' +
                                                             ' dh-disabled="'+ disableInputField + '"' +
                                                             ' dh-value="selectedTei.' + attId + '" ' +
                                                             ' dh-name="foo" ' +
@@ -983,7 +985,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 	newInputField = '<span class="hideInPrint"><d2-age ' +
                                                             ' id=" ' + attId + '" ' +
 						                                    ' d2-object="selectedTei" ' +  						                                    
-						                                    ' d2-required=" ' + (att.mandatory || att.unique) + '" ' +
+						                                    ' d2-required="'+requiredInputField+'"' +
                                                             ' d2-disabled="'+ disableInputField +'" >' +
 						                                '</d2-age></span>'+
                                                     '<span class="not-for-screen"><input type="text" ng-attr-value={{selectedTei.' + attId + '}}></span>';
@@ -993,7 +995,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                                             ' id=" ' + attId + '" ' +
 						                                    ' d2-object="selectedTei" ' +  
 						                                    ' d2-value="selectedTei.' + attId + '" ' +
-						                                    ' d2-required=" ' + (att.mandatory || att.unique) + '" ' +
+						                                    ' d2-required="'+requiredInputField+'"' +
 					                                        ' d2-disabled="'+ disableInputField + '"' +
 						                                    ' d2-coordinate-format="\'TEXT\'" > ' +
 						                            '</d2-map></span>'+
@@ -1005,7 +1007,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 				                                            ' id=" ' + attId + '" ' +
 				                                            ' d2-object="selectedTei" ' +  
 						                                    ' d2-value="selectedTei.' + attId + '" ' +
-						                                    ' d2-required=" ' + (att.mandatory || att.unique) + '" ' +
+						                                    ' d2-required="'+requiredInputField+'"' +
 					                                        ' d2-disabled="'+ disableInputField + '"' +
                                                             ' d2-orgunit-names="orgUnitNames" ' +
 					                                        ' d2-function="teiValueUpdated()" >' +
