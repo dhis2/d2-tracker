@@ -2911,30 +2911,40 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 
                 var pager = {pageSize: NUMBER_OF_EVENTS_IN_SCOPE};                
                 var ordering = {id:"eventDate",direction:"desc"};
-                
-                return DHIS2EventFactory.getByStage(orgUnitId, programStageId, null, pager, true, null, null, ordering).then(function(events) {                	
-                	var allEventsWithPossibleDuplicates = internalProcessEventGrid( events );                	
-                    var filterUrl = '&dueDateStart=' + DateUtils.formatFromUserToApi(lastEventDate) + '&dueDateEnd=' + DateUtils.formatFromUserToApi(lastEventDate); 
-                    return DHIS2EventFactory.getByStage(orgUnitId, programStageId, null, pager, true, null, filterUrl, ordering).then(function(events) {
-                    	allEventsWithPossibleDuplicates = allEventsWithPossibleDuplicates.concat( internalProcessEventGrid( events ) );
-                        eventScopeExceptCurrent = [];
-                        var eventIdDictionary = {};
-                        angular.forEach(allEventsWithPossibleDuplicates, function(eventInScope) {
-                            if(currentEvent.event !== eventInScope.event 
-                                    && !eventIdDictionary[eventInScope.event]) {
-                                //Add event and update dictionary to avoid duplicates:                                
-                                eventIdDictionary[eventInScope.event] = true;
-                            }
-                        });
 
-                        //make a sorted list of all events to pass to rules execution service:
-                        var allEventsInScope = eventScopeExceptCurrent.concat([currentEvent]);
-                        allEventsInScope = orderByFilter(allEventsInScope, '-eventDate').reverse();
-                        var byStage = {};
-                        byStage[currentEvent.programStage] = allEventsInScope;
-                        return {all: allEventsInScope, byStage:byStage};
+                var promise = DHIS2EventFactory.getByStage(orgUnitId, programStageId, null, pager, true, null, null, ordering).then(function(events) {                	
+                    var allEventsWithPossibleDuplicates = internalProcessEventGrid( events );
+                    return allEventsWithPossibleDuplicates;
+                });
+
+                if(lastEventDate){
+                    promise = promise.then(function(allEventsWithPossibleDuplicates){
+                        var filterUrl = '&dueDateStart=' + DateUtils.formatFromUserToApi(lastEventDate) + '&dueDateEnd=' + DateUtils.formatFromUserToApi(lastEventDate);
+                        return DHIS2EventFactory.getByStage(orgUnitId, programStageId, null, pager, true, null, filterUrl, ordering).then(function(events) {
+                            allEventsWithPossibleDuplicates = allEventsWithPossibleDuplicates.concat( internalProcessEventGrid( events ) );
+                            return allEventsWithPossibleDuplicates;
+                        });
                     });
-                });   
+                }
+
+                return promise.then(function(allEventsWithPossibleDuplicates) {
+                    eventScopeExceptCurrent = [];
+                    var eventIdDictionary = {};
+                    angular.forEach(allEventsWithPossibleDuplicates, function(eventInScope) {
+                        if(currentEvent.event !== eventInScope.event 
+                                && !eventIdDictionary[eventInScope.event]) {
+                            //Add event and update dictionary to avoid duplicates:                                
+                            eventIdDictionary[eventInScope.event] = true;
+                        }
+                    });
+
+                    //make a sorted list of all events to pass to rules execution service:
+                    var allEventsInScope = eventScopeExceptCurrent.concat([currentEvent]);
+                    allEventsInScope = orderByFilter(allEventsInScope, '-eventDate').reverse();
+                    var byStage = {};
+                    byStage[currentEvent.programStage] = allEventsInScope;
+                    return {all: allEventsInScope, byStage:byStage};
+                });
             }
             else
             {
