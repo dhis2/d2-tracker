@@ -68,9 +68,10 @@
             </button>
         </span>
     </div>
-    <div ng-messages="ageForm.years.$error" ng-if="ageInteracted(ageForm.years)" class="required" ng-messages-include="./templates/error-messages.html"></div>
-    <div ng-messages="ageForm.months.$error" ng-if="ageInteracted(ageForm.months)" class="required" ng-messages-include="./templates/error-messages.html"></div>
-    <div ng-messages="ageForm.months.$error" ng-if="ageInteracted(ageForm.days)" class="required" ng-messages-include="./templates/error-messages.html"></div>
+    <div ng-messages="ageForm.dob.$error" ng-if="ageInteracted(ageForm.dob, outerDataEntryForm)" class="required" ng-messages-include="./templates/error-messages.html"></div>
+    <div ng-messages="ageForm.years.$error" ng-if="ageInteracted(ageForm.years, outerDataEntryForm)" class="required" ng-messages-include="./templates/error-messages.html"></div>
+    <div ng-messages="ageForm.months.$error" ng-if="ageInteracted(ageForm.months, outerDataEntryForm)" class="required" ng-messages-include="./templates/error-messages.html"></div>
+    <div ng-messages="ageForm.days.$error" ng-if="ageInteracted(ageForm.days, outerDataEntryForm)" class="required" ng-messages-include="./templates/error-messages.html"></div>
 </div>
 
 <style>
