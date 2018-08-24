@@ -1670,7 +1670,12 @@ var d2Directives = angular.module('d2Directives', [])
             };
             
             $scope.saveAge = function(){
-                var dob = moment().subtract({days: $scope.age.days ? $scope.age.days : 0, months: $scope.age.months ? $scope.age.months : 0, years: $scope.age.years ? $scope.age.years : 0});
+                var calendarSetting = CalendarService.getSetting();
+
+                var tdy = $.calendars.instance(calendarSetting.keyCalendar).newDate();
+                var dob = moment(tdy._year + '-' + tdy._month + '-' + tdy._day, 'YYYY-MM-DD');
+
+                dob = dob.subtract({days: $scope.age.days ? $scope.age.days : 0, months: $scope.age.months ? $scope.age.months : 0, years: $scope.age.years ? $scope.age.years : 0});
                 $scope.age.dob = DateUtils.format( dob );
                 formatAge();
             };
