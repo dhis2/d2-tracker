@@ -230,7 +230,7 @@ angular.module("d2Directives")
                 
                 ngModel.$asyncValidators.uniqunessValidator = function (modelValue, viewValue) {
                     var pager = {pageSize: 1, page: 1, toolBarDisplay: 5};
-                    var deferred = $q.defer(), currentValue = modelValue || viewValue, programUrl = null, ouMode = 'ALL';
+                    var deferred = $q.defer(), currentValue = modelValue || viewValue, programOrTetUrl = null, ouMode = 'ACCESSIBLE';
                     
                     if (currentValue) {
                         
@@ -238,15 +238,17 @@ angular.module("d2Directives")
                         var attUrl = 'filter=' + attributeData.id + ':EQ:' + attributeData.value;
                         var ouId = SessionStorageService.get('ouSelected');
                         
-                        if(attrs.selectedProgram && attributeData.programScope){
-                            programUrl = 'program=' + attrs.selectedProgram;
+                        if(attrs.selectedProgramId){
+                            programOrTetUrl = 'program=' + attrs.selectedProgramId;
+                        }else{
+                            programOrTetUrl = "trackedEntityType="+attrs.selectedTet;
                         }
                         
-                        if(attributeData.orgUnitScope){
+                        if(attributeData.orgunitScope){
                             ouMode = 'SELECTED';
                         }                        
 
-                        TEIService.search(ouId, ouMode, null, programUrl, attUrl, pager, true).then(function(data) {
+                        TEIService.search(ouId, ouMode, null, programOrTetUrl, attUrl, pager, true).then(function(data) {
                             if(attrs.selectedTeiId){
                                 if(data && data.rows && data.rows.length && data.rows[0] && data.rows[0].length && data.rows[0][0] !== attrs.selectedTeiId){
                                     deferred.reject();
