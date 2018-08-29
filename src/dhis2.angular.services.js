@@ -177,8 +177,11 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             }
 
             var calendarSetting = CalendarService.getSetting();
-            dateValue = moment(dateValue, calendarSetting.momentFormat)._d;
-            dateValue = $filter('date')(dateValue, calendarSetting.keyDateFormat);
+            if(typeof dateValue !== "string") {
+                // Has to be set to lower case becasue capital letters
+                // will produce a string with day and month names not numbers.
+                dateValue = dateValue.formatDate(calendarSetting.keyDateFormat.toLowerCase());
+            }
             return dateValue;
         },
         formatToHrsMins: function (dateValue) {
@@ -378,24 +381,43 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             return isValid;
         },
         getAge: function( _dob ){
+            if(!_dob) {
+                return;
+            }
             var calendarSetting = CalendarService.getSetting();
+            var splitDate = _dob.split('-');
 
-            var tdy = $.calendars.instance(calendarSetting.keyCalendar).newDate();
-            var now = moment(tdy._year + '-' + tdy._month + '-' + tdy._day, 'YYYY-MM-DD')._d;
-            now = Date.parse(now);
-            now = $filter('date')(now, calendarSetting.keyDateFormat);
-            now = moment( now, calendarSetting.momentFormat);
-
-            var dob = moment( _dob, calendarSetting.momentFormat);
-            var age = {};
-            age.years = now.diff(dob, 'years');
-            dob.add(age.years, 'years');
-
-            age.months = now.diff(dob, 'months');
-            dob.add(age.months, 'months');
-
-            age.days = now.diff(dob, 'days');
+            var tdy = $.calendars.instance(calendarSetting.keyCalendar).today();
+            var dob = $.calendars.instance(calendarSetting.keyCalendar);    
+            if(calendarSetting.keyDateFormat === "dd-MM-yyyy") {
+                dob = dob.newDate(parseInt(splitDate[2]), parseInt(splitDate[1]), parseInt(splitDate[0]));
+            } else {
+                dob = dob.newDate(parseInt(splitDate[0]), parseInt(splitDate[1]), parseInt(splitDate[2]));
+            }
             
+            dob = dob.toJSDate();
+            var d = dob.getDate();
+            var m = dob.getMonth() + 1;
+            var y = dob.getFullYear();
+
+            tdy = tdy.toJSDate();
+            var td = tdy.getDate();
+            var tm = tdy.getMonth() + 1;
+            var ty = tdy.getFullYear();
+
+            var convertedDob = moment(y + "-" + m + "-" + d, "YYYY-MM-DD");
+            var now = moment(ty + "-" + tm + "-" + td, "YYYY-MM-DD");
+            
+            var age = {};
+            age.years = now.diff(convertedDob, 'years');
+            convertedDob.add(age.years, 'years');
+
+            age.months = now.diff(convertedDob, 'months');
+            convertedDob.add(age.months, 'months');
+
+            age.days = now.diff(convertedDob, 'days');
+            convertedDob.add(age.days, 'days');
+
             return age;
         },
         getDateFromUTCString: function(utcDateTimeString) {

@@ -1649,7 +1649,7 @@ var d2Directives = angular.module('d2Directives', [])
             
             function formatAge(){
                 if( $scope.age && $scope.age.dob !== "" ){
-                    var _age = DateUtils.getAge( $scope.age.dob );                    
+                    var _age = DateUtils.getAge($scope.age.dob );                    
                     $scope.age.years = _age.years;
                     $scope.age.months = _age.months;
                     $scope.age.days = _age.days;
@@ -1672,10 +1672,13 @@ var d2Directives = angular.module('d2Directives', [])
             $scope.saveAge = function(){
                 var calendarSetting = CalendarService.getSetting();
 
-                var tdy = $.calendars.instance(calendarSetting.keyCalendar).newDate();
-                var dob = moment(tdy._year + '-' + tdy._month + '-' + tdy._day, 'YYYY-MM-DD');
+                var tdy = $.calendars.instance(calendarSetting.keyCalendar).today();
+                var dob = $.calendars.instance(calendarSetting.keyCalendar).today();
 
-                dob = dob.subtract({days: $scope.age.days ? $scope.age.days : 0, months: $scope.age.months ? $scope.age.months : 0, years: $scope.age.years ? $scope.age.years : 0});
+                dob.add($scope.age.years ? -$scope.age.years : 0, 'y');
+                dob.add($scope.age.months ? -$scope.age.months : 0, 'm');
+                dob.add($scope.age.days ? -$scope.age.days : 0, 'd');
+                
                 $scope.age.dob = DateUtils.format( dob );
                 formatAge();
             };
