@@ -2036,7 +2036,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 var brokenExecution = false;
                 angular.forEach(dhisFunctions, function(dhisFunction){
                     //Select the function call, with any number of parameters inside single quotations, or number parameters witout quotations
-                    var regularExFunctionCall = new RegExp(dhisFunction.name + "\\( *(([\\d/\\*\\+\\-%\.]+)|( *'[^']*'))*( *, *(([\\d/\\*\\+\\-%\.]+)|'[^']*'))* *\\)",'g');
+                    var regularExFunctionCall = new RegExp(dhisFunction.name + "\\( *(([\\d/\\*\\+\\-%\. ]+)|( *'[^']*'))*( *, *(([\\d/\\*\\+\\-%\. ]+)|'[^']*'))* *\\)",'g');
                     var callsToThisFunction = expression.match(regularExFunctionCall);
                     angular.forEach(callsToThisFunction, function(callToThisFunction){
                         //Remove the function name and paranthesis:
