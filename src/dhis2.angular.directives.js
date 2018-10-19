@@ -713,7 +713,10 @@ var d2Directives = angular.module('d2Directives', [])
 
                 $scope.valueClicked = function (buttonValue){
 
-                    $scope.field.$setDirty();
+                    if($scope.field) {
+                        $scope.field.$setDirty();
+                    }
+
                     $scope.clickedButton = buttonValue;
 
                     var originalValue = $scope.value;
