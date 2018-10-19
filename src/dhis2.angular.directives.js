@@ -697,7 +697,8 @@ var d2Directives = angular.module('d2Directives', [])
             customOnClick: '&dhClick',
             currentElement: '=dhCurrentElement',
             event: '=dhEvent',
-            id: '=dhId'
+            id: '=dhId',
+            field: '=dhField'
         },
         controller: [
             '$scope',
@@ -712,10 +713,12 @@ var d2Directives = angular.module('d2Directives', [])
 
                 $scope.valueClicked = function (buttonValue){
 
+                    $scope.field.$setDirty();
                     $scope.clickedButton = buttonValue;
 
                     var originalValue = $scope.value;
                     var tempValue = buttonValue;
+
                     if($scope.value === buttonValue){
                         tempValue = "";
                     }
