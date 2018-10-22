@@ -2759,6 +2759,8 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             if(angular.isUndefined( $rootScope.ruleeffects[ruleEffectKey][action.id] )){
                                 $rootScope.ruleeffects[ruleEffectKey][action.id] =  {
                                     id:action.id,
+                                    option:action.option,
+                                    optionGroup:action.optionGroup,
                                     location:action.location,
                                     action:action.programRuleActionType,
                                     dataElement:action.dataElement,
