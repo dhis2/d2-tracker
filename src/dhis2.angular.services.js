@@ -879,7 +879,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         if (att) {
                             var attMaxDate = att.allowFutureDate ? '' : 0;
                             var isTrackerAssociate = att.valueType === 'TRACKER_ASSOCIATE';
-                            var requiredInputField = 'attributeIsRequired('+att+')';
+                            var requiredInputField = 'attributeIsRequired('+att.id+','+att.mandatory+')';
                             var disableInputField = 'attributeFieldDisabled(attributesById.'+attId+')';
                             var commonInputFieldProperty = ' name="' + fieldName + '"' +
                                 ' element-id="' + i + '"' +
