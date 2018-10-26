@@ -1447,10 +1447,15 @@ var d2Directives = angular.module('d2Directives', [])
             
             $scope.age = {};
             
-            if( $scope.id && $scope.d2Object && $scope.d2Object[$scope.id] ){
-                $scope.age.dob = $scope.d2Object[$scope.id];
-                formatAge();
+            var setDate = function(){
+                if( $scope.id && $scope.d2Object && $scope.d2Object[$scope.id] ){
+                    $scope.age.dob = $scope.d2Object[$scope.id];
+                    formatAge();
+                }
             }
+
+            setDate();
+
             
             function formatAge(){
                 if( $scope.age && $scope.age.dob !== "" ){
@@ -1469,7 +1474,15 @@ var d2Directives = angular.module('d2Directives', [])
                     }
                 }
             });
-            
+
+            //In cases where the value is assigned with a program rule we need to set model.radio so that the UI updates.
+            $scope.$watch('d2Object[id]',function(newValue, oldValue){
+                if( newValue !== oldValue ){
+                    $scope.age = {};
+                    setDate();
+                }        
+            });
+
             $scope.saveDOB = function(){                
                 formatAge();                
             };
