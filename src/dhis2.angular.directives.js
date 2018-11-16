@@ -167,6 +167,16 @@ var d2Directives = angular.module('d2Directives', [])
         },
         link: function (scope, element) {
             var content, program;
+            var hideClickOutside = function(e){
+                if (!element[0].contains(e.target)) {
+                    element.popover('hide');
+                    //Fix for bootstrap 3.0.2. This is fixed in 3.1.0
+                    var popover = element.siblings('.popover.fade.right');
+                    if(popover) popover.remove();
+                }
+            }
+
+
             if (scope.content) {
                 content = $templateCache.get(scope.template);
                 content = $compile(content)(scope);
@@ -182,15 +192,12 @@ var d2Directives = angular.module('d2Directives', [])
                     html: true,
                     title: $translate.instant('_details')
                 };
-                element.popover(options);
-
-                $('body').on('click', function (e) {
-                    if (!element[0].contains(e.target)) {
-                        element.popover('hide');
-                        //Fix for bootstrap 3.0.2. This is fixed in 3.1.0
-                        var popover = element.siblings('.popover.fade.right');
-                        if(popover) popover.remove();
-                    }
+                var popover = element.popover(options);
+                popover.on('show.bs.popover', function(){
+                    $('body').bind('click', hideClickOutside);
+                });
+                popover.on('hide.bs.popover', function(){
+                    $('body').unbind('click', hideClickOutside);
                 });
             }
         }
@@ -1725,14 +1732,38 @@ var d2Directives = angular.module('d2Directives', [])
             d2OptionFilter: "="
 		},
 		link: function (scope, element, attrs) {
-            
+            scope.optionListOpen = false;
+            var onClickOutside = function(event){
+                var isClickedElementChildOfPopup = element
+                    .find(event.target)
+                    .length > 0;
+        
+                if (isClickedElementChildOfPopup)
+                    return;
+        
+                scope.$applyAsync(function(){
+                    scope.closeOptionList();
+                });
+            }
+
+            scope.toggleOptionList = function(){
+                scope.optionListOpen = !scope.optionListOpen;
+                if(scope.optionListOpen){
+                    $(document).bind('click', onClickOutside);
+                }else{
+                    $(document).unbind('click', onClickOutside);
+                }
+            }
+            scope.closeOptionList = function(){
+                scope.optionListOpen = false;
+                $(document).unbind('click', onClickOutside);
+            }
         },
         controller: function($scope,$filter) {
             $scope.loadMoreId = "loadMore";
             var filteredOptions;
             var currentFilteredOptions;
             $scope.displayOptions = [];
-
 
             var filterOptions = function(){
                 if($scope.d2OptionFilter && $scope.d2OptionFilter[$scope.d2ModelId] && ($scope.d2OptionFilter[$scope.d2ModelId].showOnly || $scope.d2OptionFilter[$scope.d2ModelId].hidden)){
@@ -1754,10 +1785,22 @@ var d2Directives = angular.module('d2Directives', [])
             }
 
             var setOptions = function(){
-                $scope.displayOptions = currentFilteredOptions.slice(0, $scope.d2MaxOptionSize);
-                if(currentFilteredOptions.length > $scope.d2MaxOptionSize){
+                $scope.displayOptions = currentFilteredOptions; //.slice(0, $scope.d2MaxOptionSize);
+                /*if(currentFilteredOptions.length > $scope.d2MaxOptionSize){
                     $scope.displayOptions.push({id: $scope.loadMoreId, displayName:'Load more' });
-                }
+                }*/
+            }
+
+            $scope.selectOption = function(option){
+                $scope.d2Model[$scope.d2ModelId] = option.displayName;
+                $scope.closeOptionList();
+                $scope.d2Change();
+            }
+
+            $scope.removeSelectedOption = function(event){
+                event.stopPropagation();
+                $scope.d2Model[$scope.d2ModelId] = null;
+                $scope.d2Change();
             }
 
             filterOptions();
