@@ -1733,6 +1733,7 @@ var d2Directives = angular.module('d2Directives', [])
 		},
 		link: function (scope, element, attrs) {
             scope.optionListOpen = false;
+            scope.searchText = '';
             var onClickOutside = function(event){
                 var isClickedElementChildOfPopup = element
                     .find(event.target)
@@ -1745,18 +1746,22 @@ var d2Directives = angular.module('d2Directives', [])
                     scope.closeOptionList();
                 });
             }
-
             scope.toggleOptionList = function(){
-                scope.optionListOpen = !scope.optionListOpen;
-                if(scope.optionListOpen){
-                    $(document).bind('click', onClickOutside);
-                }else{
-                    $(document).unbind('click', onClickOutside);
+                if(scope.optionListOpen) {
+                    scope.closeOptionList();
+                    return;
                 }
+                scope.openOptionList();
             }
             scope.closeOptionList = function(){
                 scope.optionListOpen = false;
+                scope.search();
                 $(document).unbind('click', onClickOutside);
+            }
+
+            scope.openOptionList = function(){
+                scope.optionListOpen = true;
+                $(document).bind('click', onClickOutside);
             }
         },
         controller: function($scope,$filter) {
@@ -1780,15 +1785,16 @@ var d2Directives = angular.module('d2Directives', [])
             }
 
             $scope.search = function(searchParam){
-                currentFilteredOptions = $filter('filter')(filteredOptions, searchParam);
+                if(!searchParam){
+                    currentFilteredOptions = filteredOptions;
+                } else {
+                    currentFilteredOptions = $filter('filter')(filteredOptions, searchParam);
+                }                
                 setOptions();
             }
 
             var setOptions = function(){
-                $scope.displayOptions = currentFilteredOptions; //.slice(0, $scope.d2MaxOptionSize);
-                /*if(currentFilteredOptions.length > $scope.d2MaxOptionSize){
-                    $scope.displayOptions.push({id: $scope.loadMoreId, displayName:'Load more' });
-                }*/
+                $scope.displayOptions = currentFilteredOptions;
             }
 
             $scope.selectOption = function(option){
@@ -1833,6 +1839,7 @@ var d2Directives = angular.module('d2Directives', [])
 
 			$scope.saveOption = function() {
                 $scope.d2Change();
+                
 			};
 
 			$scope.getInputNotifcationClass = function(id) {

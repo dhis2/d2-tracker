@@ -31,7 +31,7 @@
             <input type="text" class="form-control" ng-model="searchText" ng-change="search(searchText)" ng-model-options="{ debounce: 600 }" placeholder="Search..."/>
         </div>
         <div vs-repeat class="optionListVsRepeater">
-            <div ng-repeat="option in displayOptions track by option.id" class="optionListItem" ng-click="selectOption(option)">
+            <div ng-repeat="option in displayOptions track by option.id" class="optionListItem" ng-click="selectOption(option)" ng-class="{ 'optionListItemSelected': (option.displayName===d2Model[d2ModelId])}">
                 {{option.displayName}}
             </div>
         </div>
