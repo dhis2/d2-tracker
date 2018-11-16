@@ -1,4 +1,4 @@
-    <ui-select ng-model="d2Model[d2ModelId]"
+    <!--<ui-select ng-model="d2Model[d2ModelId]"
                theme="select2"
                ng-required="d2Required"
                ng-disabled="d2Disabled"
@@ -6,7 +6,7 @@
                on-select="saveOption()"
                class="ui-select-style">
         <ui-select-match allow-clear="true" ng-class="d2UseNotification ? getInputNotifcationClass(d2ModelId) : '';"  class="form-control-ui-select"  ng-attr-placeholder="{{'select_or_search' | translate}}">{{$select.selected.displayName  || $select.selected}}</ui-select-match>
-        <ui-select-choices repeat="option.displayName as option in displayOptions" ui-disable-choice="option.id===loadMoreId" refresh="search($select.search)" refresh-delay="500">
+        <ui-select-choices repeat="option.displayName as option in displayOptions track by option.id" ui-disable-choice="option.id===loadMoreId" refresh="search($select.search)" refresh-delay="500">
             <span ng-if="option.id!==loadMoreId" ng-bind-html="option.displayName | highlight: $select.search"></span>
             <div ng-if="option.id===loadMoreId">
                 <button class="btn btn-xs btn-default" 
@@ -15,4 +15,24 @@
                         ng-disabled="loading">{{'show_more' | translate}}</button>                              
               </div>
         </ui-select-choices>
-    </ui-select>
+    </ui-select>-->
+
+<div class="optionListContainer">
+    <div ng-click="toggleOptionList()" class="optionListInput" ng-class="{ 'optionListInputOpen': optionListOpen }">
+        <div class="optionListInputText" >
+            <span ng-if="d2Model[d2ModelId]">{{ d2Model[d2ModelId] }}</span>
+            <span ng-if="!d2Model[d2ModelId]" class="optionListInputTextPlaceholder">{{'select_or_search' | translate}}</span>
+        </div>
+        <div class="optionListInputToggle"><i class="fa fa-caret-up" ng-show="optionListOpen"></i><i class="fa fa-caret-down" ng-hide="optionListOpen"></i></div>
+    </div>
+    <div ng-if="optionListOpen" class="optionListPopup">
+        <div class="optionListSearchInputContainer">
+            <input type="text" class="form-control" ng-model="searchText" ng-change="search(searchText)" ng-model-options="{ debounce: 600 }" placeholder="Search..."/>
+        </div>
+        <div vs-repeat class="optionListVsRepeater">
+            <div ng-repeat="option in displayOptions track by option.id" class="optionListItem" ng-click="selectOption(option)">
+                {{option.displayName}}
+            </div>
+        </div>
+    </div>
+</div>
