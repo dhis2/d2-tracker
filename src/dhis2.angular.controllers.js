@@ -265,10 +265,16 @@ var d2Controllers = angular.module('d2Controllers', [])
     }    
             
     function getGeoJsonByOuLevel(initialize, event, mode) {                    
-        var url = null, parent = null;
+        var requestData =  {
+            url: DHIS2URL + '/organisationUnits.geojson',
+            params: {},
+            hasValue: false,
+        };
+        var parent = null;
         if (initialize) {
             currentLevel = 0;
-            url = DHIS2URL + '/organisationUnits.geojson?level=' + ouLevels[currentLevel].level;
+            requestData.params.level = ouLevels[currentLevel].level;
+            requestData.hasValue = true;
         }
         else {
             if (mode === 'IN') {
@@ -282,13 +288,15 @@ var d2Controllers = angular.module('d2Controllers', [])
             }
             
             if( ouLevels[currentLevel] && ouLevels[currentLevel].level && parent && !initialize ){
-                url = url = DHIS2URL + '/organisationUnits.geojson?level=' + ouLevels[currentLevel].level + '&parent=' + parent;
+                requestData.hasValue = true;
+                requestData.params.level = ouLevels[currentLevel].level;
+                requestData.params.parent = parent;
             }
         }
 
-        if( url ){
+        if( requestData.hasValue ){
             
-            $http.get(url).success(function (data) {
+            $http.get(requestData.url, { params: requestData.params }).success(function (data) {
 
                 $scope.currentGeojson = {data: data, style: style, onEachFeature: onEachFeature, pointToLayer: pointToLayer};
                 

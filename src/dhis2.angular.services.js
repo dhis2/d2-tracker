@@ -35,7 +35,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     var getUserSetting = function () {
         var locale = 'en';
         
-        var promise = $http.get( DHIS2URL + '/userSettings.json?key=keyDbLocale&key=keyUiLocale&key=keyCurrentStyle&key=keyStyle').then(function (response) {
+        var promise = $http.get( DHIS2URL + '/userSettings.json?key=keyDbLocale&key=keyUiLocale&key=keyStyle').then(function (response) {
             SessionStorageService.set('USER_SETTING', response.data);
             if (response.data &&response.data.keyUiLocale) {
                 locale = response.data.keyUiLocale;
@@ -407,7 +407,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 .service('UsersService', function( $http, $translate) {
     return {
         getAll: function(){
-            var promise = $http.get("../api/users?paging=false&fields=*").then(function (response) {
+            var promise = $http.get("../api/users", { params: { paging: 'false', fields: '*' }}).then(function (response) {
                 var users = [];
                 angular.forEach(response.data.users, function (user) {
                     var userObj = {username: user.userCredentials.username, orgUnits: user.organisationUnits};
@@ -1404,7 +1404,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             var httpMessage = {
                 method: "put",
                 url: GRIDCOLUMNS_URL + name,
-                data: {"gridColumns": gridColumns},
+                params: {"gridColumns": gridColumns},
                 headers: {'Content-Type': 'application/json;charset=UTF-8'}
             };
 
@@ -3294,15 +3294,17 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
 .service('AuditHistoryDataService', function( $http, $translate, NotificationService, DHIS2URL ) {
     this.getAuditHistoryData = function(dataId, dataType ) {
-        var url="";
+        var requestData = { url: DHIS2URL+ '/audits', params: { skipPaging: 'true' }};
         if (dataType === "attribute") {
-            url="/audits/trackedEntityAttributeValue?tei="+dataId+"&skipPaging=true";
+            requestData.url += '/trackedEntityAttributeValue';
+            requestData.params.tei = dataId;
             
         } else {
-            url="/audits/trackedEntityDataValue?psi="+dataId+"&skipPaging=true";
+            requestData.url += '/trackedEntityDataValue';
+            requestData.params.psi = dataId;
         }
 
-        var promise = $http.get(DHIS2URL + url).then(function( response ) {
+        var promise = $http.get(requestData.url, {params: requestData.params}).then(function( response ) {
             return response.data;
         }, function( response ) {
             if( response && response.data && response.data.status === 'ERROR' ) {
@@ -3340,7 +3342,12 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     return {
         getChildren: function(uid){
             if( orgUnit !== uid ){
-                orgUnitPromise = $http.get( DHIS2URL + '/organisationUnits/'+ uid + '.json?fields=id,path,programs[id],level,children[id,displayName,programs[id],level,children[id]]&paging=false' ).then(function(response){
+                orgUnitPromise = $http.get(DHIS2URL + '/organisationUnits/'+ uid + '.json', {
+                    params: {
+                        fields: 'id,path,programs[id],level,children[id,displayName,programs[id],level,children[id]]',
+                        paging: 'false',
+                    }
+                }).then(function(response){
                     orgUnit = uid;
                     return response.data;
                 });
@@ -3349,7 +3356,11 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         },
         get: function(uid){
             if( orgUnit !== uid ){
-                orgUnitPromise = $http.get( DHIS2URL + '/organisationUnits/'+ uid + '.json?fields=id,displayName,programs[id],level,path' ).then(function(response){
+                orgUnitPromise = $http.get(DHIS2URL + '/organisationUnits/'+ uid + '.json', {
+                    params: { 
+                        fields: 'id,displayName,programs[id],level,path',
+                    }
+                }).then(function(response){
                     orgUnit = uid;
                     return response.data;
                 });
@@ -3357,7 +3368,13 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             return orgUnitPromise;
         },
         getByName: function(name){            
-            var promise = $http.get( DHIS2URL + '/organisationUnits.json?paging=false&fields=id,displayName,path,level,children[id,displayName,path,level,children[id]]&filter=displayName:ilike:' + name ).then(function(response){
+            var promise = $http.get(DHIS2URL + '/organisationUnits.json', {
+                params: {
+                    paging: 'false',
+                    fields: 'id,displayName,path,level,children[id,displayName,path,level,children[id]]',
+                    filter: 'displayName:ilike:' + name,
+                }
+            }).then(function(response){
                 return response.data;
             });
             return promise;        
@@ -3371,8 +3388,12 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 def.resolve( ous );
             }
             else{
-                var url = DHIS2URL + '/me.json?fields=organisationUnits[id,displayName,level,path,children[id,displayName,level,children[id]]],dataViewOrganisationUnits[id,displayName,level,path,children[id,displayName,level,children[id]]]&paging=false';
-                $http.get( url ).then(function(response){
+                $http.get(DHIS2URL + '/me.json', {
+                    params: {
+                        fields: 'organisationUnits[id,displayName,level,path,children[id,displayName,level,children[id]]],dataViewOrganisationUnits[id,displayName,level,path,children[id,displayName,level,children[id]]]',
+                        paging: 'false',
+                     }
+                 }).then(function(response){
                     response.data.organisationUnits = response.data.dataViewOrganisationUnits && response.data.dataViewOrganisationUnits.length > 0 ? response.data.dataViewOrganisationUnits : response.data.organisationUnits;
                     delete response.data.dataViewOrganisationUnits;
                     def.resolve( response.data );
@@ -3389,8 +3410,12 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 def.resolve( ous );
             }
             else{
-                var url = DHIS2URL + '/me.json?fields=organisationUnits[id,displayName,programs[id],level,path,children[id,displayName,programs[id],level,children[id]]],teiSearchOrganisationUnits[id,displayName,programs[id],level,path,children[id,displayName,programs[id],level,children[id]]]&paging=false';
-                $http.get( url ).then(function(response){
+                $http.get(DHIS2URL + '/me.json', {
+                    params: {
+                        fields: 'organisationUnits[id,displayName,programs[id],level,path,children[id,displayName,programs[id],level,children[id]]],teiSearchOrganisationUnits[id,displayName,programs[id],level,path,children[id,displayName,programs[id],level,children[id]]]',
+                        paging: 'false',
+                    }
+                }).then(function(response){
                     response.data.organisationUnits = response.data.teiSearchOrganisationUnits && response.data.teiSearchOrganisationUnits.length > 0 ? response.data.teiSearchOrganisationUnits : response.data.organisationUnits;
                     delete response.data.teiSearchOrganisationUnits;
                     def.resolve( response.data );
@@ -3398,9 +3423,14 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             }            
             return def.promise;
         },
-        getOrgUnits: function(uid,fieldUrl){
-            var url = DHIS2URL + '/organisationUnits.json?filter=id:eq:'+uid+'&'+fieldUrl+'&paging=false';
-            orgUnitTreePromise = $http.get(url).then(function(response){
+        getOrgUnits: function(uid,fields){
+            orgUnitTreePromise = $http.get(DHIS2URL + '/organisationUnits.json', {
+                params: {
+                    filter: 'id:eq:'+uid,
+                    fields: fields,
+                    paging: 'false',
+                }
+            }).then(function(response){
                 return response.data;
             });
             return orgUnitTreePromise;
@@ -3441,6 +3471,10 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         getFromStoreOrServer: function(uid){
             var deferred = $q.defer();
             var orgUnitFactory = this;
+            if(!uid){
+                deferred.resolve();
+                return deferred.promise;
+            }
             if (db === null) {
                 openStore().then(getOu, function () {
                     deferred.reject("DB not opened");
@@ -3478,7 +3512,11 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 deferred.resolve(e.target.result);
                             }
                             else{
-                                $http.get( DHIS2URL + '/organisationUnits/'+ uid + '.json?fields=id,displayName,code,closedDate,openingDate' ).then(function(response){
+                                $http.get(DHIS2URL + '/organisationUnits/'+ uid + '.json', {
+                                    params: {
+                                        fields: 'id,displayName,code,closedDate,openingDate,organisationUnitGroups[id,code,name]',
+                                    }
+                                }).then(function(response){
                                     if( response && response.data ){
                                         deferred.resolve({
                                             id: response.data.id,
@@ -3543,7 +3581,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             var httpMessage = {
                 method: "put",
                 url: getUrl(container, name),
-                data: data,
+                params: data,
                 headers: {'Content-Type': 'application/json;charset=UTF-8'}
             };
 
@@ -3590,18 +3628,17 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     };
 })
 .factory("AttributeUtils", function($http,DHIS2URL){
-    var getValueUrl = function(valueToSet, selectedTei, program, orgUnit, required){
-        var valueUrlBase = valueToSet+"=";
-        var valueUrl = null;
+    var getValueParameter = function(valueToSet, selectedTei, program, orgUnit, required){
+        var valueParameter = null;
         switch(valueToSet){
             case "ORG_UNIT_CODE":
-                if(orgUnit && orgUnit.code) valueUrl = valueUrlBase+orgUnit.code;
+                if(orgUnit && orgUnit.code) valueParameter = orgUnit.code;
                 break;
             default:
                 return null;
         }
-        if(required && !valueUrl) throw "value "+valueToSet+ "not found";
-        return valueUrl;
+        if(required && !valueParameter) throw "value "+valueToSet+ "not found";
+        return valueParameter;
     }
     return {
         generateUniqueValue: function(attribute, selectedTei, program, orgUnit) {
@@ -3621,22 +3658,24 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     
             return $http.get(DHIS2URL + '/trackedEntityAttributes/'+attribute+'/requiredValues').then(function(response){
                 var paramsUrl = "?";
+                var requestData = {
+                    url: DHIS2URL + '/trackedEntityAttributes/' + attribute + '/generate',
+                    params: {},
+                }
                 if(response && response.data){
                     if(response.data.REQUIRED){
                         angular.forEach(response.data.REQUIRED, function(requiredValue){
-                            var valueUrl = getValueUrl(requiredValue, selectedTei, program, orgUnit,true);
-                            paramsUrl+="&"+valueUrl;
+                            requestData.params[requiredValue] = getValueParameter(requiredValue, selectedTei, program, orgUnit, true);
                         });
                     }
                     if(response.data.OPTIONAL){
                         angular.forEach(response.data.OPTIONAL, function(optionalValue){
-                            var valueUrl = getValueUrl(optionalValue, selectedTei, program, orgUnit,false);
-                            if(valueUrl) paramsUrl += "&"+valueUrl;
+                            var valueParameter = getValueParameter(optionalValue, selectedTei, program, orgUnit,false);
+                            if(valueParameter) requestData.params[optionalValue] = valueParameter;
                         });
                     }
                 }
-                if(paramsUrl.length >= 2 && paramsUrl.charAt(1) === "&") paramsUrl = paramsUrl.slice(0,1)+paramsUrl.slice(2);
-                return $http.get(DHIS2URL + '/trackedEntityAttributes/' + attribute + '/generate'+paramsUrl).then(function (response) {
+                return $http.get(requestData.url, { params: requestData.params }).then(function (response) {
                     if (response && response.data && response.data.value) {
                         return response.data.value;
                     }
