@@ -43,20 +43,20 @@ dhis2.tracker.chunk = function( array, size ){
     return groups;
 }
 
-dhis2.tracker.getTrackerMetaObjects = function( programs, objNames, url, filter )
+dhis2.tracker.getTrackerMetaObjects = function( programs, objNames, url, requestData )
 {
     if( !programs || !programs.programIds || programs.programIds.length === 0 ){
         return;
     }       
 
-    filter = filter + '[' + programs.programIds.toString() + ']';
+    requestData.filter = requestData.filter + '[' + programs.programIds.toString() + ']';
     
     
     return $.ajax(
         {
             url: url,
             type: 'GET',
-            data:filter
+            data:requestData
         })
         .then( function(response) {
             return {programs: programs, self: response[objNames], programIds: programs.programIds};
@@ -65,67 +65,14 @@ dhis2.tracker.getTrackerMetaObjects = function( programs, objNames, url, filter 
         }); 
 };
 
-/*dhis2.tracker.checkAndGetTrackerObjects  = function( obj, store, url, filter, db )
-{
-    if( !obj || !obj.programs || !obj.programIds || !obj.self || !db ){
-        return;
-    }
-    
-    var mainDef = $.Deferred();
-    var mainPromise = mainDef.promise();
-
-    var def = $.Deferred();
-    var promise = def.promise();
-
-    var builder = $.Deferred();
-    var build = builder.promise();
-
-    var ids = [];
-    _.each( _.values( obj.self ), function ( obj) {
-        build = build.then(function() {
-            var d = $.Deferred();
-            var p = d.promise();
-            db.get(store, obj.id).done(function(o) {
-                //if(!o) {                    
-                    ids.push( obj.id );
-                //}
-                d.resolve();
-            });
-
-            return p;
-        });
-    });
-
-    build.done(function() {
-        def.resolve();
-        promise = promise.done( function () {
-            
-            if( ids && ids.length > 0 ){
-                var _ids = ids.toString();
-                _ids = '[' + _ids + ']';
-                filter = filter + '&filter=id:in:' + _ids + '&paging=false';
-                mainPromise = mainPromise.then( dhis2.tracker.getTrackerObjects( store, store, url, filter, 'idb', db ) );
-            }
-            
-            mainDef.resolve( obj.programs, obj.programIds );
-        } );
-    }).fail(function(){
-        mainDef.resolve( null );
-    });
-
-    builder.resolve();
-
-    return mainPromise;
-};*/
-
-dhis2.tracker.getTrackerObjects = function( store, objs, url, filter, storage, db )
+dhis2.tracker.getTrackerObjects = function( store, objs, url, requestData, storage, db )
 {
 
     return $.ajax(
         {
             url: url,
             type: 'GET',
-            data: filter
+            data: requestData
         })
         .then(function(response) {
             if(response[objs]){
@@ -146,7 +93,7 @@ dhis2.tracker.getTrackerObjects = function( store, objs, url, filter, storage, d
         });
 };
 
-dhis2.tracker.getTrackerObject = function( id, store, url, filter, storage, db )
+dhis2.tracker.getTrackerObject = function( id, store, url, requestData, storage, db )
 {
     
     if(id){
@@ -157,7 +104,7 @@ dhis2.tracker.getTrackerObject = function( id, store, url, filter, storage, db )
         {
             url: url,
             type: 'GET',            
-            data: filter
+            data: requestData
         })
         .then( function( response ){
             if(storage === 'idb'){
@@ -175,7 +122,7 @@ dhis2.tracker.getTrackerObject = function( id, store, url, filter, storage, db )
     });
 };
 
-dhis2.tracker.getBatches = function( ids, batchSize, data, store, objs, url, filter, storage, db )
+dhis2.tracker.getBatches = function( ids, batchSize, data, store, objs, url, requestData, storage, db )
 {
     if( !ids || !ids.length || ids.length < 1){
         
@@ -184,16 +131,16 @@ dhis2.tracker.getBatches = function( ids, batchSize, data, store, objs, url, fil
     
     var batches = dhis2.tracker.chunk( ids, batchSize );
 
-    var promises = batches.map(function(batch) { return dhis2.tracker.fetchBatchItems(batch,store, objs, url, filter, storage,db) });
+    var promises = batches.map(function(batch) { return dhis2.tracker.fetchBatchItems(batch,store, objs, url, requestData, storage,db) });
 
     return $.when.apply($, promises).then(function(){
         return data;
     });
 };
 
-dhis2.tracker.fetchBatchItems = function( batch, store, objs, url, filter, storage, db )
-{   
+dhis2.tracker.fetchBatchItems = function( batch, store, objs, url, requestData, storage, db )
+{
     var ids = '[' + batch.toString() + ']';             
-    filter = filter + '&filter=id:in:' + ids;    
-    return dhis2.tracker.getTrackerObjects( store, objs, url, filter, storage, db );    
+    requestData.filter = 'id:in:' + ids;    
+    return dhis2.tracker.getTrackerObjects( store, objs, url, requestData, storage, db );    
 };
