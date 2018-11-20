@@ -290,12 +290,12 @@ var d2Controllers = angular.module('d2Controllers', [])
     var currentOuLayer;
 
     function getGeoJsonByOuLevel(level, parent){
-        var url = DHIS2URL+'/organisationUnits.geojson?level='+level;
+        var requestData = { url:  DHIS2URL+'/organisationUnits.geojson', params: { level: level }};
         if(parent){
-            url+="&parent="+parent;
+            requestData.params.parent = parent;
         }
 
-        return $http.get(url).then(function(response){                
+        return $http.get(requestData.url, { params: requestData.params }).then(function(response){                
             return leafletData.getMap().then(function( map ){
                 if(currentOuLayer){
                     currentOuLayer.removeFrom(map);
