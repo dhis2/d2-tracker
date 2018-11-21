@@ -1401,18 +1401,11 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         },
         set: function (gridColumns, name) {
             var deferred = $q.defer();
-            var httpMessage = {
-                method: "put",
-                url: GRIDCOLUMNS_URL + name,
-                params: {"gridColumns": gridColumns},
-                headers: {'Content-Type': 'application/json;charset=UTF-8'}
-            };
-
-            $http(httpMessage).then(function (response) {
+            var url = GRIDCOLUMNS_URL + name;
+            $http.put(url, gridColumns).then(function (response) {
                 deferred.resolve(response.data);
             },function (error) {
-                httpMessage.method = "post";
-                $http(httpMessage).then(function (response) {
+                $http.post(url, gridColumns).then(function (response) {
                     deferred.resolve(response.data);
                 }, function (error) {
                     if (error && error.data) {
@@ -3578,19 +3571,12 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     return {
         set: function (data, container, name) {
             var deferred = $q.defer();
-            var httpMessage = {
-                method: "put",
-                url: getUrl(container, name),
-                params: data,
-                headers: {'Content-Type': 'application/json;charset=UTF-8'}
-            };
-
-            $http(httpMessage).then(function (response) {
+            var url = getUrl(container, name);
+            $http.put(url, data).then(function (response) {
                 setCached(data);
                 deferred.resolve(response.data);
             },function (error) {
-                httpMessage.method = "post";
-                $http(httpMessage).then(function (response) {
+                $http.post(url, data).then(function (response) {
                     setCached(data);
                     deferred.resolve(response.data);
                 }, function (error) {
