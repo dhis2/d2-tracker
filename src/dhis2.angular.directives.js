@@ -1139,9 +1139,15 @@ var d2Directives = angular.module('d2Directives', [])
                 $scope.d2CallbackFunction();
             }
 
+            var geometryHasValue = function(){
+                return $scope.geometry && $scope.geometry.coordinates && $scope.geometry.coordinates.length > 0;
+            }
+
             $scope.showMap = function(){
-                var geo = angular.copy($scope.geometry);
-                delete geo.coordinate;    
+                var geoJson = geometryHasValue() ? angular.copy($scope.geometry) : null;
+                if(geoJson){
+                    delete geoJson.coordinate;
+                }
                 var modalInstance = $modal.open({
                     templateUrl: './templates/map.html',
                     controller: 'MapController',
@@ -1151,7 +1157,7 @@ var d2Directives = angular.module('d2Directives', [])
                             return $scope.currentGeometryTypeDefinition.type;
                         },
                         geoJson: function () {
-                            return $scope.geometry;
+                            return geoJson;
                         }
                     }
                 });

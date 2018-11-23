@@ -51,9 +51,10 @@ var d2Controllers = angular.module('d2Controllers', [])
                 CurrentSelection,
                 DHIS2URL,
                 NotificationService,
+                ModalService,
                 geometryType,
                 geoJson) {
-
+    var inDrawMode = false;
     $scope.tilesDictionaryKeys = ['openstreetmap', 'googlemap'];   
     $scope.selectedTileKey = 'openstreetmap';           
     $scope.tilesDictionary = {
@@ -444,13 +445,11 @@ var d2Controllers = angular.module('d2Controllers', [])
                 console.log($scope.location);
                 
             });
-            map.on('draw:deleted', function(e){
-                var g = 1;
-                var u = 2;
+            map.on('draw:toolbaropened', function(e){
+                inDrawMode = true;
             });
-            map.on('draw:deletestarted', function(e){
-                var g = 1;
-                var u = 2;
+            map.on('draw:toolbarclosed', function(e){
+                inDrawMode = false;
             });
         });
     }
@@ -505,14 +504,33 @@ var d2Controllers = angular.module('d2Controllers', [])
     $scope.close = function () {
         $modalInstance.dismiss();
     };
-    
-    $scope.captureCoordinate = function(){
+
+    var internalCaptureCoordinate = function(){
         var geoJson = currentGeometryType.getGeoJson();
         if(!geoJson){
             NotificationService.showNotifcationDialog($translate.instant("warning"), $translate.instant("no_geometry_captured"));
         }
         $modalInstance.close(geoJson);
+    }
+    
+    $scope.captureCoordinate = function(){
+        
+        if(inDrawMode) {
+            var modalOptions = {
+                closeButtonText: "Cancel",
+                actionButtonText: 'OK',
+                headerText: 'cancel_capturing_polygon',
+                bodyText: 'you_are_currently_in_draw_mode_all_unfinished_changes_will_be_lost',
+            };
+            ModalService.showModal({},modalOptions).then(function(){
+                internalCaptureCoordinate();
+            }, function(){});
+            return;
+        }
+        internalCaptureCoordinate();
     };
+
+
     
     function setDraggedMarker( args ){
         if( args ){
