@@ -1,26 +1,8 @@
-    <!--<ui-select ng-model="d2Model[d2ModelId]"
-               theme="select2"
-               ng-required="d2Required"
-               ng-disabled="d2Disabled"
-               name="foo"
-               on-select="saveOption()"
-               class="ui-select-style">
-        <ui-select-match allow-clear="true" ng-class="d2UseNotification ? getInputNotifcationClass(d2ModelId) : '';"  class="form-control-ui-select"  ng-attr-placeholder="{{'select_or_search' | translate}}">{{$select.selected.displayName  || $select.selected}}</ui-select-match>
-        <ui-select-choices repeat="option.displayName as option in displayOptions track by option.id" ui-disable-choice="option.id===loadMoreId" refresh="search($select.search)" refresh-delay="500">
-            <span ng-if="option.id!==loadMoreId" ng-bind-html="option.displayName | highlight: $select.search"></span>
-            <div ng-if="option.id===loadMoreId">
-                <button class="btn btn-xs btn-default" 
-                        style="width: 100%; margin-top: 5px;" 
-                        ng-click="showMore($select, $event);"
-                        ng-disabled="loading">{{'show_more' | translate}}</button>                              
-              </div>
-        </ui-select-choices>
-    </ui-select>-->
-
 <div class="optionListContainer">
-    <div ng-click="toggleOptionList()" class="optionListInput" ng-class="{ 'optionListInputOpen': optionListOpen }">
+    <div ng-if="d2Disabled"><input class="form-control" ng-model="d2Model[d2ModelId]" disabled></div>
+    <div ng-click="toggleOptionList()" ng-if="!d2Disabled" class="optionListInput" ng-class="{ 'optionListInputOpen': optionListOpen }">
         <div class="optionListInputText" >
-            <span ng-if="d2Model[d2ModelId]">{{ d2Model[d2ModelId] }}</span>
+            <span ng-if="d2Model[d2ModelId]">{{d2Model[d2ModelId]}}</span>
             <span ng-if="!d2Model[d2ModelId]" class="optionListInputTextPlaceholder">{{'select_or_search' | translate}}</span>
         </div>
         <div class="optionListInputDelete" ng-click="removeSelectedOption($event)"><i class="fa fa-times" ng-if="d2Model && d2Model[d2ModelId]"></i></div>
