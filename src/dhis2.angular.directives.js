@@ -1793,7 +1793,7 @@ var d2Directives = angular.module('d2Directives', [])
             $scope.search = function(searchParam){
                 if(!searchParam){
                     currentFilteredOptions = filteredOptions;
-                } else {
+                } else {
                     currentFilteredOptions = $filter('filter')(filteredOptions, searchParam);
                 }                
                 setOptions();
