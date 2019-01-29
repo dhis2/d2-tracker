@@ -652,14 +652,17 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 //check if dataelement has optionset
                                 if (prStDe.dataElement.optionSetValue) {
                                     var optionSetId = prStDe.dataElement.optionSet.id;
-                                    newInputField = '<span class="hideInPrint" ng-if="!isHidden(prStDes.' + fieldId + '.dataElement.id, currentEvent)"><ui-select theme="select2" ' + commonInputFieldProperty + ' ng-disabled="model.editingDisabled" on-select="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')" >' +
-                                        '<ui-select-match ng-class="getInputNotifcationClass(prStDes.' + fieldId + '.dataElement.id, true)" allow-clear="true" ng-attr-placeholder="' + $translate.instant('select_or_search') + '">{{$select.selected.displayName || $select.selected}}</ui-select-match>' +
-                                        '<ui-select-choices ' +
-                                        ' repeat="option.displayName as option in optionSets.' + optionSetId + '.options | filter: $select.search | limitTo:maxOptionSize">' +
-                                        '<span ng-bind-html="option.displayName | highlight: $select.search">' +
-                                        '</span>' +
-                                        '</ui-select-choices>' +
-                                        '</ui-select></span><span class="not-for-screen"><input type="text" ng-attr-value={{currentEvent.' + fieldId + '}}></span>';
+                                    newInputField = '<span class="hideInPrint" ng-if="!isHidden(prStDes.' + fieldId + '.dataElement.id, currentEvent)">' +
+                                                    '<d2-option-list d2-model="currentEvent"' + 
+                                                    'd2-model-id="prStDes.' + fieldId + '.dataElement.id"' +
+                                                    'd2-required="prStDes.' + fieldId + '.compulsory"' +
+                                                    'd2-disabled="' + disableInputField + '"' +
+                                                    'd2-change="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')"' +
+                                                    'd2-max-option-size="maxOptionSize"' +
+                                                    'd2-option-filter="optionVisibility"' +
+                                                    'd2-all-options="optionSets.' + optionSetId + '.options">' +
+                                                    '</d2-option-list>' +
+                                                    '</span>';
                                 }
                                 else {
                                     //check data element type and generate corresponding angular input field
