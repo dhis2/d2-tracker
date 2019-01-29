@@ -440,10 +440,7 @@ var d2Controllers = angular.module('d2Controllers', [])
                 if(layer._latlngs) {
                     var polygons = layer.toGeoJSON()
                     $scope.location = polygons.geometry;
-                }
-                
-                console.log($scope.location);
-                
+                }                
             });
             map.on('draw:toolbaropened', function(e){
                 inDrawMode = true;
