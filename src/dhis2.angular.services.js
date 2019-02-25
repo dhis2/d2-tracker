@@ -578,7 +578,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 .service('CustomFormService', function ($translate, NotificationService) {
 
     return {
-        getForProgramStage: function (programStage, programStageDataElements) {
+        getForProgramStage: function (programStage, programStageDataElements, singleStageProgram) {
 
             var htmlCode = programStage.dataEntryForm ? programStage.dataEntryForm.htmlCode : null;
             var timeFormat = "24h"
@@ -652,6 +652,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 //check if dataelement has optionset
                                 if (prStDe.dataElement.optionSetValue) {
                                     var optionSetId = prStDe.dataElement.optionSet.id;
+                                    var optionFilter = singleStageProgram ? 'd2-option-filter="optionVisibility"' : 'd2-option-filter="optionVisibility[currentEvent.event]"';
                                     newInputField = '<span class="hideInPrint" ng-if="!isHidden(prStDes.' + fieldId + '.dataElement.id, currentEvent)">' +
                                                     '<d2-option-list d2-model="currentEvent"' + 
                                                     'd2-model-id="prStDes.' + fieldId + '.dataElement.id"' +
@@ -659,7 +660,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                                     'd2-disabled="' + disableInputField + '"' +
                                                     'd2-change="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')"' +
                                                     'd2-max-option-size="maxOptionSize"' +
-                                                    'd2-option-filter="optionVisibility"' +
+                                                    optionFilter +
                                                     'd2-all-options="optionSets.' + optionSetId + '.options">' +
                                                     '</d2-option-list>' +
                                                     '</span>';
