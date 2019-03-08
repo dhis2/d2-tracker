@@ -245,10 +245,8 @@ angular.module("d2Directives")
         link: function(scope, element, attrs, ngModel) {            
             
             function uniqunessValidatior(attributeData){
-                
-                ngModel.$asyncValidators.uniqunessValidator = function (modelValue, viewValue) {
-                    var pager = {pageSize: 1, page: 1, toolBarDisplay: 5};
-                    var deferred = $q.defer(), currentValue = modelValue || viewValue, programOrTetUrl = null, ouMode = 'ACCESSIBLE';
+                element.on('blur', function() {
+                    var deferred = $q.defer(), currentValue = ngModel.$modelValue, programOrTetUrl = null, ouMode = 'ACCESSIBLE';
                     
                     if (currentValue) {
                         
@@ -266,27 +264,27 @@ angular.module("d2Directives")
                             ouMode = 'SELECTED';
                         }                        
 
-                        TEIService.search(ouId, ouMode, null, programOrTetUrl, attUrl, pager, true).then(function(data) {
+                        TEIService.search(ouId, ouMode, null, programOrTetUrl, attUrl, null, false).then(function(data) {
                             if(attrs.selectedTeiId){
                                 if(data && data.rows && data.rows.length && data.rows[0] && data.rows[0].length && data.rows[0][0] !== attrs.selectedTeiId){
-                                    deferred.reject();
+                                    ngModel.$setValidity('uniqunessValidator', false);
+                                    return;
                                 }
                             }
                             else{
                                 if (data.rows.length > 0) {    
-                                    deferred.reject();
+                                    ngModel.$setValidity('uniqunessValidator', false);
+                                    return 
+                                    ;
                                 }
                             }                            
-                            deferred.resolve();
+                            ngModel.$setValidity('uniqunessValidator', true);
+                        }).catch(function(){
+                            ngModel.$setValidity('uniqunessValidator', false);
                         });
                     }
-                    else {
-                        deferred.resolve();
-                    }
-
-                    return deferred.promise;
-                };
-            }                      
+                });
+            }                    
             
             scope.$watch(attrs.ngDisabled, function(value){
                 var attributeData = scope.$eval(attrs.attributeData);
