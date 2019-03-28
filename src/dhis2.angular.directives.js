@@ -1775,6 +1775,7 @@ var d2Directives = angular.module('d2Directives', [])
             var filteredOptions;
             var currentFilteredOptions;
             $scope.displayOptions = [];
+            $scope.valueForValidation = $scope.d2Model[$scope.d2ModelId];
 
             var filterOptions = function(){
                 if($scope.d2OptionFilter && $scope.d2OptionFilter[$scope.d2ModelId] && ($scope.d2OptionFilter[$scope.d2ModelId].showOnly || $scope.d2OptionFilter[$scope.d2ModelId].hidden)){
@@ -1805,6 +1806,7 @@ var d2Directives = angular.module('d2Directives', [])
 
             $scope.selectOption = function(option){
                 $scope.d2Model[$scope.d2ModelId] = option.displayName;
+                $scope.valueForValidation = option.displayName;
                 $scope.closeOptionList();
                 $scope.d2Change();
             }
@@ -1812,6 +1814,7 @@ var d2Directives = angular.module('d2Directives', [])
             $scope.removeSelectedOption = function(event){
                 event.stopPropagation();
                 $scope.d2Model[$scope.d2ModelId] = null;
+                $scope.valueForValidation = null;
                 $scope.d2Change();
             }
 
