@@ -569,6 +569,108 @@ var d2Directives = angular.module('d2Directives', [])
     };
 })
 
+.directive('d2AssignUsersInput', function(){
+    return {
+        restrict: 'E',
+        templateUrl: './templates/assign-user-input.html',
+        scope: {
+            d2Model: '=',
+            d2Disabled: '=',
+            d2SaveMethode: '&',
+            d2Saved: '='
+            
+        },
+        link: function (scope, element, attrs) {
+            scope.optionListOpen = false;
+            scope.searchText = '';
+            var onClickOutside = function(event){
+                var isClickedElementChildOfPopup = element
+                    .find(event.target)
+                    .length > 0;
+        
+                if (isClickedElementChildOfPopup)
+                    return;
+        
+                scope.$applyAsync(function(){
+                    scope.closeOptionList();
+                });
+            }
+            scope.toggleOptionList = function(){
+                if(scope.optionListOpen) {
+                    scope.closeOptionList();
+                    return;
+                }
+                scope.openOptionList();
+            }
+            scope.closeOptionList = function(){
+                scope.optionListOpen = false;
+                scope.search();
+                $(document).unbind('click', onClickOutside);
+            }
+
+            scope.openOptionList = function(){
+                scope.optionListOpen = true;
+                $(document).bind('click', onClickOutside);
+            }
+        },
+        controller: function($scope, UsersService, OrgUnitFactory) {
+            $scope.allOptions = [];
+            $scope.currentFilteredOptions = [];
+            $scope.temp = UsersService.getAll().then(function(users){
+                $scope.allOptions = users;
+                $scope.currentFilteredOptions = $scope.allOptions;
+                setOptions();
+            });
+
+            $scope.loadMoreId = "loadMore";
+            $scope.displayOptions = [];
+            $scope.tempUsername = null;
+
+            $scope.saveOption = function() {
+                $scope.d2SaveMethode()();
+            };
+
+            $scope.search = function(searchParam){
+                if(searchParam){
+                    $scope.currentFilteredOptions = $scope.currentFilteredOptions.filter(function (option) {
+                        return option.username.includes(searchParam);
+                    });
+                } else {
+                    $scope.currentFilteredOptions = $scope.allOptions;
+                }              
+                setOptions();
+            }
+
+            var setOptions = function(){
+                $scope.displayOptions = $scope.currentFilteredOptions;
+            }
+
+            $scope.selectOption = function(option){
+                $scope.d2Model.assignedUser = option.userid;
+                $scope.tempUsername = option.username;
+                $scope.closeOptionList();
+                $scope.d2SaveMethode()();
+            }
+
+            $scope.removeSelectedOption = function(event){
+                event.stopPropagation();
+                $scope.d2Model.assignedUser = null;
+                $scope.tempUsername = null;
+                $scope.d2SaveMethode()();
+            }
+
+            setOptions();
+
+            $scope.$watch("$scope.currentFilteredOptions", function(newValue,oldValue){
+                if(newValue != oldValue){
+                    setOptions();
+                }
+            });
+        }
+
+    };
+})
+
 .directive('d2Audit', function (CurrentSelection, MetaDataFactory ) {
     return {
         restrict: 'E',
