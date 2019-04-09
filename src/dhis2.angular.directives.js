@@ -576,7 +576,7 @@ var d2Directives = angular.module('d2Directives', [])
         scope: {
             d2Model: '=',
             d2Disabled: '=',
-            d2SaveMethode: '&',
+            d2SaveMethod: '&',
             d2Saved: '='
             
         },
@@ -627,7 +627,7 @@ var d2Directives = angular.module('d2Directives', [])
             $scope.tempUsername = null;
 
             $scope.saveOption = function() {
-                $scope.d2SaveMethode()();
+                $scope.d2SaveMethod()();
             };
 
             $scope.search = function(searchParam){
@@ -649,14 +649,14 @@ var d2Directives = angular.module('d2Directives', [])
                 $scope.d2Model.assignedUser = option.userid;
                 $scope.tempUsername = option.username;
                 $scope.closeOptionList();
-                $scope.d2SaveMethode()();
+                $scope.d2SaveMethod()();
             }
 
             $scope.removeSelectedOption = function(event){
                 event.stopPropagation();
                 $scope.d2Model.assignedUser = null;
                 $scope.tempUsername = null;
-                $scope.d2SaveMethode()();
+                $scope.d2SaveMethod()();
             }
 
             setOptions();
