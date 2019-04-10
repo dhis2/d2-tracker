@@ -2216,9 +2216,9 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         if (weight < sdArray[0]) { return -3.5; }
         if (weight > sdArray[6]) { return 3.5; }
 
-
-        var { higherLimitIn, lowerLimitIn } = findDeviationLimits(weight, sdArray);
-
+        var deviationLimits = findDeviationLimits(weight, sdArray);
+        var higherLimitIn = deviationLimits.higherLimitIn;
+        var lowerLimitIn = deviationLimits.lowerLimitIn;
 
         // Find the distance between the two SDs in kilos.
         var distance = sdArray[higherLimitIn] - sdArray[lowerLimitIn];
