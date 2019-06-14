@@ -417,6 +417,24 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 return users;
             });
             return promise;
+        },
+        getByQuery: function( queryString ){
+            var promise = $http.get("../api/users?paging=true&page=1&pageSize=10&query=" + queryString + "&fields=firstName,surname,userCredentials[username],id").then(function (response) {
+                var users = [];
+                angular.forEach(response.data.users, function (user) {
+                    var userObj = {userid: user.id, username: user.userCredentials.username, firstName: user.firstName, lastName: user.surname};
+                    users.push(userObj);
+                });
+                return users;
+            });
+            return promise;
+        },
+        getByUid: function( uid ){
+            var promise = $http.get("../api/users/" + uid + "?fields=firstName,surname,userCredentials[username],id").then(function (response) {
+                var userObj = {userid: response.data.id, username: response.data.userCredentials.username, firstName: response.data.firstName, lastName: response.data.surname};
+                return userObj;        
+            });
+            return promise;
         }
     };
 }) 

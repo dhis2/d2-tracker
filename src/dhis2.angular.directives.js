@@ -595,6 +595,7 @@ var d2Directives = angular.module('d2Directives', [])
                     scope.closeOptionList();
                 });
             }
+
             scope.toggleOptionList = function(){
                 if(scope.optionListOpen) {
                     scope.closeOptionList();
@@ -602,52 +603,52 @@ var d2Directives = angular.module('d2Directives', [])
                 }
                 scope.openOptionList();
             }
+
             scope.closeOptionList = function(){
                 scope.optionListOpen = false;
-                scope.search();
                 $(document).unbind('click', onClickOutside);
             }
 
             scope.openOptionList = function(){
                 scope.optionListOpen = true;
+                scope.search('');
                 $(document).bind('click', onClickOutside);
             }
         },
         controller: function($scope, UsersService, OrgUnitFactory) {
-            $scope.allOptions = [];
-            $scope.currentFilteredOptions = [];
-            $scope.temp = UsersService.getAll().then(function(users){
-                $scope.allOptions = users;
-                $scope.currentFilteredOptions = $scope.allOptions;
-                setOptions();
+            $scope.displayOptions = [];       
+            $scope.userDisplayName = "";
+
+            $scope.getNameForUserOject = function(userObject){
+                return userObject.firstName + " " + userObject.lastName +
+                    " (" + userObject.username + ")";
+            }
+
+            UsersService.getByQuery('').then(function(users){
+                $scope.displayOptions = users;
             });
 
-            $scope.loadMoreId = "loadMore";
-            $scope.displayOptions = [];
-            $scope.tempUsername = null;
+            if( $scope.d2Model.assignedUser ) {
+                UsersService.getByUid($scope.d2Model.assignedUser).then(function(user){
+                    $scope.selectedUserObject = user;
+                    $scope.userDisplayName = $scope.getNameForUserOject(user);
+                });
+            }
 
             $scope.saveOption = function() {
                 $scope.d2SaveMethod()();
             };
 
             $scope.search = function(searchParam){
-                if(searchParam){
-                    $scope.currentFilteredOptions = $scope.currentFilteredOptions.filter(function (option) {
-                        return option.username.includes(searchParam);
-                    });
-                } else {
-                    $scope.currentFilteredOptions = $scope.allOptions;
-                }              
-                setOptions();
-            }
-
-            var setOptions = function(){
-                $scope.displayOptions = $scope.currentFilteredOptions;
+                UsersService.getByQuery(searchParam).then(function(users){
+                    $scope.displayOptions = users;
+                });
             }
 
             $scope.selectOption = function(option){
                 $scope.d2Model.assignedUser = option.userid;
-                $scope.tempUsername = option.username;
+                $scope.selectedUserObject = option;
+                $scope.userDisplayName =  $scope.getNameForUserOject(option);
                 $scope.closeOptionList();
                 $scope.d2SaveMethod()();
             }
@@ -655,19 +656,10 @@ var d2Directives = angular.module('d2Directives', [])
             $scope.removeSelectedOption = function(event){
                 event.stopPropagation();
                 $scope.d2Model.assignedUser = null;
-                $scope.tempUsername = null;
+                $scope.selectedUserDisplayString = null;
                 $scope.d2SaveMethod()();
             }
-
-            setOptions();
-
-            $scope.$watch("$scope.currentFilteredOptions", function(newValue,oldValue){
-                if(newValue != oldValue){
-                    setOptions();
-                }
-            });
         }
-
     };
 })
 
