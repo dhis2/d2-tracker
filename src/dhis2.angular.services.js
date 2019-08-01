@@ -1959,10 +1959,17 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     var replaceVariables = function(expression, variablesHash){
         //replaces the variables in an expression with actual variable values.
 
+        //First, check if the special cases like d2:hasValue(#{variableName}) is present. If it is, we need to replace with:
+        //d2:hasValue('variableName') to avoid the further replacement, and make sure the correct input is fed into d2:hasValue.
+        var avoidReplacementFunctions = ['d2:hasValue','d2:lastEventDate', 'd2:count', 'd2:countIfZeroPos', 'd2:countIfValue'];
+        avoidReplacementFunctions.forEach(avoidReplaceFunction => {
+            expression = expression.replace( new RegExp("(" + avoidReplaceFunction + "\\() *[A#CV]\\{([\\w \\-\\_\\.]+)\\}(.*)\\)" ), "$1'$2'$3\)");
+        });
+
         //Check if the expression contains program rule variables at all(any curly braces):
         if(expression.indexOf('{') !== -1) {
             //Find every variable name in the expression;
-            var variablespresent = expression.match(/[A#CV]\{[\w -_.]+}/g);
+            var variablespresent = expression.match(/[A#CV]\{[\w \-\_\.]+\}/g);
             //Replace each matched variable:
             angular.forEach(variablespresent, function(variablepresent) {
                 //First strip away any prefix and postfix signs from the variable name:
