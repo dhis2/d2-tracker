@@ -1861,14 +1861,6 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 else if(programVariable.programRuleVariableSourceType === "CALCULATED_VALUE"){
                     //We won't assign the calculated variables at this step. The rules execution will calculate and assign the variable.
                 }
-                else {
-                    //If the rules was executed without events, we ended up in this else clause as expected, as most of the variables require an event to be mapped
-                    if(evs)
-                    {
-                        //If the rules was executed and events was supplied, we should have found an if clause for the the source type, and not ended up in this dead end else.
-                        $log.warn("Unknown programRuleVariableSourceType:" + programVariable.programRuleVariableSourceType);
-                    }
-                }
 
 
                 if(!valueFound){
