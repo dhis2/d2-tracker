@@ -2656,20 +2656,20 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
     function getZScoreFromMap(key, value, map) {
 
-        var sdArray = map[Number(ageInMonths)];
+        var sdArray = map[Number(key)];
 
-        if (weight < sdArray[0]) { return -3.5; }
-        if (weight > sdArray[6]) { return 3.5; }
+        if (value < sdArray[0]) { return -3.5; }
+        if (value > sdArray[6]) { return 3.5; }
 
-        var deviationLimits = findDeviationLimits(weight, sdArray);
+        var deviationLimits = findDeviationLimits(value, sdArray);
         var higherLimitIn = deviationLimits.higherLimitIn;
         var lowerLimitIn = deviationLimits.lowerLimitIn;
 
-        // Find the distance between the two SDs in kilos.
+        // Find the distance between the two SDs in the common unit.
         var distance = sdArray[higherLimitIn] - sdArray[lowerLimitIn];
 
-        // The gap from the intervals top limit down to the actual weight:
-        var gap = sdArray[higherLimitIn] - weight;
+        // The gap from the intervals top limit down to the actual value:
+        var gap = sdArray[higherLimitIn] - value;
 
         // The decimal places this gap represent from the higher SD
         var decimalSubtraction = distance > 0 ? gap / distance : 0;
