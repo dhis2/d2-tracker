@@ -179,3 +179,8 @@
     border-top-left-radius: 0;
     margin-left: -1px;
 }
+
+div .paging-navigation {
+    margin-right: 0;
+    text-align: right;
+}
