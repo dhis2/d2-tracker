@@ -260,6 +260,28 @@ var d2Directives = angular.module('d2Directives', [])
     };
 })
 
+.directive('serversidePaginatorPerformant', function factory() {
+
+    return {
+       restrict: 'E',
+       controller: function ($scope, Paginator) {
+           $scope.paginator = Paginator;
+
+            $scope.getDisplayPage = function() {
+               var pager = $scope.pager;
+               return pager.page;
+           }
+
+            $scope.hasNextPage = function(){
+               var pager = $scope.pager;
+               return pager.recordsCount === pager.pageSize;
+           }
+
+        },
+       templateUrl: './templates/serverside-pagination-performant.html'
+   };
+})
+
 .directive('d2CustomDataEntryForm', function ($compile) {
     return{
         restrict: 'E',
