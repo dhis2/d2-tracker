@@ -28,7 +28,7 @@
                         <span ng-attr-title="{{'first'| translate}}">&laquo;&laquo;</span>
                         <span ng-attr-title="{{'previous'| translate}}">&laquo;</span>
                     </span>
-                    {{getVisibleRecordsRange()}}
+                    {{getDisplayPage()}}
                     <span ng-show="hasNextPage()">
                         <a href ng-click="getPage(pager.page + 1)" ng-attr-title="{{'next'| translate}}" > 
                             &raquo;

@@ -266,21 +266,13 @@ var d2Directives = angular.module('d2Directives', [])
         restrict: 'E',
         controller: function ($scope, Paginator) {
             $scope.paginator = Paginator;
-            debugger;
-            
-            $scope.getVisibleRecordsRange = function(){
-                var pager = $scope.pager;
-                if(pager.recordsCount === 0){
-                    return "-";
-                }
 
-                var firstRecord = (pager.pageSize * (pager.page - 1)) + 1;
-                var lastRecord = firstRecord + pager.recordsCount - 1;
-                return firstRecord + " - " + lastRecord;
+            $scope.getDisplayPage = function() {
+                var pager = $scope.pager;
+                return pager.page;
             }
 
             $scope.hasNextPage = function(){
-                debugger;
                 var pager = $scope.pager;
                 return pager.recordsCount === pager.pageSize;
             }
