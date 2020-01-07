@@ -263,9 +263,18 @@ var d2Directives = angular.module('d2Directives', [])
 .directive('serversidePaginatorPerformant', function factory() {
 
     return {
-       restrict: 'E',
-       controller: function ($scope, Paginator) {
-           $scope.paginator = Paginator;
+        restrict: 'E',
+        controller: function ($scope, Paginator) {
+            $scope.paginator = Paginator;
+            
+            $scope.pageSizeEdit = $scope.pager && $scope.pager.pageSize;
+            $scope.pageEdit = $scope.pager && $scope.pager.page;
+
+            $scope.$watch('pager.page', function (){
+                if ($scope.pager && $scope.pager.page){
+                    $scope.pageEdit = $scope.pager.page;
+                }
+            });
 
             $scope.getDisplayPage = function() {
                var pager = $scope.pager;
@@ -277,6 +286,39 @@ var d2Directives = angular.module('d2Directives', [])
                return pager.recordsCount === pager.pageSize;
            }
 
+            $scope.changePage = function(){
+                var pageEdit = $scope.pageEdit;
+                if(isNaN(pageEdit)){
+                    $scope.pageEdit = $scope.pager.page;
+                    return;
+                }
+
+                var pageEditNumber = Number(pageEdit);
+                if (!Number.isSafeInteger(pageEditNumber)){
+                    $scope.pageEdit = $scope.pager.page;
+                    return;
+                }
+                $scope.onChangePage(pageEditNumber);
+            }
+
+            $scope.changePageSize = function(){
+                var pageSizeEdit = $scope.pageSizeEdit;
+                if(isNaN(pageSizeEdit)){
+                    $scope.pageSizeEdit = $scope.pager.pageSize;
+                    return;
+                }
+
+                var pageSizeEditNumber = Number(pageSizeEdit);
+                if (!Number.isSafeInteger(pageSizeEditNumber)){
+                    $scope.pageSizeEdit = $scope.pager.pageSize;
+                    return;
+                }
+                $scope.onChangePageSize(pageSizeEditNumber);
+            }
+
+            $scope.getPage = function(page){
+                $scope.onGetPage(page);
+            }
         },
        templateUrl: './templates/serverside-pagination-performant.html'
    };

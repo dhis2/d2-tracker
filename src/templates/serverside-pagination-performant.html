@@ -4,10 +4,10 @@
             <td>
             </td>
             <td>
-                <span>{{'rows_per_page'| translate}}:</span> <input type="text" min="1" style="width:50px;" ng-model="pager.pageSizeEdit" d2-enter="resetPageSize()" ng-blur="resetPageSize()"> 
+                <span>{{'rows_per_page'| translate}}:</span> <input type="text" min="1" style="width:50px;" ng-model="pageSizeEdit" d2-enter="changePageSize()" ng-blur="changePageSize()"> 
             </td>
             <td>
-                <span>{{'jump_to_page'| translate}}:</span> <input type="text" min="1" style="width:50px;" ng-model="pager.pageEdit" d2-enter="jumpToPage()" ng-blur="jumpToPage()"> 
+                <span>{{'jump_to_page'| translate}}:</span> <input type="text" min="1" style="width:50px;" ng-model="pageEdit" d2-enter="changePage()" ng-blur="changePage()"> 
             </td>
         </tr>
         <tr>
