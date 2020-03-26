@@ -510,7 +510,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                     }
                 }
             }
-            if((val || val === 0) && obj.optionSetValue && obj.optionSet && obj.optionSet.id && optionSets[obj.optionSet.id] && optionSets[obj.optionSet.id].options  ){
+            if((val || val === 0) && obj.optionSetValue && obj.optionSet && obj.optionSet.id && optionSets && optionSets[obj.optionSet.id] && optionSets[obj.optionSet.id].options  ){
                 if(destination === 'USER'){
                     val = OptionSetService.getName(optionSets[obj.optionSet.id].options, String(val));
                 }
