@@ -604,7 +604,7 @@ var d2Directives = angular.module('d2Directives', [])
         },
         controller: function($scope, UsersService, OrgUnitFactory) {
             $scope.allUsers = [];        
-            $scope.temp = UsersService.getAll().then(function(users){
+            $scope.temp = UsersService.getByQuery('').then(function(users){
                 $scope.allUsers = users;
             });
 

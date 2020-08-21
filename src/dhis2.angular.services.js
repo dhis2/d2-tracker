@@ -425,7 +425,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         },
         getByUid: function( uid ){
             var promise = $http.get("../api/userLookup/" + uid).then(function (response) {
-                var userObj = mapUserLookupResponse(repsponse.data);
+                var userObj = mapUserLookupResponse(response.data);
                 return userObj;
             });
             return promise;
