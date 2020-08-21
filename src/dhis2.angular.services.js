@@ -377,7 +377,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             }
             return isValid;
         },
-        getAge: function( _dob ){
+        getAge: function( _dob ) {
             var calendarSetting = CalendarService.getSetting();
 
             var tdy = $.calendars.instance(calendarSetting.keyCalendar).newDate();
@@ -406,23 +406,17 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 })
 
 .service('UsersService', function( $http, $translate) {
+
+    var mapUserLookupResponse = function( userLookup ) {
+        return {userid: userLookup.id, username: userLookup.username, firstName: userLookup.firstName, lastName: userLookup.surname};
+    };
+
     return {
-        getAll: function(){
-            var promise = $http.get("../api/users?paging=false&fields=*").then(function (response) {
-                var users = [];
-                angular.forEach(response.data.users, function (user) {
-                    var userObj = {userid: user.id, username: user.userCredentials.username, orgUnits: user.organisationUnits};
-                    users.push(userObj);
-                });
-                return users;
-            });
-            return promise;
-        },
         getByQuery: function( queryString ){
-            var promise = $http.get("../api/users?paging=true&page=1&pageSize=10&query=" + queryString + "&fields=firstName,surname,userCredentials[username],id").then(function (response) {
+            var promise = $http.get("../api/userLookup?paging=true&page=1&pageSize=10&query=" + queryString).then(function (response) {
                 var users = [];
                 angular.forEach(response.data.users, function (user) {
-                    var userObj = {userid: user.id, username: user.userCredentials.username, firstName: user.firstName, lastName: user.surname};
+                    var userObj = mapUserLookupResponse(user);
                     users.push(userObj);
                 });
                 return users;
@@ -430,9 +424,9 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             return promise;
         },
         getByUid: function( uid ){
-            var promise = $http.get("../api/users/" + uid + "?fields=firstName,surname,userCredentials[username],id").then(function (response) {
-                var userObj = {userid: response.data.id, username: response.data.userCredentials.username, firstName: response.data.firstName, lastName: response.data.surname};
-                return userObj;        
+            var promise = $http.get("../api/userLookup/" + uid).then(function (response) {
+                var userObj = mapUserLookupResponse(repsponse.data);
+                return userObj;
             });
             return promise;
         }
