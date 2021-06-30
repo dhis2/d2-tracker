@@ -1,6 +1,6 @@
 {
   "name": "d2-tracker",
-  "version": "35.0.5",
+  "version": "35.0.6",
   "description": "Shared angular code for tracker-capture and event-capture apps",
   "repository": {
     "type": "git",
