@@ -3043,7 +3043,11 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             .map(({ name }) => name)
             .join('|');
         const regularExFunctionCall = new RegExp(`\\b(?:${includedFunctionNames})\\b`, 'g');
-        const functionCalls = [...expression.matchAll(regularExFunctionCall)];
+        const functionCallsIterator = expression.matchAll(regularExFunctionCall);
+        const functionCalls = [];
+        for (const functionCall of functionCallsIterator) {
+            functionCalls.push(functionCall);
+        }
 
         // Run each d2-function. d2-functions appearing in the argument list of another d2-function
         // is handled using recursive calls to internalExecuteExpression.
@@ -3091,7 +3095,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         let answer = false;
         try {
             const expressionModuloStrings = expression.replace(/'[^']*'|"[^"]*"/g, match => ' '.repeat(match.length));
-            const applicableDhisFunctions = Object.entries(dhisFunctions).map(([key, value]) => ({ ...value, name: key }));
+            const applicableDhisFunctions = Object.entries(dhisFunctions).map(([key, value]) => ({ name: key, parameters: value.parameters, execute: value.execute }));
             answer = internalExecuteExpression(applicableDhisFunctions, expression, expressionModuloStrings, variablesHash);
 
             if(flag.verbose) {
