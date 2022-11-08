@@ -3544,6 +3544,16 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         }
 
                         hiddenFields[effect.trackedEntityAttribute.id] = true;
+                    } else if (effect.action === "HIDEFIELDNODELETE" && effect.trackedEntityAttribute) {
+                        if (currentTei[effect.trackedEntityAttribute.id]) {
+                            //If a field is going to be hidden, but contains a value, we need to take action;
+                            if (effect.content) {
+                                //TODO: Alerts is going to be replaced with a proper display mecanism.
+                                alert(effect.content);
+                            }
+                        }
+
+                        hiddenFields[effect.trackedEntityAttribute.id] = true;
                     } else if (effect.action === "SHOWERROR" && effect.trackedEntityAttribute) {
                         if(effect.ineffect) {
                             var headerText =  $translate.instant('validation_error');
